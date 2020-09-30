@@ -66,7 +66,7 @@ def updateDateIndex(map, crime):
     Si no se encuentra creado un nodo para esa fecha en el arbol
     se crea y se actualiza el indice de tipos de crimenes
     """
-    occurreddate = crime['End_Time']
+    occurreddate = crime['Start_Time']
     crimedate = datetime.datetime.strptime(occurreddate, '%Y-%m-%d %H:%M:%S')
     entry = om.get(map, crimedate.date())
     if entry is None:
@@ -128,18 +128,25 @@ def rango_de_fechas(cont,min,max):
     return lst
 def fecha(cont, fecha):
     return om.get(cont['dateIndex'], fecha)
-def mayor(cont,lista):
+def recorrido(cont,lista):
+    #funcion que saca la fecha con la mayor catidad de accidentes
+    #la cantidad de accidentes en las lista de fechas
     mayor=0
+    contar=0
     nombre="None"
     w=lstit.newIterator(lista)
     while lstit.hasNext(w):
         x=lstit.next(w)
-        g=om.get(['dateIndex'][x]['lstaccidentes'],x)
-        g=g['lstaccidentes']
+        g=om.get(cont['dateIndex'],x)
+        print(g)
+        if mayor==0:
+            print(g)
+            mayor =1
+        """contar+=g
         if g>mayor:
-           mayor=g
-           nombre=x
-    return nombre
+            mayor=g
+            nombre=x"""
+    return [nombre,g]
 # ==============================
 # Funciones de Comparacion
 # ==============================
