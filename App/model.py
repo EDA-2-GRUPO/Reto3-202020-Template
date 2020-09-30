@@ -135,6 +135,7 @@ def recorrido(cont,lista):
     contar=0
     nombre="None"
     w=lstit.newIterator(lista)
+    listafinal=lt.newList("ARRAY_LIST")
     while lstit.hasNext(w):
         x=lstit.next(w)
         g=lt.size(om.get(cont['dateIndex'],x)["value"]["lstaccidentes"])
@@ -142,7 +143,10 @@ def recorrido(cont,lista):
         if g>mayor:
             mayor=g
             nombre=x
-    return [nombre,contar,mayor]
+    lt.addLast(listafinal,nombre)
+    lt.addLast(listafinal,contar)
+    lt.addLast(listafinal,mayor)
+    return listafinal
 # ==============================
 # Funciones de Comparacion
 # ==============================

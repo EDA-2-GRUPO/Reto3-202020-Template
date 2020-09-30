@@ -26,6 +26,7 @@ from DISClib.ADT import list as lt
 from App import controller
 assert config
 from time import perf_counter
+from DISClib.DataStructures import listiterator as lstit
 
 """
 La vista se encarga de la interacción con el usuario.
@@ -59,7 +60,19 @@ def printMenu():
     print("0- Salir")
     print("*******************************************")
 
-
+def Printlistafinal(lista):
+    it=0
+    w=lstit.newIterator(lista)
+    while lstit.hasNext(w):
+        x=lstit.next(w)
+        print(x)
+        if it==0:
+            print("fecha con más accidentes"+str(x))
+        elif it==1:
+            print("cantidad total de accidentes"+str(x))
+        elif it==2:
+             print("cantidad de accidentes de la fecha dada" +str(x))
+        it+=1
 """
 Menu principal
 """
@@ -83,7 +96,7 @@ while True:
         fecha =input("fecha")
         t1 = perf_counter()
         w = controller.rango_de_fechas(cont,"None",fecha)
-        
+        Printlistafinal(w)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
     elif int(inputs[0]) == 3:
