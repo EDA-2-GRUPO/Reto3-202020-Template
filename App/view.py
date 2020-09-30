@@ -83,7 +83,7 @@ while True:
         fecha =input("fecha")
         t1 = perf_counter()
         w = controller.rango_de_fechas(cont,"None",fecha)
-        print(w)
+        
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
     elif int(inputs[0]) == 3:

@@ -137,16 +137,12 @@ def recorrido(cont,lista):
     w=lstit.newIterator(lista)
     while lstit.hasNext(w):
         x=lstit.next(w)
-        g=om.get(cont['dateIndex'],x)
-        print(g)
-        if mayor==0:
-            print(g)
-            mayor =1
-        """contar+=g
+        g=lt.size(om.get(cont['dateIndex'],x)["value"]["lstaccidentes"])
+        contar+=g
         if g>mayor:
             mayor=g
-            nombre=x"""
-    return [nombre,g]
+            nombre=x
+    return [nombre,contar,mayor]
 # ==============================
 # Funciones de Comparacion
 # ==============================
