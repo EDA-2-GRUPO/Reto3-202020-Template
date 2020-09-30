@@ -65,7 +65,6 @@ def Printlistafinal(lista):
     w=lstit.newIterator(lista)
     while lstit.hasNext(w):
         x=lstit.next(w)
-        print(x)
         if it==0:
             print("fecha con más accidentes"+str(x))
         elif it==1:
