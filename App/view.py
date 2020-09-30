@@ -25,6 +25,7 @@ import config
 from DISClib.ADT import list as lt
 from App import controller
 assert config
+from time import perf_counter
 
 """
 La vista se encarga de la interacción con el usuario.
@@ -38,7 +39,8 @@ operación seleccionada.
 # ___________________________________________________
 
 
-crimefile = 'crime-utf8.csv'
+crimefile = 'us_accidents_dis_2016.csv'
+crimefile2 = "us_accidents_dis_2019.csv"
 
 # ___________________________________________________
 #  Menu principal
@@ -53,6 +55,7 @@ def printMenu():
     print("2- Cargar información de accidentes")
     print("3- Requerimento 1")
     print("4- Requerimento 2")
+    print("5- Requerimento 3")
     print("0- Salir")
     print("*******************************************")
 
@@ -71,14 +74,26 @@ while True:
 
     elif int(inputs[0]) == 2:
         print("\nCargando información de crimenes ....")
-
-    elif int(inputs[0]) == 3:
-        print("\nBuscando crimenes en un rango de fechas: ")
-
-
+        t1 = perf_counter()
+        controller.loadData(cont, crimefile,crimefile2)
+        t2 = perf_counter()
+        print("tiempo de carga:", t2 - t1)
     elif int(inputs[0]) == 4:
+        print("\nBuscando crimenes en un rango de fechas: ")
+        fecha =input("fecha")
+        t1 = perf_counter()
+        w = controller.rango_de_fechas(cont,"None",fecha)
+        print(w)
+        t2 = perf_counter()
+        print("tiempo de carga:", t2 - t1)
+    elif int(inputs[0]) == 3:
         print("\nRequerimiento No 1 del reto 3: ")
-
+        print("\nBuscando crimenes en un rango de fechas: ")
+        fecha =input("fecha")
+        t1 = perf_counter()
+        w = controller.fecha(cont,fecha)
+        print(w)
+        t2 = perf_counter()
     else:
         sys.exit(0)
 sys.exit(0)

@@ -24,6 +24,7 @@ import config as cf
 from App import model
 import datetime
 import csv
+from DISClib.ADT import orderedmap as om
 
 """
 El controlador se encarga de mediar entre la vista y el modelo.
@@ -39,11 +40,9 @@ recae sobre el controlador.
 
 
 def init():
-    """
-    Llama la funcion de inicializacion del modelo.
-    """
+    analyzer = model.newAnalyzer()
+    return analyzer
 
-    return None
 
 
 # ___________________________________________________
@@ -51,13 +50,33 @@ def init():
 #  de datos en los modelos
 # ___________________________________________________
 
-def loadData(analyzer, accidentsfile):
+def loadData(analyzer, accidentsfile2016, accidentsfile2019):
     """
     Carga los datos de los archivos CSV en el modelo
     """
-    
+    crimesfile = cf.data_dir + accidentsfile2016
+    input_file = csv.DictReader(open(crimesfile, encoding="utf-8"),delimiter=",")
+    for crime in input_file:
+        model.addCrime(analyzer, crime)
+    crimesfile2 = cf.data_dir + accidentsfile2019
+    input_file2 = csv.DictReader(open(crimesfile2, encoding="utf-8"),delimiter=",")
+    for crime in input_file2:
+        model.addCrime(analyzer, crime)
     return analyzer
 
 # ___________________________________________________
 #  Funciones para consultas
 # ___________________________________________________
+def rango_de_fechas(cont,min,max):
+    if min =="None":
+       min=str(om.minKey(cont['dateIndex']))
+       print(min)
+    initialDate = datetime.datetime.strptime(min, '%Y-%m-%d')
+    finalDate = datetime.datetime.strptime(max, '%Y-%m-%d')
+    fechas=model.rango_de_fechas(cont, initialDate.date(),finalDate.date())
+    mayor=model.mayor(cont, fechas)
+    w=[fechas, mayor]
+    return w
+def fecha(cont,fecha):
+    Date = datetime.datetime.strptime(fecha, '%Y-%m-%d')
+    return model.fecha(cont,Date)
