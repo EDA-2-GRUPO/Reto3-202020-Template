@@ -57,7 +57,7 @@ def loadData(analyzer, accidentsfile2016, accidentsfile2019):
     crimesfile = cf.data_dir + accidentsfile2016
     input_file = csv.DictReader(open(crimesfile, encoding="utf-8"),delimiter=",")
     for crime in input_file:
-        model.addCrime(analyzer, crime)
+        model.addAccident(analyzer, crime)
     # crimesfile2 = cf.data_dir + accidentsfile2019
     # input_file2 = csv.DictReader(open(crimesfile2, encoding="utf-8"),delimiter=",")
     # for crime in input_file2:

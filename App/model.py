@@ -26,6 +26,7 @@ from DISClib.DataStructures import mapentry as me
 from DISClib.ADT import map as m
 from DISClib.DataStructures import listiterator as lstit
 import datetime
+
 assert config
 
 """
@@ -34,6 +35,7 @@ es decir contiene los modelos con los datos en memoria
 
 
 """
+
 
 # -----------------------------------------------------
 # API del TAD Catalogo de accidentes
@@ -47,17 +49,18 @@ def newAnalyzer():
 
     Retorna el analizador inicializado.
     """
-    analyzer = {'Accidente': None,
-                'dateIndex': None
-                }
+    analyzer = {'Accidente': None, 'dateIndex': om.newMap(omaptype='BST',
+                                                          comparefunction=compareDates)}
 
-    analyzer['dateIndex'] = om.newMap(omaptype='BST',
-                                      comparefunction=compareDates)
     return analyzer
-def addCrime(analyzer, crime):
-    updateDateIndex(analyzer['dateIndex'], crime)
+
+
+def addAccident(analyzer, date):
+    updateDateIndex(analyzer['dateIndex'], date)
     return analyzer
-def updateDateIndex(map, crime):
+
+
+def updateDateIndex(map, date):
     """
     Se toma la fecha del crimen y se busca si ya existe en el arbol
     dicha fecha.  Si es asi, se adiciona a su lista de crimenes
@@ -66,17 +69,20 @@ def updateDateIndex(map, crime):
     Si no se encuentra creado un nodo para esa fecha en el arbol
     se crea y se actualiza el indice de tipos de crimenes
     """
-    occurreddate = crime['Start_Time']
-    crimedate = datetime.datetime.strptime(occurreddate, '%Y-%m-%d %H:%M:%S')
-    entry = om.get(map, crimedate.date())
+    occurredDate = date['Start_Time']
+    accidentDate = datetime.datetime.strptime(occurredDate, '%Y-%m-%d %H:%M:%S')
+    entry = om.get(map, accidentDate.date())
     if entry is None:
-        datentry = newDataEntry(crime)
-        om.put(map, crimedate.date(), datentry)
+        datentry = newDataEntry(date)
+        om.put(map, accidentDate.date(), datentry)
     else:
         datentry = me.getValue(entry)
-    addDateIndex(datentry, crime)
+
+    addDateIndex(datentry, date)
     return map
-def addDateIndex(datentry, crime):
+
+
+def addDateIndex(datentry, accident):
     """
     Actualiza un indice de tipo de crimenes.  Este indice tiene una lista
     de crimenes y una tabla de hash cuya llave es el tipo de crimen y
@@ -84,38 +90,34 @@ def addDateIndex(datentry, crime):
     se está consultando (dada por el nodo del arbol)
     """
     lst = datentry['lstaccidentes']
-    lt.addLast(lst, crime)
-    """offenseIndex = datentry['offenseIndex']
-    offentry = m.get(offenseIndex, crime['OFFENSE_CODE_GROUP'])
-    if (offentry is None):
-        entry = newOffenseEntry(crime['OFFENSE_CODE_GROUP'], crime)
-        lt.addLast(entry['lstoffenses'], crime)
-        m.put(offenseIndex, crime['OFFENSE_CODE_GROUP'], entry)
-    else:
-        entry = me.getValue(offentry)
-        lt.addLast(entry['lstoffenses'], crime)"""
-    return datentry
-def newOffenseEntry(offensegrp, crime):
-    """
-    Crea una entrada en el indice por tipo de crimen, es decir en
-    la tabla de hash, que se encuentra en cada nodo del arbol.
-    """
-    ofentry = {'offense': None, 'lstoffenses': None}
-    ofentry['offense'] = offensegrp
-    ofentry['lstoffenses'] = lt.newList('SINGLELINKED', compareOffenses)
-    return ofentry
+    lt.addLast(lst, accident)
 
-def newDataEntry(crime):
+    SeverityIndex = datentry['SeverityIndex']
+    SevKey = accident['OFFENSE_CODE_GROUP']
+    SeverityEntry = m.get(SeverityIndex, SevKey)
+    if SeverityEntry is None:
+        entry = lt.newList('SINGLELINKED', compareOffenses)
+        m.put(SeverityIndex, SevKey, entry)
+    else:
+        entry = me.getValue(SeverityEntry)
+
+    lt.addLast(entry, accident)
+    return datentry
+
+
+def newDataEntry():
     """
     Crea una entrada en el indice por fechas, es decir en el arbol
     binario.
     """
-    entry = {'offenseIndex': None, 'lstaccidentes': None}
-    """entry['offenseIndex'] = m.newMap(numelements=30,
-                                     maptype='PROBING',
-                                     comparefunction=compareOffenses)"""
-    entry['lstaccidentes'] = lt.newList('SINGLE_LINKED', compareDates)
+    entry = {'SeverityIndex': m.newMap(numelements=10,
+                                       maptype='PROBING',
+                                       comparefunction=compareOffenses),
+
+             'lstaccidentes': lt.newList('SINGLE_LINKED', compareDates)}
+
     return entry
+
 
 # Funciones para agregar informacion al catalogo
 
@@ -123,30 +125,36 @@ def newDataEntry(crime):
 # ==============================
 # Funciones de consulta
 # ==============================
-def rango_de_fechas(cont,min,max):
+def rango_de_fechas(cont, min, max):
     lst = om.values(cont['dateIndex'], min, max)
     return lst
+
+
 def fecha(cont, fecha):
     return om.get(cont['dateIndex'], fecha)
-def recorrido(cont,lista):
-    #funcion que saca la fecha con la mayor catidad de accidentes
-    #la cantidad de accidentes en las lista de fechas
-    mayor=0
-    contar=0
-    nombre="None"
-    w=lstit.newIterator(lista)
-    listafinal=lt.newList("ARRAY_LIST")
+
+
+def recorrido(cont, lista):
+    # funcion que saca la fecha con la mayor catidad de accidentes
+    # la cantidad de accidentes en las lista de fechas
+    mayor = 0
+    contar = 0
+    nombre = "None"
+    w = lstit.newIterator(lista)
+    listafinal = lt.newList("ARRAY_LIST")
     while lstit.hasNext(w):
-        x=lstit.next(w)
-        g=lt.size(om.get(cont['dateIndex'],x)["value"]["lstaccidentes"])
-        contar+=g
-        if g>mayor:
-            mayor=g
-            nombre=x
-    lt.addLast(listafinal,nombre)
-    lt.addLast(listafinal,contar)
-    lt.addLast(listafinal,mayor)
+        x = lstit.next(w)
+        g = lt.size(om.get(cont['dateIndex'], x)["value"]["lstaccidentes"])
+        contar += g
+        if g > mayor:
+            mayor = g
+            nombre = x
+    lt.addLast(listafinal, nombre)
+    lt.addLast(listafinal, contar)
+    lt.addLast(listafinal, mayor)
     return listafinal
+
+
 # ==============================
 # Funciones de Comparacion
 # ==============================
