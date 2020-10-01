@@ -24,7 +24,7 @@ from DISClib.ADT import list as lt
 from DISClib.ADT import orderedmap as om
 from DISClib.DataStructures import mapentry as me
 from DISClib.ADT import map as m
-from DISClib.DataStructures import listiterator as lstit
+from DISClib.DataStructures import listiterator as it
 import datetime
 
 assert config
@@ -131,7 +131,19 @@ def rango_de_fechas(cont, min, max):
 
 
 def fecha(cont, fecha):
-    return om.get(cont['dateIndex'], fecha)
+    return om.get(cont['dateIndex'], fecha)["value"]
+
+
+def Severity_list(Dataentry):
+    Severitys = Dataentry['SeverityIndex']
+    listK = m.keySet(Severitys)
+    listP = lt.newList()
+    iterador = it.newIterator(listK)
+    for _ in range(lt.size(listP)):
+        Key = it.next(iterador)
+        value = me.getValue(m.get(Dataentry['SeverityIndex'], Key))
+        el = {"Severity": Key, "Value": value}
+        lt.addLast(listP, el)
 
 
 def recorrido(cont, lista):
@@ -140,10 +152,10 @@ def recorrido(cont, lista):
     mayor = 0
     contar = 0
     nombre = "None"
-    w = lstit.newIterator(lista)
+    w = it.newIterator(lista)
     listafinal = lt.newList("ARRAY_LIST")
-    while lstit.hasNext(w):
-        x = lstit.next(w)
+    while it.hasNext(w):
+        x = it.next(w)
         g = lt.size(om.get(cont['dateIndex'], x)["value"]["lstaccidentes"])
         contar += g
         if g > mayor:

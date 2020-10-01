@@ -26,7 +26,7 @@ from DISClib.ADT import list as lt
 from App import controller
 assert config
 from time import perf_counter
-from DISClib.DataStructures import listiterator as lstit
+from DISClib.DataStructures import listiterator as it
 
 """
 La vista se encarga de la interacción con el usuario.
@@ -52,19 +52,19 @@ def printMenu():
     print("\n")
     print("*******************************************")
     print("Bienvenido")
-    print("1- Inicializar Analizador")
-    print("2- Cargar información de accidentes")
-    print("3- Requerimento 1")
-    print("4- Requerimento 2")
-    print("5- Requerimento 3")
+    print("w- Inicializar Analizador")
+    print("q- Cargar información de accidentes")
+    print("1- Requerimento 1")
+    print("2- Requerimento 2")
+    print("3- Requerimento 3")
     print("0- Salir")
     print("*******************************************")
 
 def Printlistafinal(lista):
     it=0
-    w=lstit.newIterator(lista)
-    while lstit.hasNext(w):
-        x=lstit.next(w)
+    w=it.newIterator(lista)
+    while it.hasNext(w):
+        x=it.next(w)
         if it==0:
             print("fecha con más accidentes"+str(x))
         elif it==1:
@@ -72,6 +72,19 @@ def Printlistafinal(lista):
         elif it==2:
              print("cantidad de accidentes de la fecha dada" +str(x))
         it+=1
+
+
+def Print1(g):
+    iter = it.newIterator(g)
+    for _ in range(lt.size(g)):
+        el = it.next(iter)
+        sev = el["severity"]
+        cant = lt.size(el["value"])
+        print(sev,": ",  cant)
+
+
+
+
 """
 Menu principal
 """
@@ -79,18 +92,28 @@ while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n>')
 
-    if int(inputs[0]) == 1:
+    if inputs[0] == "q":
         print("\nInicializando....")
         # cont es el controlador que se usará de acá en adelante
         cont = controller.init()
 
-    elif int(inputs[0]) == 2:
+    elif inputs[0] == "w":
         print("\nCargando información de crimenes ....")
         t1 = perf_counter()
         controller.loadData(cont, crimefile,crimefile2)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
-    elif int(inputs[0]) == 4:
+    elif int(inputs[0]) == 1:
+        print("\nBuscando crimenes en un rango de fechas: ")
+        fecha = input("fecha")
+        t1 = perf_counter()
+        w = controller.fecha(cont, fecha)
+        g = controller.Severity_list(w)
+        Print1(g)
+        t2 = perf_counter()
+        print("tiempo de carga:", t2 - t1)
+
+    elif int(inputs[0]) == 2:
         print("\nBuscando crimenes en un rango de fechas: ")
         fecha =input("fecha")
         t1 = perf_counter()
@@ -98,14 +121,6 @@ while True:
         Printlistafinal(w)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
-    elif int(inputs[0]) == 3:
-        print("\nRequerimiento No 1 del reto 3: ")
-        print("\nBuscando crimenes en un rango de fechas: ")
-        fecha =input("fecha")
-        t1 = perf_counter()
-        w = controller.fecha(cont,fecha)
-        print(w)
-        t2 = perf_counter()
+
     else:
         sys.exit(0)
-sys.exit(0)

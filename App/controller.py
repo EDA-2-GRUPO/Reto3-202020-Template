@@ -34,6 +34,7 @@ del modelo en una sola respuesta.  Esta responsabilidad
 recae sobre el controlador.
 """
 
+
 # ___________________________________________________
 #  Inicializacion del catalogo
 # ___________________________________________________
@@ -42,7 +43,6 @@ recae sobre el controlador.
 def init():
     analyzer = model.newAnalyzer()
     return analyzer
-
 
 
 # ___________________________________________________
@@ -55,7 +55,7 @@ def loadData(analyzer, accidentsfile2016, accidentsfile2019):
     Carga los datos de los archivos CSV en el modelo
     """
     crimesfile = cf.data_dir + accidentsfile2016
-    input_file = csv.DictReader(open(crimesfile, encoding="utf-8"),delimiter=",")
+    input_file = csv.DictReader(open(crimesfile, encoding="utf-8"), delimiter=",")
     for crime in input_file:
         model.addAccident(analyzer, crime)
     # crimesfile2 = cf.data_dir + accidentsfile2019
@@ -64,17 +64,24 @@ def loadData(analyzer, accidentsfile2016, accidentsfile2019):
     #     model.addCrime(analyzer, crime)
     # return analyzer
 
+
 # ___________________________________________________
 #  Funciones para consultas
 # ___________________________________________________
-def rango_de_fechas(cont,min,max):
-    if min =="None":
-       min=str(om.minKey(cont['dateIndex']))
+def rango_de_fechas(cont, min, max):
+    if min == "None":
+        min = str(om.minKey(cont['dateIndex']))
     initialDate = datetime.datetime.strptime(min, '%Y-%m-%d')
     finalDate = datetime.datetime.strptime(max, '%Y-%m-%d')
-    fechas=model.rango_de_fechas(cont, initialDate.date(),finalDate.date())
-    mayor=model.recorrido(cont, fechas)
+    fechas = model.rango_de_fechas(cont, initialDate.date(), finalDate.date())
+    mayor = model.recorrido(cont, fechas)
     return mayor
-def fecha(cont,fecha):
+
+
+def fecha(cont, fecha):
     Date = datetime.datetime.strptime(fecha, '%Y-%m-%d')
-    return model.fecha(cont,Date)
+    return model.fecha(cont, Date)
+
+
+def Severity_list(Dataentry):
+    return model.Severity_list(Dataentry)
