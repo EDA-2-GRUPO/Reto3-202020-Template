@@ -25,6 +25,7 @@ from DISClib.ADT import orderedmap as om
 from DISClib.DataStructures import mapentry as me
 from DISClib.ADT import map as m
 from DISClib.DataStructures import listiterator as lstit
+from DISClib.DataStructures import mapstructure as mp
 import datetime
 
 assert config
@@ -153,8 +154,24 @@ def recorrido(cont, lista):
     lt.addLast(listafinal, contar)
     lt.addLast(listafinal, mayor)
     return listafinal
-
-
+def requerimient3(cont,lista):
+    mayor = 0
+    contar = 0
+    nombre = "None"
+    w = lstit.newIterator(lista)
+    mapa = mp.newMap()
+    listafinal = lt.newList("ARRAY_LIST")
+    while lstit.hasNext(w):
+        x = lstit.next(w)
+        g = om.get(cont['dateIndex'], x)["value"]["SeverityIndex"]
+        g= om.keySet(g)
+        iteseg= lstit.newIterator(g)
+        while lstit.hasNext(iteseg):
+            key = lstit.next(iteseg)
+            if mp.contains(mapa, key):
+               valor=om.get(g, key)["size"]
+               valor+=mp.get(mapa, x)
+    return 0
 # ==============================
 # Funciones de Comparacion
 # ==============================
