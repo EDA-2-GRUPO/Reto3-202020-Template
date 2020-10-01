@@ -73,7 +73,7 @@ def updateDateIndex(map, date):
     accidentDate = datetime.datetime.strptime(occurredDate, '%Y-%m-%d %H:%M:%S')
     entry = om.get(map, accidentDate.date())
     if entry is None:
-        datentry = newDataEntry(date)
+        datentry = newDataEntry()
         om.put(map, accidentDate.date(), datentry)
     else:
         datentry = me.getValue(entry)
@@ -144,6 +144,7 @@ def Severity_list(Dataentry):
         value = me.getValue(m.get(Dataentry['SeverityIndex'], Key))
         el = {"Severity": Key, "Value": value}
         lt.addLast(listP, el)
+    return listP
 
 
 def recorrido(cont, lista):

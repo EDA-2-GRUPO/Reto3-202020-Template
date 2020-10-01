@@ -80,7 +80,7 @@ def rango_de_fechas(cont, min, max):
 
 def fecha(cont, fecha):
     Date = datetime.datetime.strptime(fecha, '%Y-%m-%d')
-    return model.fecha(cont, Date)
+    return model.fecha(cont, Date.date())
 
 
 def Severity_list(Dataentry):
