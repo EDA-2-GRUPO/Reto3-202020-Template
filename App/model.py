@@ -93,7 +93,7 @@ def addDateIndex(datentry, accident):
     lt.addLast(lst, accident)
 
     SeverityIndex = datentry['SeverityIndex']
-    SevKey = accident['OFFENSE_CODE_GROUP']
+    SevKey = accident['Severity']
     SeverityEntry = m.get(SeverityIndex, SevKey)
     if SeverityEntry is None:
         entry = lt.newList('SINGLELINKED', compareOffenses)
