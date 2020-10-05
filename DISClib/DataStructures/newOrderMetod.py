@@ -10,11 +10,11 @@ assert config
 
 # ordermap funccion
 
-def pairSet(rbt):
+def pairSet(omap):
     """
     Retorna una lista con todas las parejas llave-valor de la tabla
     Args:
-        rbt: La tabla de simbolos
+        omap: La tabla de simbolos
     Returns:
         Una lista con todas las llaves de la tabla
     Raises:
@@ -22,7 +22,7 @@ def pairSet(rbt):
     """
     try:
         klist = lt.newList()
-        klist = pairSetTree(rbt['root'], klist)
+        klist = pairSetTree(omap['root'], klist)
         return klist
     except Exception as exp:
         error.reraise(exp, 'RBT:pairSet')
@@ -48,22 +48,21 @@ def keysBefore(omap, key):
         error.reraise(exp, 'RBT:KeysBefore')
 
 
-def pairsBefore(rbt, key):
+def pairsBefore(omap, key):
     """
     Retorna todas las llaves del arbol que se encuentren entre
     [keylo, keyhi]
     Args:
-        bst: La tabla de simbolos
-        keylo: limite inferior
-        keylohi: limite superiorr
+        omap:
+        key:
     Returns:
         Las llaves en el rago especificado
     Raises:
         Exception
     """
     try:
-        lstkeys = lt.newList('SINGLELINKED', rbt['cmpfunction'])
-        lstkeys = PairBefore_tree(rbt['root'], key, rbt['cmpfunction'], lstkeys)
+        lstkeys = lt.newList('SINGLELINKED', omap['cmpfunction'])
+        lstkeys = PairBefore_tree(omap['root'], key, omap['cmpfunction'], lstkeys)
         return lstkeys
     except Exception as exp:
         error.reraise(exp, 'RBT:keys')
