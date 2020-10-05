@@ -31,7 +31,6 @@ from DISClib.Utils import error as error
 from DISClib.ADT import list as lt
 assert config
 
-
 """
 Implementación de una tabla de simbolos ordenada, mediante un arbol binario
 balanceado Red-Black.
@@ -40,6 +39,7 @@ Este código está basados en la implementación
 propuesta por R.Sedgewick y Kevin Wayne en su libro
 Algorithms, 4th Edition
 """
+
 
 # ________________________________________________________________________
 #                     API  RBT
@@ -195,7 +195,7 @@ def keySet(rbt):
     """
     try:
         klist = lt.newList()
-        klist = keySetTree(rbt, klist)
+        klist = keySetTree(rbt['root'], klist)
         return klist
     except Exception as exp:
         error.reraise(exp, 'RBT:KeySet')
@@ -213,7 +213,7 @@ def valueSet(rbt):
     """
     try:
         vlist = lt.newList()
-        vlist = valueSetTree(rbt, vlist)
+        vlist = valueSetTree(rbt['root'], vlist)
         return vlist
     except Exception as exp:
         error.reraise(exp, 'RBT:valueSet')
@@ -626,19 +626,19 @@ def insertNode(root, key, value, comparefunction):
         Exception
     """
     try:
-        if root is None:     # Se trata de la raíz del árbol
+        if root is None:  # Se trata de la raíz del árbol
             root = node.newNode(key, value, 1, node.RED)
             return root
 
         cmp = comparefunction(key, root['key'])
 
-        if (cmp < 0):     # La llave a insertar es menor que la raiz
-            root['left'] = insertNode(root['left'],  key, value,
+        if cmp < 0:  # La llave a insertar es menor que la raiz
+            root['left'] = insertNode(root['left'], key, value,
                                       comparefunction)
-        elif (cmp > 0):    # La llave a insertar es mayor que la raíz
+        elif (cmp > 0):  # La llave a insertar es mayor que la raíz
             root['right'] = insertNode(root['right'], key, value,
                                        comparefunction)
-        else:              # La llave ya se encuentra en la tabla
+        else:  # La llave ya se encuentra en la tabla
             root['value'] = value
 
         # Se ajusta el balanceo del arbol
@@ -886,11 +886,11 @@ def valuesRange(root, keylo, keyhi, lstvalues, cmpfunction):
             comphi = cmpfunction(keyhi, root['key'])
 
             if (complo < 0):
-                keysRange(root['left'], keylo, keyhi, lstvalues, cmpfunction)
+                valuesRange(root['left'], keylo, keyhi, lstvalues, cmpfunction)
             if ((complo <= 0) and (comphi >= 0)):
                 lt.addLast(lstvalues, root['value'])
             if (comphi > 0):
-                keysRange(root['right'], keylo, keyhi, lstvalues, cmpfunction)
+                valuesRange(root['right'], keylo, keyhi, lstvalues, cmpfunction)
         return lstvalues
     except Exception as exp:
         error.reraise(exp, 'BST:valuesrange')
@@ -913,7 +913,7 @@ def selectKey(root, key):
             if (cont > key):
                 return selectKey(root['left'], key)
             elif (cont < key):
-                return selectKey(root['right'], key-cont-1)
+                return selectKey(root['right'], key - cont - 1)
             else:
                 return root
         return root
@@ -964,8 +964,7 @@ def deleteMaxTree(root):
             return None
 
         if ((not isRed(root['right'])) and
-           ((not isRed(root['right']['left'])))):
-
+                ((not isRed(root['right']['left'])))):
             root = moveRedRight(root)
 
         root['right'] = deleteMaxTree(root['right'])
@@ -1059,7 +1058,7 @@ def removeKey(root, key, cmpfunction):
     try:
         if (cmpfunction(key, root['key']) < 0):
             if ((not isRed(root['left'])) and
-               (not isRed(root['left']['left']))):
+                    (not isRed(root['left']['left']))):
                 root = moveRedLeft(root)
             root['left'] = removeKey(root['left'], key, cmpfunction)
         else:
@@ -1067,11 +1066,11 @@ def removeKey(root, key, cmpfunction):
                 root = rotateRight(root)
 
             if ((cmpfunction(key, root['key']) == 0) and
-               (root['right'] is None)):
+                    (root['right'] is None)):
                 return None
 
             if ((not isRed(root['right']) and
-               (not isRed(root['right']['left'])))):
+                 (not isRed(root['right']['left'])))):
                 root = moveRedRight(root)
 
             if ((cmpfunction(key, root['key']) == 0)):
@@ -1086,3 +1085,25 @@ def removeKey(root, key, cmpfunction):
 
     except Exception as exp:
         error.reraise(exp, 'RBT:removeKey')
+
+
+if __name__ == '__main__':
+    def compare(el1, el2):
+        if el1 == el2:
+            return 0
+        elif el1 < el2:
+            return -1
+        return 1
+
+
+    from random import randint
+
+    s = newMap(compare)
+    for _ in range(27):
+        # el = randint(1, 100)
+        put(s, _, chr(_ + 97))
+
+    g = keySet(s)
+    t = ValuesBefore(s, 23)
+    h = values(s, 23, 30)
+    q = valueSet(s)

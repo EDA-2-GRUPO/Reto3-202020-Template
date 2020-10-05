@@ -60,18 +60,19 @@ def printMenu():
     print("0- Salir")
     print("*******************************************")
 
+
 def Printlistafinal(lista):
-    it=0
-    w=it.newIterator(lista)
+    count = 0
+    w = it.newIterator(lista)
     while it.hasNext(w):
-        x=it.next(w)
-        if it==0:
+        x = it.next(w)
+        if count == 0:
             print("fecha con más accidentes"+str(x))
-        elif it==1:
+        elif count == 1:
             print("cantidad total de accidentes"+str(x))
-        elif it==2:
+        elif count == 2:
              print("cantidad de accidentes de la fecha dada" +str(x))
-        it+=1
+        count += 1
 
 
 def Print1(g):
@@ -92,26 +93,29 @@ while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n>')
 
-    if inputs[0] == "q":
+    if inputs[0] == "w":
         print("\nInicializando....")
         # cont es el controlador que se usará de acá en adelante
         cont = controller.init()
 
-    elif inputs[0] == "w":
+    elif inputs[0] == "q":
         print("\nCargando información de crimenes ....")
         t1 = perf_counter()
         controller.loadData(cont, crimefile,crimefile2)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
+
     elif int(inputs[0]) == 1:
         print("\nBuscando crimenes en un rango de fechas: ")
         fecha = input("fecha")
         t1 = perf_counter()
-        w = controller.fecha(cont, fecha)
-        g = controller.Severity_list(w)
-        Print1(g)
+        dateEntry = controller.getDate(cont, fecha)
+        SeverityList = controller.Severity_list(dateEntry)
+        Print1(SeverityList)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
+
+
 
     elif int(inputs[0]) == 2:
         print("\nBuscando crimenes en un rango de fechas: ")
@@ -123,4 +127,10 @@ while True:
         print("tiempo de carga:", t2 - t1)
 
     else:
-        sys.exit(0)
+        break
+
+t1 = perf_counter()
+for _ in range(320000):
+    pass
+t2 = perf_counter()
+print(t2-t1)

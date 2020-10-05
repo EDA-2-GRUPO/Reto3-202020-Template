@@ -69,19 +69,18 @@ def loadData(analyzer, accidentsfile2016, accidentsfile2019):
 #  Funciones para consultas
 # ___________________________________________________
 def rango_de_fechas(cont, min, max):
-    if min == "None":
-        min = str(om.minKey(cont['dateIndex']))
     initialDate = datetime.datetime.strptime(min, '%Y-%m-%d')
     finalDate = datetime.datetime.strptime(max, '%Y-%m-%d')
+
     fechas = model.rango_de_fechas(cont, initialDate.date(), finalDate.date())
-    mayor = model.recorrido(cont, fechas)
+    mayor = model.MayorCantidadAccidentes(cont, fechas)
     return mayor
 
 
-def fecha(cont, fecha):
-    Date = datetime.datetime.strptime(fecha, '%Y-%m-%d')
-    return model.fecha(cont, Date.date())
+def getDate(cont, date):
+    Date = datetime.datetime.strptime(date, '%Y-%m-%d')
+    return model.getDate(cont, Date.date())
 
 
-def Severity_list(Dataentry):
-    return model.Severity_list(Dataentry)
+def Severity_list(dataentry):
+    return model.Severity_list(dataentry)

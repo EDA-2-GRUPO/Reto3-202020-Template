@@ -130,7 +130,7 @@ def rango_de_fechas(cont, min, max):
     return lst
 
 
-def fecha(cont, fecha):
+def getDate(cont, fecha):
     return om.get(cont['dateIndex'], fecha)["value"]
 
 
@@ -141,13 +141,13 @@ def Severity_list(Dataentry):
     iterador = it.newIterator(listK)
     for _ in range(lt.size(listP)):
         Key = it.next(iterador)
-        value = me.getValue(m.get(Dataentry['SeverityIndex'], Key))
+        value = me.getValue(m.get(Severitys, Key))
         el = {"Severity": Key, "Value": value}
         lt.addLast(listP, el)
     return listP
 
 
-def recorrido(cont, lista):
+def MayorCantidadAccidentes(lista):
     # funcion que saca la fecha con la mayor catidad de accidentes
     # la cantidad de accidentes en las lista de fechas
     mayor = 0
@@ -157,7 +157,7 @@ def recorrido(cont, lista):
     listafinal = lt.newList("ARRAY_LIST")
     while it.hasNext(w):
         x = it.next(w)
-        g = lt.size(om.get(cont['dateIndex'], x)["value"]["lstaccidentes"])
+        g = lt.size(["lstaccidentes"])
         contar += g
         if g > mayor:
             mayor = g
@@ -208,3 +208,4 @@ def compareOffenses(offense1, offense2):
         return 1
     else:
         return -1
+
