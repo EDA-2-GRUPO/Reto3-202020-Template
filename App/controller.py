@@ -58,22 +58,25 @@ def loadData(analyzer, accidentsfile2016, accidentsfile2019):
     input_file = csv.DictReader(open(crimesfile, encoding="utf-8"),delimiter=",")
     for crime in input_file:
         model.addAccident(analyzer, crime)
-    # crimesfile2 = cf.data_dir + accidentsfile2019
-    # input_file2 = csv.DictReader(open(crimesfile2, encoding="utf-8"),delimiter=",")
-    # for crime in input_file2:
-    #     model.addCrime(analyzer, crime)
-    # return analyzer
+    """"crimesfile2 = cf.data_dir + accidentsfile2019
+    input_file2 = csv.DictReader(open(crimesfile2, encoding="utf-8"),delimiter=",")
+    for crime in input_file2:
+        model.addAccident(analyzer, crime)
+    return analyzer"""
 
 # ___________________________________________________
 #  Funciones para consultas
 # ___________________________________________________
-def rango_de_fechas(cont,min,max):
+def rango_de_fechas(cont,min,max, num):
     if min =="None":
        min=str(om.minKey(cont['dateIndex']))
     initialDate = datetime.datetime.strptime(min, '%Y-%m-%d')
     finalDate = datetime.datetime.strptime(max, '%Y-%m-%d')
     fechas=model.rango_de_fechas(cont, initialDate.date(),finalDate.date())
-    mayor=model.recorrido(cont, fechas)
+    if num==1:
+       mayor=model.recorrido(cont, fechas)
+    elif num ==2:
+       mayor=model.requerimient3(cont, fechas)
     return mayor
 def fecha(cont,fecha):
     Date = datetime.datetime.strptime(fecha, '%Y-%m-%d')

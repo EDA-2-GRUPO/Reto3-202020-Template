@@ -74,7 +74,7 @@ def updateDateIndex(map, date):
     accidentDate = datetime.datetime.strptime(occurredDate, '%Y-%m-%d %H:%M:%S')
     entry = om.get(map, accidentDate.date())
     if entry is None:
-        datentry = newDataEntry(date)
+        datentry = newDataEntry()
         om.put(map, accidentDate.date(), datentry)
     else:
         datentry = me.getValue(entry)
@@ -151,27 +151,46 @@ def recorrido(cont, lista):
             mayor = g
             nombre = x
     lt.addLast(listafinal, nombre)
-    lt.addLast(listafinal, contar)
     lt.addLast(listafinal, mayor)
+    lt.addLast(listafinal, contar)
     return listafinal
 def requerimient3(cont,lista):
-    mayor = 0
-    contar = 0
-    nombre = "None"
+    ntotal=0
     w = lstit.newIterator(lista)
     mapa = mp.newMap()
     listafinal = lt.newList("ARRAY_LIST")
     while lstit.hasNext(w):
         x = lstit.next(w)
+        listaa= lt.size(om.get(cont['dateIndex'], x)["value"]["lstaccidentes"])
+        ntotal+=listaa
         g = om.get(cont['dateIndex'], x)["value"]["SeverityIndex"]
-        g= om.keySet(g)
-        iteseg= lstit.newIterator(g)
+        listallaves= om.keySet(g)
+        iteseg= lstit.newIterator(listallaves)
         while lstit.hasNext(iteseg):
             key = lstit.next(iteseg)
             if mp.contains(mapa, key):
-               valor=om.get(g, key)["size"]
-               valor+=mp.get(mapa, x)
-    return 0
+               valor=int(om.get(g, key)["size"])
+               valor2=int(mp.get(mapa, key))
+               mp.put(mapa,key,valor+valor2)
+            else:
+                mp.put(mapa,key, 0)
+                valor=int(om.get(g, key)["size"])
+                valor2=int(mp.get(mapa, key))
+                mp.put(mapa,key,valor+valor2)
+    sap=mp.keySet(mapa)
+    mayor= 0
+    nombre = "None"
+    iteseg= lstit.newIterator(sap)
+    while lstit.hasNext(iteseg):
+        key = lstit.next(iteseg)
+        prueba=mp.get(mapa,key)
+        if prueba>mayor:
+            mayor=prueba
+            nombre=key   
+    lt.addLast(listafinal, nombre)
+    lt.addLast(listafinal, mayor)
+    lt.addLast(listafinal, ntotal)
+    return listafinal
 # ==============================
 # Funciones de Comparacion
 # ==============================

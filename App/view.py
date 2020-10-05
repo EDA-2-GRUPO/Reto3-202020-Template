@@ -83,7 +83,6 @@ while True:
         print("\nInicializando....")
         # cont es el controlador que se usará de acá en adelante
         cont = controller.init()
-
     elif int(inputs[0]) == 2:
         print("\nCargando información de crimenes ....")
         t1 = perf_counter()
@@ -94,7 +93,7 @@ while True:
         print("\nBuscando crimenes en un rango de fechas: ")
         fecha =input("fecha")
         t1 = perf_counter()
-        w = controller.rango_de_fechas(cont,"None",fecha)
+        w = controller.rango_de_fechas(cont,"None",fecha,1)
         Printlistafinal(w)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
@@ -106,6 +105,14 @@ while True:
         w = controller.fecha(cont,fecha)
         print(w)
         t2 = perf_counter()
+    elif int(inputs[0]) == 5:
+        print("\nBuscando crimenes en un rango de fechas: ")
+        fecha =input("fecha")
+        t1 = perf_counter()
+        w = controller.rango_de_fechas(cont,"None",fecha,2)
+        Printlistafinal(w)
+        t2 = perf_counter()
+        print("tiempo de carga:", t2 - t1)
     else:
         sys.exit(0)
 sys.exit(0)
