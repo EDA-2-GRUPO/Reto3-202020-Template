@@ -144,7 +144,7 @@ def isEmpty(map):
     Raises:
         Exception
     """
-    if (map['type'] == 'BST'):
+    if map['type'] == 'BST':
         return bst.isEmpty(map)
     else:
         return rbt.isEmpty(map)

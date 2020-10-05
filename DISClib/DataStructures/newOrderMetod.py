@@ -68,22 +68,31 @@ def pairsBefore(omap, key):
         error.reraise(exp, 'RBT:keys')
 
 
-def iterationRange(omap, keylo, keyhi, operation):
+def iteration(omap, operation, entry={}):
+    try:
+        root = omap['root']
+        return iterationTree(root, operation, entry)
+    except Exception as exp:
+        error.reraise(exp, 'Nom: iteration')
+
+
+def iterationRange(omap, keylo, keyhi, operation, entry={}):
     try:
         root = omap['root']
         cmpfunction = omap['cmpfunction']
-        entry = {}
         return iterationRangeTree(root, keylo, keyhi, operation, entry, cmpfunction)
     except Exception as exp:
         error.reraise(exp, 'Nom: iterationRange')
 
 
-def iteration(omap, operation):
+def iterationBefore(omap, key, operation, entry={}):
     try:
         root = omap['root']
-        return iterationTree(root, operation, {})
+        cmpfunction = omap['cmpfunction']
+
+        return iterationBeforeTree(root, key, operation, entry, cmpfunction)
     except Exception as exp:
-        error.reraise(exp, 'Nom: iteration')
+        error.reraise(exp, 'Nom: iterationBefore')
 
 
 # tree function
@@ -107,12 +116,12 @@ def iterationBeforeTree(root, key, operation, entry, comparefunction):
         if cmp < 0:
             return iterationBeforeTree(root['left'], key, operation, entry, comparefunction)
         elif cmp > 0:
-            iteration(root['left'], operation)
+            iterationTree(root['left'], operation, entry)
             operation(root, entry)
             iterationBeforeTree(root['right'], key, operation, entry, comparefunction)
             return entry
         else:
-            return iteration(root['left'], operation)
+            return iterationTree(root['left'], operation, entry)
 
     except Exception as exp:
         error.reraise(exp, 'RBT:BeforeKeys')
@@ -141,11 +150,11 @@ def iterationRangeTree(root, keylo, keyhi, operation, entry, cmpfunction):
             comphi = cmpfunction(keyhi, root['key'])
 
             if complo < 0:
-                iterationRangeTree(root['left'], keylo, keyhi, operation, cmpfunction)
+                iterationRangeTree(root['left'], keylo, keyhi, operation, entry, cmpfunction)
             if (complo <= 0) and (comphi >= 0):
                 iterationTree(root, operation, entry)
             if comphi > 0:
-                iterationRangeTree(root['right'], keylo, keyhi, operation, cmpfunction)
+                iterationRangeTree(root['right'], keylo, keyhi, operation, entry, cmpfunction)
         return entry
     except Exception as exp:
         error.reraise(exp, 'RBT:keysRange')
@@ -241,6 +250,7 @@ if __name__ == '__main__':
             return 0
         elif el1 < el2:
             return -1
+        return 1
 
 
     def gen(root, m):
@@ -269,13 +279,13 @@ if __name__ == '__main__':
     # h = values(s, 23, 30)
     # q = valueSet(s)
     t1 = time.perf_counter()
-    g = pairSet(s)
-    iterador = it.newIterator(g)
-    m = {}
-    for _ in range(lt.size(g)):
-        el = it.next(iterador)
-        gen(el, m)
+    # g = pairSet(s)
+    # iterador = it.newIterator(g)
+    # m = {}
+    # for _ in range(lt.size(g)):
+    #     el = it.next(iterador)
+    #     gen(el, m)
 
-    # y = iteration(s, gen)
+    y = iteration(s, gen)
     t2 = time.perf_counter()
     print(t2 - t1)

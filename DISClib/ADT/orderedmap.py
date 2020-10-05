@@ -28,7 +28,6 @@
 
 import config
 from DISClib.DataStructures import orderedmapstructure as om
-from DISClib.DataStructures import newOrderMetod as nom
 assert config
 
 
@@ -316,45 +315,3 @@ def values(map, keylo, keyhi):
     """
     return om.values(map, keylo, keyhi)
 
-
-def pairSet(map):
-    """
-    Retorna una lista con todas las llaves de la tabla
-    Args:
-        rbt: La tabla de simbolos
-    Returns:
-        Una lista con todas las llaves de la tabla
-    Raises:
-        Exception
-    """
-    return nom.pairSet(map)
-
-
-def keysBefore(map, key):
-    """
-    Retorna todas las llaves del anteriores a key
-    Args:
-        key: la llave limite
-        map: La tabla de simbolos
-    Returns:
-        Las llaves en el rago especificado
-    Raises:
-        Exception
-    """
-    return nom.keysBefore(map,key)
-
-
-def pairsBefore(map, key):
-    """
-    Retorna todas las llaves del arbol que se encuentren entre
-    [keylo, keyhi]
-    Args:
-        bst: La tabla de simbolos
-        keylo: limite inferior
-        keylohi: limite superiorr
-    Returns:
-        Las llaves en el rago especificado
-    Raises:
-        Exception
-    """
-    return nom.pairsBefore(map,key)

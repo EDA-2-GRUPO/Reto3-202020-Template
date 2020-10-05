@@ -24,6 +24,7 @@ import sys
 import config
 from DISClib.ADT import list as lt
 from App import controller
+
 assert config
 from time import perf_counter
 from DISClib.DataStructures import listiterator as it
@@ -42,6 +43,7 @@ operación seleccionada.
 
 crimefile = 'us_accidents_dis_2016.csv'
 crimefile2 = "us_accidents_dis_2019.csv"
+
 
 # ___________________________________________________
 #  Menu principal
@@ -67,11 +69,11 @@ def Printlistafinal(lista):
     while it.hasNext(w):
         x = it.next(w)
         if count == 0:
-            print("fecha con más accidentes"+str(x))
+            print("fecha con más accidentes" + str(x))
         elif count == 1:
-            print("cantidad total de accidentes"+str(x))
+            print("cantidad total de accidentes" + str(x))
         elif count == 2:
-             print("cantidad de accidentes de la fecha dada" +str(x))
+            print("cantidad de accidentes de la fecha dada" + str(x))
         count += 1
 
 
@@ -79,17 +81,16 @@ def Print1(g):
     iter = it.newIterator(g)
     for _ in range(lt.size(g)):
         el = it.next(iter)
-        sev = el["severity"]
+        sev = el["key"]
         cant = lt.size(el["value"])
-        print(sev,": ",  cant)
-
-
+        print(sev, ": ", cant)
 
 
 """
 Menu principal
 """
 while True:
+
     printMenu()
     inputs = input('Seleccione una opción para continuar\n>')
 
@@ -101,7 +102,7 @@ while True:
     elif inputs[0] == "q":
         print("\nCargando información de crimenes ....")
         t1 = perf_counter()
-        controller.loadData(cont, crimefile,crimefile2)
+        controller.loadData(cont, crimefile, crimefile2)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
 
@@ -116,13 +117,23 @@ while True:
         print("tiempo de carga:", t2 - t1)
 
 
-
     elif int(inputs[0]) == 2:
         print("\nBuscando crimenes en un rango de fechas: ")
-        fecha =input("fecha")
+        fecha = input("fecha")
         t1 = perf_counter()
-        w = controller.rango_de_fechas(cont,"None",fecha)
-        Printlistafinal(w)
+        w = controller.requirement2(cont, fecha)
+        print(w)
+        t2 = perf_counter()
+        print("tiempo de carga:", t2 - t1)
+
+    elif int(inputs[0]) == 3:
+        print("\nBuscando crimenes en un rango de fechas: ")
+        fecha1 = input("fecha1")
+        fecha2 = input('fecha2')
+        t1 = perf_counter()
+        w = controller.requirement3(cont,fecha1,fecha2)
+        print(w)
+        # Printlistafinal(w)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
 
@@ -133,4 +144,4 @@ t1 = perf_counter()
 for _ in range(320000):
     pass
 t2 = perf_counter()
-print(t2-t1)
+print(t2 - t1)

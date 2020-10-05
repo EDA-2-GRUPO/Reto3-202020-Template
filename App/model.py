@@ -21,10 +21,12 @@
  """
 import config
 from DISClib.ADT import list as lt
-from DISClib.ADT import orderedmap as om
+from DISClib.DataStructures import listiterator as it
 from DISClib.DataStructures import mapentry as me
 from DISClib.ADT import map as m
-from DISClib.DataStructures import listiterator as it
+from DISClib.ADT import orderedmap as om
+from DISClib.DataStructures import newOrderMetod as nom
+
 import datetime
 
 assert config
@@ -93,9 +95,9 @@ def addDateIndex(datentry, accident):
     lt.addLast(lst, accident)
 
     SeverityIndex = datentry['SeverityIndex']
-    SevKey = accident['Severity']
+    SevKey = int(accident['Severity'])
     SeverityEntry = m.get(SeverityIndex, SevKey)
-    if SeverityEntry is None:
+    if not SeverityEntry:
         entry = lt.newList('SINGLELINKED', compareOffenses)
         m.put(SeverityIndex, SevKey, entry)
     else:
@@ -125,47 +127,63 @@ def newDataEntry():
 # ==============================
 # Funciones de consulta
 # ==============================
-def rango_de_fechas(cont, min, max):
-    lst = om.values(cont['dateIndex'], min, max)
-    return lst
+
+def requirement1(cont, date):
+    dataEntry = om.get(cont['dateIndex'], date)["value"]
+    return Severity_list(dataEntry)
 
 
-def getDate(cont, fecha):
-    return om.get(cont['dateIndex'], fecha)["value"]
-
-
-def Severity_list(Dataentry):
-    Severitys = Dataentry['SeverityIndex']
-    listK = m.keySet(Severitys)
+def Severity_list(dataEntry):
+    Severity = dataEntry['SeverityIndex']
+    listK = m.keySet(Severity)
     listP = lt.newList()
-    iterador = it.newIterator(listK)
-    for _ in range(lt.size(listP)):
-        Key = it.next(iterador)
-        value = me.getValue(m.get(Severitys, Key))
-        el = {"Severity": Key, "Value": value}
+    iterator = it.newIterator(listK)
+    for _ in range(lt.size(listK)):
+        Key = it.next(iterator)
+        value = lt.size(me.getValue(m.get(Severity, Key)))
+        el = {"key": Key, "value": value}
         lt.addLast(listP, el)
     return listP
 
 
-def MayorCantidadAccidentes(lista):
-    # funcion que saca la fecha con la mayor catidad de accidentes
-    # la cantidad de accidentes en las lista de fechas
-    mayor = 0
-    contar = 0
-    nombre = "None"
-    w = it.newIterator(lista)
-    listafinal = lt.newList("ARRAY_LIST")
-    while it.hasNext(w):
-        x = it.next(w)
-        g = lt.size(["lstaccidentes"])
-        contar += g
-        if g > mayor:
-            mayor = g
-            nombre = x
-    lt.addLast(listafinal, nombre)
-    lt.addLast(listafinal, contar)
-    lt.addLast(listafinal, mayor)
-    return listafinal
+def requirement2(cont, date):
+    return nom.iterationBefore(cont['dateIndex'], date, TotalAndFrequent)
+
+
+def TotalAndFrequent(dateRoot, returnEntry):
+    dateEntry = dateRoot['value']
+    num_accidents = lt.size(dateEntry['lstaccidentes'])
+    try:
+        current_n = returnEntry['mayor']
+        if num_accidents > current_n:
+            returnEntry['maxDate'] = dateRoot['key']
+            returnEntry['mayor'] = num_accidents
+    except KeyError:
+        returnEntry['maxDate'] = dateRoot['key']
+        returnEntry['mayor'] = num_accidents
+        returnEntry['totalAccidents'] = 0
+
+    returnEntry['totalAccidents'] += num_accidents
+
+
+def requirement3(cont, date1, date2):
+    severityFrequency = nom.iterationRange(cont['dateIndex'], date1, date2, frequentSeverity, {1: 0, 2: 0, 3: 0, 4: 0})
+    return severityFrequency
+
+
+def frequentSeverity(dateRoot, returnEntry):
+    dateEntry = dateRoot['value']
+    severityMap = dateEntry['SeverityIndex']
+    sevKeys = m.keySet(severityMap)
+    iterKeys = it.newIterator(sevKeys)
+    for _ in range(lt.size(sevKeys)):
+        s_key = it.next(iterKeys)
+        num_acc = lt.size(me.getValue(m.get(severityMap, s_key)))
+        returnEntry[s_key] += num_acc
+
+
+def getDate(cont, fecha):
+    return om.get(cont['dateIndex'], fecha)["value"]
 
 
 # ==============================
@@ -175,7 +193,7 @@ def compareIds(id1, id2):
     """
     Compara dos crimenes
     """
-    if (id1 == id2):
+    if id1 == id2:
         return 0
     elif id1 > id2:
         return 1
@@ -202,10 +220,9 @@ def compareOffenses(offense1, offense2):
     y entry una pareja llave-valor
     """
     offense = me.getKey(offense2)
-    if (offense1 == offense):
+    if offense1 == offense:
         return 0
-    elif (offense1 > offense):
+    elif offense1 > offense:
         return 1
     else:
         return -1
-
