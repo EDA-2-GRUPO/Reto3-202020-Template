@@ -154,36 +154,37 @@ def recorrido(cont, lista):
     lt.addLast(listafinal, mayor)
     lt.addLast(listafinal, contar)
     return listafinal
+
 def requerimient3(cont,lista):
     ntotal=0
     w = lstit.newIterator(lista)
-    mapa = mp.newMap()
+    mapau = m.newMap(numelements=11,maptype='PROBING',comparefunction=compareOffenses)
     listafinal = lt.newList("ARRAY_LIST")
     while lstit.hasNext(w):
         x = lstit.next(w)
         listaa= lt.size(om.get(cont['dateIndex'], x)["value"]["lstaccidentes"])
         ntotal+=listaa
         g = om.get(cont['dateIndex'], x)["value"]["SeverityIndex"]
-        listallaves= om.keySet(g)
+        listallaves= mp.keySet(g)
         iteseg= lstit.newIterator(listallaves)
+        listakeys = lt.newList("ARRAY_LIST",compareIds)
         while lstit.hasNext(iteseg):
             key = lstit.next(iteseg)
-            if mp.contains(mapa, key):
-               valor=int(om.get(g, key)["size"])
-               valor2=int(mp.get(mapa, key))
-               mp.put(mapa,key,valor+valor2)
+            if lt.isPresent(listakeys,key)!=0:
+               valor2=valor2["value"]
+               valor=m.get(g, key)["value"]["size"]
+               m.put(mapau,key,valor+valor2)
             else:
-                mp.put(mapa,key, 0)
-                valor=int(om.get(g, key)["size"])
-                valor2=int(mp.get(mapa, key))
-                mp.put(mapa,key,valor+valor2)
-    sap=mp.keySet(mapa)
+                valor=m.get(g, key)["value"]["size"]
+                m.put(mapau,key,valor)
+                lt.addLast(listakeys,key)
+    sap=m.keySet(mapau)
     mayor= 0
     nombre = "None"
     iteseg= lstit.newIterator(sap)
     while lstit.hasNext(iteseg):
         key = lstit.next(iteseg)
-        prueba=mp.get(mapa,key)
+        prueba=mp.get(mapau,key)["value"]
         if prueba>mayor:
             mayor=prueba
             nombre=key   

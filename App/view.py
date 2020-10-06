@@ -107,9 +107,10 @@ while True:
         t2 = perf_counter()
     elif int(inputs[0]) == 5:
         print("\nBuscando crimenes en un rango de fechas: ")
-        fecha =input("fecha")
+        fecha =input("fecha1")
+        fecha2 =input("fecha2")
         t1 = perf_counter()
-        w = controller.rango_de_fechas(cont,"None",fecha,2)
+        w = controller.rango_de_fechas(cont,fecha,fecha2,2)
         Printlistafinal(w)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
