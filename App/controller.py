@@ -80,6 +80,11 @@ def requirement3(cont, date1, date2):
     date2 = datetime.datetime.strptime(date2, '%Y-%m-%d')
     return model.requirement3(cont, date1.date(), date2.date())
 
+def requirement4(cont, date1, date2):
+    date1 = datetime.datetime.strptime(date1, '%Y-%m-%d')
+    date2 = datetime.datetime.strptime(date2, '%Y-%m-%d')
+    return model.requirement4(cont, date1.date(), date2.date())
+
 
 def getDate(cont, date):
     Date = datetime.datetime.strptime(date, '%Y-%m-%d')

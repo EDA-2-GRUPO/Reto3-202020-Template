@@ -23,9 +23,9 @@ import config
 from DISClib.ADT import list as lt
 from DISClib.DataStructures import listiterator as it
 from DISClib.DataStructures import mapentry as me
-from DISClib.ADT import map as m
+from DISClib.ADT import map as mp
 from DISClib.ADT import orderedmap as om
-from DISClib.DataStructures import newOrderMetod as nom
+from App import newOrderMetod as nom
 
 import datetime
 
@@ -57,12 +57,12 @@ def newAnalyzer():
     return analyzer
 
 
-def addAccident(analyzer, date):
-    updateDateIndex(analyzer['dateIndex'], date)
+def addAccident(analyzer, accident):
+    updateDateIndex(analyzer['dateIndex'], accident)
     return analyzer
 
 
-def updateDateIndex(map, date):
+def updateDateIndex(omap, accident):
     """
     Se toma la fecha del crimen y se busca si ya existe en el arbol
     dicha fecha.  Si es asi, se adiciona a su lista de crimenes
@@ -71,40 +71,51 @@ def updateDateIndex(map, date):
     Si no se encuentra creado un nodo para esa fecha en el arbol
     se crea y se actualiza el indice de tipos de crimenes
     """
-    occurredDate = date['Start_Time']
+    occurredDate = accident['Start_Time']
     accidentDate = datetime.datetime.strptime(occurredDate, '%Y-%m-%d %H:%M:%S')
-    entry = om.get(map, accidentDate.date())
+    entry = om.get(omap, accidentDate.date())
     if entry is None:
         datentry = newDataEntry()
-        om.put(map, accidentDate.date(), datentry)
+        om.put(omap, accidentDate.date(), datentry)
     else:
         datentry = me.getValue(entry)
 
-    addDateIndex(datentry, date)
-    return map
+    SevKey = int(accident['Severity'])
+    stateKey = accident['State']
+
+    addDateIndex(datentry, SevKey, stateKey)
+    return omap
 
 
-def addDateIndex(datentry, accident):
+def addDateIndex(datentry, SevKey, stateKey):
     """
     Actualiza un indice de tipo de crimenes.  Este indice tiene una lista
     de crimenes y una tabla de hash cuya llave es el tipo de crimen y
     el valor es una lista con los crimenes de dicho tipo en la fecha que
     se está consultando (dada por el nodo del arbol)
     """
-    lst = datentry['lstaccidentes']
-    lt.addLast(lst, accident)
-
+    datentry['numAccidents'] += 1
+    # lst = datentry['lstaccidentes']
+    # lt.addLast(lst, accident)
     SeverityIndex = datentry['SeverityIndex']
-    SevKey = int(accident['Severity'])
-    SeverityEntry = m.get(SeverityIndex, SevKey)
-    if not SeverityEntry:
-        entry = lt.newList('SINGLELINKED', compareOffenses)
-        m.put(SeverityIndex, SevKey, entry)
-    else:
-        entry = me.getValue(SeverityEntry)
+    # SevKey = int(accident['Severity'])
+    updateIndex(SeverityIndex, SevKey)
+    StateIndex = datentry['StateIndex']
+    # stateKey = accident['State']
+    updateIndex(StateIndex, stateKey)
 
-    lt.addLast(entry, accident)
     return datentry
+
+
+def updateIndex(Index, indexKey):
+    indexEntry = mp.get(Index, indexKey)
+    if not indexEntry:
+        # indexEntry = lt.newList('SINGLELINKED', compareOffenses)
+        mp.put(Index, indexKey, 1)
+    else:
+        indexEntry['value'] += 1
+
+    return Index
 
 
 def newDataEntry():
@@ -112,11 +123,15 @@ def newDataEntry():
     Crea una entrada en el indice por fechas, es decir en el arbol
     binario.
     """
-    entry = {'SeverityIndex': m.newMap(numelements=10,
-                                       maptype='PROBING',
-                                       comparefunction=compareOffenses),
+    entry = {'SeverityIndex': mp.newMap(numelements=10,
+                                        maptype='PROBING',
+                                        comparefunction=compareOffenses),
 
-             'lstaccidentes': lt.newList('SINGLE_LINKED', compareDates)}
+             'StateIndex': mp.newMap(numelements=50,
+                                     maptype='PROBING',
+                                     comparefunction=compareOffenses),
+
+             'numAccidents': 0}
 
     return entry
 
@@ -129,35 +144,41 @@ def newDataEntry():
 # ==============================
 
 def requirement1(cont, date):
-    dataEntry = om.get(cont['dateIndex'], date)["value"]
+    dataEntry = om.get(cont['dateIndex'], date)
     return Severity_list(dataEntry)
 
 
-def Severity_list(dataEntry):
-    Severity = dataEntry['SeverityIndex']
-    listK = m.keySet(Severity)
+def getDate(cont, fecha):
+    return om.get(cont['dateIndex'], fecha)["value"]
+
+
+def Severity_list(dateEntry):
+    severityMap = dateEntry['SeverityIndex']
+    sevKeys = mp.keySet(severityMap)
+    iterKeys = it.newIterator(sevKeys)
     listP = lt.newList()
-    iterator = it.newIterator(listK)
-    for _ in range(lt.size(listK)):
-        Key = it.next(iterator)
-        value = lt.size(me.getValue(m.get(Severity, Key)))
+    for _ in range(lt.size(sevKeys)):
+        Key = it.next(iterKeys)
+        value = me.getValue(mp.get(severityMap, Key))
         el = {"key": Key, "value": value}
         lt.addLast(listP, el)
     return listP
 
 
 def requirement2(cont, date):
-    return nom.iterationBefore(cont['dateIndex'], date, TotalAndFrequent)
+    return nom.operationBefore(cont['dateIndex'], date, TotalAndFrequent)
 
 
 def TotalAndFrequent(dateRoot, returnEntry):
     dateEntry = dateRoot['value']
-    num_accidents = lt.size(dateEntry['lstaccidentes'])
+    num_accidents = dateEntry['numAccidents']
+
     try:
         current_n = returnEntry['mayor']
         if num_accidents > current_n:
             returnEntry['maxDate'] = dateRoot['key']
             returnEntry['mayor'] = num_accidents
+
     except KeyError:
         returnEntry['maxDate'] = dateRoot['key']
         returnEntry['mayor'] = num_accidents
@@ -167,23 +188,40 @@ def TotalAndFrequent(dateRoot, returnEntry):
 
 
 def requirement3(cont, date1, date2):
-    severityFrequency = nom.iterationRange(cont['dateIndex'], date1, date2, frequentSeverity, {1: 0, 2: 0, 3: 0, 4: 0})
+    severityFrequency = nom.operationRange(cont['dateIndex'], date1, date2,
+                                           frequentSeverity)
+    severityFrequency['total'] = 0
+    for v in severityFrequency.values():
+        severityFrequency['total'] += v
+
     return severityFrequency
 
 
 def frequentSeverity(dateRoot, returnEntry):
+    frequentInMap(dateRoot, returnEntry, 'SeverityIndex')
+
+
+def requirement4(cont, date1, date2):
+    stateFrequency = nom.operationRange(cont['dateIndex'], date1, date2, frequentState)
+    return stateFrequency
+
+
+def frequentState(dateRoot, returnEntry):
+    frequentInMap(dateRoot, returnEntry, 'StateIndex')
+
+
+def frequentInMap(dateRoot, returnEntry, mapIndex):
     dateEntry = dateRoot['value']
-    severityMap = dateEntry['SeverityIndex']
-    sevKeys = m.keySet(severityMap)
-    iterKeys = it.newIterator(sevKeys)
-    for _ in range(lt.size(sevKeys)):
-        s_key = it.next(iterKeys)
-        num_acc = lt.size(me.getValue(m.get(severityMap, s_key)))
-        returnEntry[s_key] += num_acc
-
-
-def getDate(cont, fecha):
-    return om.get(cont['dateIndex'], fecha)["value"]
+    acMap = dateEntry[mapIndex]
+    Keys = mp.keySet(acMap)
+    iterKeys = it.newIterator(Keys)
+    for _ in range(lt.size(Keys)):
+        key = it.next(iterKeys)
+        num_acc = me.getValue(mp.get(acMap, key))
+        try:
+            returnEntry[key] += num_acc
+        except KeyError:
+            returnEntry[key] = num_acc
 
 
 # ==============================
@@ -206,9 +244,9 @@ def compareDates(date1, date2):
     Compara dos ids de libros, id es un identificador
     y entry una pareja llave-valor
     """
-    if (date1 == date2):
+    if date1 == date2:
         return 0
-    elif (date1 > date2):
+    elif date1 > date2:
         return 1
     else:
         return -1

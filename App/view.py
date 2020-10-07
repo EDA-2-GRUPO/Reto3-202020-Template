@@ -59,22 +59,9 @@ def printMenu():
     print("1- Requerimento 1")
     print("2- Requerimento 2")
     print("3- Requerimento 3")
+    print("4- Requerimento 4")
     print("0- Salir")
     print("*******************************************")
-
-
-def Printlistafinal(lista):
-    count = 0
-    w = it.newIterator(lista)
-    while it.hasNext(w):
-        x = it.next(w)
-        if count == 0:
-            print("fecha con más accidentes" + str(x))
-        elif count == 1:
-            print("cantidad total de accidentes" + str(x))
-        elif count == 2:
-            print("cantidad de accidentes de la fecha dada" + str(x))
-        count += 1
 
 
 def Print1(g):
@@ -82,8 +69,8 @@ def Print1(g):
     for _ in range(lt.size(g)):
         el = it.next(iter)
         sev = el["key"]
-        cant = lt.size(el["value"])
-        print(sev, ": ", cant)
+        cant = el["value"]
+        print("Severity :", sev, "  accidentes :", cant)
 
 
 """
@@ -136,12 +123,24 @@ while True:
         # Printlistafinal(w)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
-
+    elif int(inputs[0]) == 4:
+        print("\nBuscando crimenes en un rango de fechas: ")
+        fecha1 = input("fecha1")
+        fecha2 = input('fecha2')
+        t1 = perf_counter()
+        w = controller.requirement4(cont,fecha1,fecha2)
+        print(w)
+        # Printlistafinal(w)
+        t2 = perf_counter()
+        print("tiempo de carga:", t2 - t1)
     else:
         break
 
 t1 = perf_counter()
 for _ in range(320000):
-    pass
+    try:
+        pass
+    except KeyError:
+        pass
 t2 = perf_counter()
 print(t2 - t1)
