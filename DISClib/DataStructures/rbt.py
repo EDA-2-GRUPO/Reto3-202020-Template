@@ -295,7 +295,7 @@ def deleteMax(rbt):
     try:
         root = rbt['root']
         if (root is not None):
-            if ((not isRed(root['left'])) and ((not isRed(root['right'])))):
+            if (not isRed(root['left'])) and ((not isRed(root['right']))):
                 root['color'] = node.RED
             root = deleteMaxTree(root)
             if (root is not None):

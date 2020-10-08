@@ -61,13 +61,17 @@ def loadData(analyzer, accidentsfile2016, accidentsfile2019):
     # crimesfile2 = cf.data_dir + accidentsfile2019
     # input_file2 = csv.DictReader(open(crimesfile2, encoding="utf-8"),delimiter=",")
     # for crime in input_file2:
-    #     model.addCrime(analyzer, crime)
+    #     model.addAccident(analyzer, crime)
     # return analyzer
 
 
 # ___________________________________________________
 #  Funciones para consultas
 # ___________________________________________________
+
+def requirement1(cont,date):
+    Date = datetime.datetime.strptime(date, '%Y-%m-%d')
+    return model.requirement1(cont, Date.date())
 
 
 def requirement2(cont, date):
@@ -80,16 +84,15 @@ def requirement3(cont, date1, date2):
     date2 = datetime.datetime.strptime(date2, '%Y-%m-%d')
     return model.requirement3(cont, date1.date(), date2.date())
 
+
 def requirement4(cont, date1, date2):
     date1 = datetime.datetime.strptime(date1, '%Y-%m-%d')
     date2 = datetime.datetime.strptime(date2, '%Y-%m-%d')
     return model.requirement4(cont, date1.date(), date2.date())
 
 
-def getDate(cont, date):
-    Date = datetime.datetime.strptime(date, '%Y-%m-%d')
-    return model.getDate(cont, Date.date())
+def requirement5(cont, time1, time2):
+    time1 = datetime.time.fromisoformat(time1)
+    time2 = datetime.time.fromisoformat(time2)
+    return model.requirement5(cont, time1, time2)
 
-
-def Severity_list(dataentry):
-    return model.Severity_list(dataentry)

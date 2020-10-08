@@ -60,6 +60,7 @@ def printMenu():
     print("2- Requerimento 2")
     print("3- Requerimento 3")
     print("4- Requerimento 4")
+    print("5- Requerimento 5")
     print("0- Salir")
     print("*******************************************")
 
@@ -97,12 +98,10 @@ while True:
         print("\nBuscando crimenes en un rango de fechas: ")
         fecha = input("fecha")
         t1 = perf_counter()
-        dateEntry = controller.getDate(cont, fecha)
-        SeverityList = controller.Severity_list(dateEntry)
-        Print1(SeverityList)
+        dateEntry = controller.requirement1(cont, fecha)
+        Print1(dateEntry)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
-
 
     elif int(inputs[0]) == 2:
         print("\nBuscando crimenes en un rango de fechas: ")
@@ -118,7 +117,7 @@ while True:
         fecha1 = input("fecha1")
         fecha2 = input('fecha2')
         t1 = perf_counter()
-        w = controller.requirement3(cont,fecha1,fecha2)
+        w = controller.requirement3(cont, fecha1, fecha2)
         print(w)
         # Printlistafinal(w)
         t2 = perf_counter()
@@ -128,9 +127,20 @@ while True:
         fecha1 = input("fecha1")
         fecha2 = input('fecha2')
         t1 = perf_counter()
-        w = controller.requirement4(cont,fecha1,fecha2)
+        w = controller.requirement4(cont, fecha1, fecha2)
         print(w)
         # Printlistafinal(w)
+        t2 = perf_counter()
+        print("tiempo de carga:", t2 - t1)
+
+    elif int(inputs[0]) == 5:
+        print("\nBuscando crimenes en un rango de fechas: ")
+        fecha1 = input("time1")
+        fecha2 = input('time2')
+
+        t1 = perf_counter()
+        w = controller.requirement5(cont, fecha1, fecha2)
+        Print1(w)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
     else:

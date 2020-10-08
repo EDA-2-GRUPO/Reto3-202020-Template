@@ -21,11 +21,11 @@
  """
 import config
 from DISClib.ADT import list as lt
-from DISClib.DataStructures import listiterator as it
 from DISClib.DataStructures import mapentry as me
 from DISClib.ADT import map as mp
 from DISClib.ADT import orderedmap as om
-from App import newOrderMetod as nom
+from App import newOrderMetod as Nom
+from App import newMpMetod as Nmp
 
 import datetime
 
@@ -51,18 +51,26 @@ def newAnalyzer():
 
     Retorna el analizador inicializado.
     """
-    analyzer = {'Accidente': None, 'dateIndex': om.newMap(omaptype='BST',
-                                                          comparefunction=compareDates)}
+    analyzer = {'numAccidents': 0,
+                'dateIndex': om.newMap(omaptype='BST', comparefunction=compareDates),
+                'timeIndex': om.newMap(omaptype='BST', comparefunction=compareDates)}
 
     return analyzer
 
 
 def addAccident(analyzer, accident):
-    updateDateIndex(analyzer['dateIndex'], accident)
+    analyzer['numAccidents'] += 1
+    SevKey = int(accident['Severity'])
+    stateKey = accident['State']
+    occurredTf = datetime.datetime.strptime(accident['Start_Time'], '%Y-%m-%d %H:%M:%S')
+    occurredDate = occurredTf.date()
+    occurredTime = redondeoHoras(occurredTf.time())
+    updateDateIndex(analyzer['dateIndex'], occurredDate, SevKey, stateKey)
+    updateTimeIndex(analyzer['timeIndex'], occurredTime, SevKey)
     return analyzer
 
 
-def updateDateIndex(omap, accident):
+def updateDateIndex(omap, occurredDate, SevKey, stateKey):
     """
     Se toma la fecha del crimen y se busca si ya existe en el arbol
     dicha fecha.  Si es asi, se adiciona a su lista de crimenes
@@ -71,19 +79,36 @@ def updateDateIndex(omap, accident):
     Si no se encuentra creado un nodo para esa fecha en el arbol
     se crea y se actualiza el indice de tipos de crimenes
     """
-    occurredDate = accident['Start_Time']
-    accidentDate = datetime.datetime.strptime(occurredDate, '%Y-%m-%d %H:%M:%S')
-    entry = om.get(omap, accidentDate.date())
+    entry = om.get(omap, occurredDate)
+
     if entry is None:
         datentry = newDataEntry()
-        om.put(omap, accidentDate.date(), datentry)
+        om.put(omap, occurredDate, datentry)
     else:
         datentry = me.getValue(entry)
 
-    SevKey = int(accident['Severity'])
-    stateKey = accident['State']
-
     addDateIndex(datentry, SevKey, stateKey)
+    return omap
+
+
+def updateTimeIndex(omap, occurredTime, SevKey):
+    """
+    Se toma la fecha del crimen y se busca si ya existe en el arbol
+    dicha fecha.  Si es asi, se adiciona a su lista de crimenes
+    y se actualiza el indice de tipos de crimenes.
+
+    Si no se encuentra creado un nodo para esa fecha en el arbol
+    se crea y se actualiza el indice de tipos de crimenes
+    """
+
+    entry = om.get(omap, occurredTime)
+    if entry is None:
+        datentry = newTimeEntry()
+        om.put(omap, occurredTime, datentry)
+    else:
+        datentry = me.getValue(entry)
+
+    addTimeIndex(datentry, SevKey)
     return omap
 
 
@@ -95,14 +120,24 @@ def addDateIndex(datentry, SevKey, stateKey):
     se está consultando (dada por el nodo del arbol)
     """
     datentry['numAccidents'] += 1
-    # lst = datentry['lstaccidentes']
-    # lt.addLast(lst, accident)
     SeverityIndex = datentry['SeverityIndex']
-    # SevKey = int(accident['Severity'])
     updateIndex(SeverityIndex, SevKey)
     StateIndex = datentry['StateIndex']
-    # stateKey = accident['State']
     updateIndex(StateIndex, stateKey)
+
+    return datentry
+
+
+def addTimeIndex(datentry, SevKey):
+    """
+    Actualiza un indice de tipo de crimenes.  Este indice tiene una lista
+    de crimenes y una tabla de hash cuya llave es el tipo de crimen y
+    el valor es una lista con los crimenes de dicho tipo en la fecha que
+    se está consultando (dada por el nodo del arbol)
+    """
+    datentry['numAccidents'] += 1
+    SeverityIndex = datentry['SeverityIndex']
+    updateIndex(SeverityIndex, SevKey)
 
     return datentry
 
@@ -110,7 +145,6 @@ def addDateIndex(datentry, SevKey, stateKey):
 def updateIndex(Index, indexKey):
     indexEntry = mp.get(Index, indexKey)
     if not indexEntry:
-        # indexEntry = lt.newList('SINGLELINKED', compareOffenses)
         mp.put(Index, indexKey, 1)
     else:
         indexEntry['value'] += 1
@@ -123,7 +157,7 @@ def newDataEntry():
     Crea una entrada en el indice por fechas, es decir en el arbol
     binario.
     """
-    entry = {'SeverityIndex': mp.newMap(numelements=10,
+    entry = {'SeverityIndex': mp.newMap(numelements=3,
                                         maptype='PROBING',
                                         comparefunction=compareOffenses),
 
@@ -131,6 +165,15 @@ def newDataEntry():
                                      maptype='PROBING',
                                      comparefunction=compareOffenses),
 
+             'numAccidents': 0}
+
+    return entry
+
+
+def newTimeEntry():
+    entry = {'SeverityIndex': mp.newMap(numelements=3,
+                                        maptype='PROBING',
+                                        comparefunction=compareOffenses),
              'numAccidents': 0}
 
     return entry
@@ -144,84 +187,104 @@ def newDataEntry():
 # ==============================
 
 def requirement1(cont, date):
-    dataEntry = om.get(cont['dateIndex'], date)
-    return Severity_list(dataEntry)
-
-
-def getDate(cont, fecha):
-    return om.get(cont['dateIndex'], fecha)["value"]
-
-
-def Severity_list(dateEntry):
+    dateEntry = me.getValue(om.get(cont['dateIndex'], date))
     severityMap = dateEntry['SeverityIndex']
-    sevKeys = mp.keySet(severityMap)
-    iterKeys = it.newIterator(sevKeys)
-    listP = lt.newList()
-    for _ in range(lt.size(sevKeys)):
-        Key = it.next(iterKeys)
-        value = me.getValue(mp.get(severityMap, Key))
-        el = {"key": Key, "value": value}
-        lt.addLast(listP, el)
-    return listP
+    ListEntry = lt.newList()
+    Nmp.operationSet(severityMap, makeListMp, ListEntry)
+    return ListEntry
 
 
 def requirement2(cont, date):
-    return nom.operationBefore(cont['dateIndex'], date, TotalAndFrequent)
+    entry = {'maxDate': None, 'maxNum': -1, 'totalAccidents': 0}
+    return Nom.operationBefore(cont['dateIndex'], date, TotalAndFrequentOmap, entry)
 
 
-def TotalAndFrequent(dateRoot, returnEntry):
+def requirement3(cont, date1, date2):
+    severityFrequency = mp.newMap(5, maptype='PROBING', comparefunction=compareOffenses)
+    severityFrequency = Nom.operationRange(cont['dateIndex'], date1, date2, frequentSeverity, severityFrequency)
+    mEntry = {'mayor': None, 'mayorNum': -1, 'total': 0}
+    Nmp.operationSet(severityFrequency, mayorEntryAndTotalMp, mEntry)
+
+    return mEntry
+
+
+def requirement4(cont, date1, date2):
+    stateFrequency = mp.newMap(40, maptype='PROBING', comparefunction=compareOffenses)
+    Nom.operationRange(cont['dateIndex'], date1, date2, frequentState, stateFrequency)
+    returnEntry = {'mayor': None, 'mayorNum': -1, 'total': 0}
+    Nmp.operationSet(stateFrequency, mayorEntryAndTotalMp, returnEntry)
+
+    return returnEntry
+
+
+def requirement5(cont, date1, date2):
+    severityFrequency = mp.newMap(5, maptype='PROBING', comparefunction=compareOffenses)
+    severityFrequency = Nom.operationRange(cont['timeIndex'], date1, date2, frequentSeverity, severityFrequency)
+    ListEntry = lt.newList()
+    Nmp.operationSet(severityFrequency, makeListMp, ListEntry)
+    return ListEntry
+
+
+# ==============================
+# Funciones auxiliares
+# ==============================
+
+
+def makeListMp(entry, ListEntry):
+    lt.addLast(ListEntry, entry)
+    return ListEntry
+
+
+def TotalAndFrequentOmap(dateRoot, returnEntry):
     dateEntry = dateRoot['value']
     num_accidents = dateEntry['numAccidents']
 
-    try:
-        current_n = returnEntry['mayor']
-        if num_accidents > current_n:
-            returnEntry['maxDate'] = dateRoot['key']
-            returnEntry['mayor'] = num_accidents
-
-    except KeyError:
+    if num_accidents > returnEntry['maxNum']:
         returnEntry['maxDate'] = dateRoot['key']
-        returnEntry['mayor'] = num_accidents
-        returnEntry['totalAccidents'] = 0
+        returnEntry['maxNum'] = num_accidents
 
     returnEntry['totalAccidents'] += num_accidents
 
 
-def requirement3(cont, date1, date2):
-    severityFrequency = nom.operationRange(cont['dateIndex'], date1, date2,
-                                           frequentSeverity)
-    severityFrequency['total'] = 0
-    for v in severityFrequency.values():
-        severityFrequency['total'] += v
-
-    return severityFrequency
-
-
 def frequentSeverity(dateRoot, returnEntry):
-    frequentInMap(dateRoot, returnEntry, 'SeverityIndex')
-
-
-def requirement4(cont, date1, date2):
-    stateFrequency = nom.operationRange(cont['dateIndex'], date1, date2, frequentState)
-    return stateFrequency
+    frequencyInMapForOmp(dateRoot, returnEntry, 'SeverityIndex')
 
 
 def frequentState(dateRoot, returnEntry):
-    frequentInMap(dateRoot, returnEntry, 'StateIndex')
+    frequencyInMapForOmp(dateRoot, returnEntry, 'StateIndex')
 
 
-def frequentInMap(dateRoot, returnEntry, mapIndex):
+def frequencyInMapForOmp(dateRoot, returnEntry, mapIndex):
     dateEntry = dateRoot['value']
     acMap = dateEntry[mapIndex]
-    Keys = mp.keySet(acMap)
-    iterKeys = it.newIterator(Keys)
-    for _ in range(lt.size(Keys)):
-        key = it.next(iterKeys)
-        num_acc = me.getValue(mp.get(acMap, key))
-        try:
-            returnEntry[key] += num_acc
-        except KeyError:
-            returnEntry[key] = num_acc
+    Nmp.operationSet(acMap, frequencyInMap, returnEntry)
+    return returnEntry
+
+
+def frequencyInMap(entry, returnEntry):
+    key = entry['key']
+    num_acc = entry['value']
+    Ek = mp.get(returnEntry, key)
+    if Ek:
+        Ek['value'] += num_acc
+    else:
+        mp.put(returnEntry, key, num_acc)
+
+    return returnEntry
+
+
+def mayorEntryAndTotalMp(entry, returnEntry):
+    acn = entry['value']
+    if acn > returnEntry['mayorNum']:
+        returnEntry['mayorNum'] = acn
+        returnEntry['mayor'] = entry['key']
+    returnEntry['total'] += acn
+
+    return returnEntry
+
+
+def redondeoHoras(time):
+    return datetime.time(hour=time.hour, minute=time.minute)
 
 
 # ==============================
