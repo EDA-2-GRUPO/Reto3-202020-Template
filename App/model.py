@@ -160,6 +160,7 @@ def requerimient3(cont,lista):
     w = lstit.newIterator(lista)
     mapau = m.newMap(numelements=11,maptype='PROBING',comparefunction=compareOffenses)
     listafinal = lt.newList("ARRAY_LIST")
+    listakeys = lt.newList("ARRAY_LIST",compareIds)
     while lstit.hasNext(w):
         x = lstit.next(w)
         listaa= lt.size(om.get(cont['dateIndex'], x)["value"]["lstaccidentes"])
@@ -167,11 +168,10 @@ def requerimient3(cont,lista):
         g = om.get(cont['dateIndex'], x)["value"]["SeverityIndex"]
         listallaves= mp.keySet(g)
         iteseg= lstit.newIterator(listallaves)
-        listakeys = lt.newList("ARRAY_LIST",compareIds)
         while lstit.hasNext(iteseg):
             key = lstit.next(iteseg)
             if lt.isPresent(listakeys,key)!=0:
-               valor2=valor2["value"]
+               valor2=m.get(mapau,key)["value"]
                valor=m.get(g, key)["value"]["size"]
                m.put(mapau,key,valor+valor2)
             else:
