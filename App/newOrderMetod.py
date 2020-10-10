@@ -102,7 +102,6 @@ def operationRangeTree(root, keylo, keyhi, operation, entry, cmpfunction):
         if root is not None:
             complo = cmpfunction(keylo, root['key'])
             comphi = cmpfunction(keyhi, root['key'])
-
             if complo < 0:
                 operationRangeTree(root['left'], keylo, keyhi, operation, entry, cmpfunction)
             if (complo <= 0) and (comphi >= 0):
@@ -301,8 +300,6 @@ def operationBeforeTree(root, key, operation, entry, comparefunction):
 #
 #     except Exception as exp:
 #         error.reraise(exp, 'RBT:BeforeValues')
-
-
 # pruebas
 if __name__ == '__main__':
     from DISClib.DataStructures.rbt import newMap, put, keySet, values, valueSet, get
