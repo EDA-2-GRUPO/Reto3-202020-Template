@@ -24,8 +24,11 @@ import sys
 import config
 from DISClib.ADT import list as lt
 from App import controller
+from DISClib.ADT import map as mp
+
 assert config
 from time import perf_counter
+from DISClib.DataStructures import listiterator as it
 
 """
 La vista se encarga de la interacción con el usuario.
@@ -42,6 +45,7 @@ operación seleccionada.
 crimefile = 'us_accidents_dis_2016.csv'
 crimefile2 = "us_accidents_dis_2019.csv"
 
+
 # ___________________________________________________
 #  Menu principal
 # ___________________________________________________
@@ -51,49 +55,113 @@ def printMenu():
     print("\n")
     print("*******************************************")
     print("Bienvenido")
-    print("1- Inicializar Analizador")
-    print("2- Cargar información de accidentes")
-    print("3- Requerimento 1")
-    print("4- Requerimento 2")
-    print("5- Requerimento 3")
+    print("w- Inicializar Analizador")
+    print("q- Cargar información de accidentes")
+    print("1- Requerimiento 1")
+    print("2- Requerimiento 2")
+    print("3- Requerimiento 3")
+    print("4- Requerimiento 4")
+    print("5- Requerimiento 5")
+    print("6- Requerimiento 6")
     print("0- Salir")
     print("*******************************************")
+
+
+def Print1(g, pairs):
+    iterator = it.newIterator(g)
+    for _ in range(lt.size(g)):
+        el = it.next(iterator)
+        text = ""
+        for pair in pairs:
+            text += pair[0] + " : " + str(el[pair[1]]) + "  "
+        print(text)
 
 
 """
 Menu principal
 """
 while True:
+
     printMenu()
     inputs = input('Seleccione una opción para continuar\n>')
 
-    if int(inputs[0]) == 1:
+    if inputs[0] == "w":
         print("\nInicializando....")
         # cont es el controlador que se usará de acá en adelante
         cont = controller.init()
 
-    elif int(inputs[0]) == 2:
+    elif inputs[0] == "q":
         print("\nCargando información de crimenes ....")
         t1 = perf_counter()
-        controller.loadData(cont, crimefile,crimefile2)
+        controller.loadData(cont, crimefile, crimefile2)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
-    elif int(inputs[0]) == 4:
+
+    elif int(inputs[0]) == 1:
         print("\nBuscando crimenes en un rango de fechas: ")
-        fecha =input("fecha")
+        fecha = input("fecha")
         t1 = perf_counter()
-        w = controller.rango_de_fechas(cont,"None",fecha)
-        
+        dateEntry = controller.requirement1(cont, fecha)
+        pairs = [('Severity', 'key'), ('accidentes', 'value')]
+        Print1(dateEntry['list'], pairs)
+        print('total de accidentes', dateEntry['total'])
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
-    elif int(inputs[0]) == 3:
-        print("\nRequerimiento No 1 del reto 3: ")
+
+    elif int(inputs[0]) == 2:
         print("\nBuscando crimenes en un rango de fechas: ")
-        fecha =input("fecha")
+        fecha = input("fecha")
         t1 = perf_counter()
-        w = controller.fecha(cont,fecha)
+        w = controller.requirement2(cont, fecha)
         print(w)
         t2 = perf_counter()
+        print("tiempo de carga:", t2 - t1)
+
+    elif int(inputs[0]) == 3:
+        print("\nBuscando crimenes en un rango de fechas: ")
+        fecha1 = input("fecha1")
+        fecha2 = input('fecha2')
+        t1 = perf_counter()
+        w = controller.requirement3(cont, fecha1, fecha2)
+        print(w)
+        # Printlistafinal(w)
+        t2 = perf_counter()
+        print("tiempo de carga:", t2 - t1)
+
+    elif int(inputs[0]) == 4:
+        print("\nBuscando crimenes en un rango de fechas: ")
+        fecha1 = input("fecha1")
+        fecha2 = input('fecha2')
+        t1 = perf_counter()
+        w = controller.requirement4(cont, fecha1, fecha2)
+        print(w)
+        # Printlistafinal(w)
+        t2 = perf_counter()
+        print("tiempo de carga:", t2 - t1)
+
+    elif int(inputs[0]) == 5:
+        print("\nBuscando crimenes en un rango de fechas: ")
+        fecha1 = input("time1")
+        fecha2 = input('time2')
+        t1 = perf_counter()
+        SeverityEntry = controller.requirement5(cont, fecha1, fecha2)
+        pairs = [('Severity', 'key'), ('accidentes', 'value'), ('porcentaje', 'percent')]
+        Print1(SeverityEntry['list'], pairs)
+        print('total de accidentes', SeverityEntry['total'])
+        t2 = perf_counter()
+        print("tiempo de carga:", t2 - t1)
+
+    elif int(inputs[0]) == 6:
+        print("\nBuscando crimenes en un rango de fechas: ")
+        lat = input("latitud")
+        lng = input('longitud')
+        distancia = input('distancia')
+        pairs = [('Severity', 'key'), ('accidentes', 'value')]
+        t1 = perf_counter()
+        SeverityEntry = controller.requirement6(cont, lat, lng, distancia)
+        Print1(SeverityEntry['list'], pairs)
+        t2 = perf_counter()
+        print("tiempo de carga:", t2 - t1)
+
     else:
-        sys.exit(0)
-sys.exit(0)
+        break

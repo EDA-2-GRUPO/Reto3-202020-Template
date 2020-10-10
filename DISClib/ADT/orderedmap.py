@@ -264,6 +264,7 @@ def rank(map, key):
     Raises:
         Exception
     """
+
     return om.rank(map, key)
 
 
@@ -277,6 +278,7 @@ def height(map):
     Raises:
         Exception
     """
+
     return om.height(map)
 
 
@@ -311,4 +313,5 @@ def values(map, keylo, keyhi):
     Raises:
         Exception
     """
-    return om.keys(map, keylo, keyhi)
+    return om.values(map, keylo, keyhi)
+

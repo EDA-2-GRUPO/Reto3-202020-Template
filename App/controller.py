@@ -34,6 +34,7 @@ del modelo en una sola respuesta.  Esta responsabilidad
 recae sobre el controlador.
 """
 
+
 # ___________________________________________________
 #  Inicializacion del catalogo
 # ___________________________________________________
@@ -42,7 +43,6 @@ recae sobre el controlador.
 def init():
     analyzer = model.newAnalyzer()
     return analyzer
-
 
 
 # ___________________________________________________
@@ -55,27 +55,52 @@ def loadData(analyzer, accidentsfile2016, accidentsfile2019):
     Carga los datos de los archivos CSV en el modelo
     """
     crimesfile = cf.data_dir + accidentsfile2016
-    input_file = csv.DictReader(open(crimesfile, encoding="utf-8"),delimiter=",")
+    input_file = csv.DictReader(open(crimesfile, encoding="utf-8"), delimiter=",")
     for crime in input_file:
-        model.addCrime(analyzer, crime)
+        model.addAccident(analyzer, crime)
     # crimesfile2 = cf.data_dir + accidentsfile2019
     # input_file2 = csv.DictReader(open(crimesfile2, encoding="utf-8"),delimiter=",")
     # for crime in input_file2:
-    #     model.addCrime(analyzer, crime)
+    #     model.addAccident(analyzer, crime)
     # return analyzer
+
 
 # ___________________________________________________
 #  Funciones para consultas
 # ___________________________________________________
-def rango_de_fechas(cont,min,max):
-    if min =="None":
-       min=str(om.minKey(cont['dateIndex']))
-    initialDate = datetime.datetime.strptime(min, '%Y-%m-%d')
-    finalDate = datetime.datetime.strptime(max, '%Y-%m-%d')
-    fechas=model.rango_de_fechas(cont, initialDate.date(),finalDate.date())
-    mayor=model.recorrido(cont, fechas)
-    w=[fechas, mayor]
-    return w
-def fecha(cont,fecha):
-    Date = datetime.datetime.strptime(fecha, '%Y-%m-%d')
-    return model.fecha(cont,Date)
+
+def requirement1(cont, date):
+    Date = datetime.datetime.strptime(date, '%Y-%m-%d')
+    return model.requirement1(cont, Date.date())
+
+
+def requirement2(cont, date):
+    Date = datetime.datetime.strptime(date, '%Y-%m-%d')
+    return model.requirement2(cont, Date.date())
+
+
+def requirement3(cont, date1, date2):
+    date1 = datetime.datetime.strptime(date1, '%Y-%m-%d')
+    date2 = datetime.datetime.strptime(date2, '%Y-%m-%d')
+    return model.requirement3(cont, date1.date(), date2.date())
+
+
+def requirement4(cont, date1, date2):
+    date1 = datetime.datetime.strptime(date1, '%Y-%m-%d')
+    date2 = datetime.datetime.strptime(date2, '%Y-%m-%d')
+    return model.requirement4(cont, date1.date(), date2.date())
+
+
+def requirement5(cont, time1, time2):
+    time1 = datetime.time.fromisoformat(time1)
+    time2 = datetime.time.fromisoformat(time2)
+    return model.requirement5(cont, time1, time2)
+
+
+def requirement6(cont, lat, longi, distance):
+    lat = float(lat)
+    longi = float(longi)
+    distance = float(distance)
+    return model.requirement6(cont, lat, longi, distance)
+
+

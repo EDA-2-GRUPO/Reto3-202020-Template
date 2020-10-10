@@ -144,7 +144,7 @@ def isEmpty(map):
     Raises:
         Exception
     """
-    if (map['type'] == 'BST'):
+    if map['type'] == 'BST':
         return bst.isEmpty(map)
     else:
         return rbt.isEmpty(map)
@@ -369,6 +369,6 @@ def values(map, keylo, keyhi):
         Exception
     """
     if (map['type'] == 'BST'):
-        return bst.valueRange(map, keylo, keyhi)
+        return bst.values(map, keylo, keyhi)
     else:
-        return rbt.valueRange(map, keylo, keyhi)
+        return rbt.values(map, keylo, keyhi)

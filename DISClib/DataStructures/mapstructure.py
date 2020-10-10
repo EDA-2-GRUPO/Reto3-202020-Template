@@ -164,7 +164,7 @@ def isEmpty(map):
     Raises:
         Exception
     """
-    if (map['type'] == 'CHAINING'):
+    if map['type'] == 'CHAINING':
         return cht.isEmpty(map)
     else:
         return pht.isEmpty(map)
@@ -181,7 +181,7 @@ def keySet(map):
     Raises:
         Exception
     """
-    if (map['type'] == 'CHAINING'):
+    if map['type'] == 'CHAINING':
         return cht.keySet(map)
     else:
         return pht.keySet(map)
