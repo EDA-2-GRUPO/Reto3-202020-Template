@@ -181,7 +181,8 @@ def aprox(eltiempoala):
        elif (minu>=0 and minu<15):
           minu = "00"
       else:
-         minu="30"
+         hour=1
+         minu="00"
       if hour<10:
          hour="0"+str(hour)
       else:
