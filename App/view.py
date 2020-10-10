@@ -65,13 +65,14 @@ def printMenu():
     print("*******************************************")
 
 
-def Print1(g):
-    iter = it.newIterator(g)
+def Print1(g, pairs):
+    iterator = it.newIterator(g)
     for _ in range(lt.size(g)):
-        el = it.next(iter)
-        sev = el["key"]
-        cant = el["value"]
-        print("Severity :", sev, "  accidentes :", cant)
+        el = it.next(iterator)
+        text = ""
+        for pair in pairs:
+            text += pair[0] + " : " + str(el[pair[1]]) + "  "
+        print(text)
 
 
 """
@@ -99,7 +100,9 @@ while True:
         fecha = input("fecha")
         t1 = perf_counter()
         dateEntry = controller.requirement1(cont, fecha)
-        Print1(dateEntry)
+        pairs = [('Severity', 'key'), ('accidentes', 'value')]
+        Print1(dateEntry['list'], pairs)
+        print('total de accidentes', dateEntry['total'])
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
 
@@ -122,6 +125,7 @@ while True:
         # Printlistafinal(w)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
+
     elif int(inputs[0]) == 4:
         print("\nBuscando crimenes en un rango de fechas: ")
         fecha1 = input("fecha1")
@@ -137,10 +141,11 @@ while True:
         print("\nBuscando crimenes en un rango de fechas: ")
         fecha1 = input("time1")
         fecha2 = input('time2')
-
         t1 = perf_counter()
-        w = controller.requirement5(cont, fecha1, fecha2)
-        Print1(w)
+        SeverityEntry = controller.requirement5(cont, fecha1, fecha2)
+        pairs = [('Severity', 'key'), ('accidentes', 'value'), ('porcentaje', 'percent')]
+        Print1(SeverityEntry['list'],pairs)
+        print('total de accidentes', SeverityEntry['total'])
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
     else:
