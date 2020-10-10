@@ -58,6 +58,11 @@ def loadData(analyzer, accidentsfile2016, accidentsfile2019):
     input_file = csv.DictReader(open(crimesfile, encoding="utf-8"), delimiter=",")
     for crime in input_file:
         model.addAccident(analyzer, crime)
+    # crimesfile2 = cf.data_dir + accidentsfile2019
+    # input_file2 = csv.DictReader(open(crimesfile2, encoding="utf-8"),delimiter=",")
+    # for crime in input_file2:
+    #     model.addAccident(analyzer, crime)
+    # return analyzer
 
 
 # ___________________________________________________
@@ -90,3 +95,12 @@ def requirement5(cont, time1, time2):
     time1 = datetime.time.fromisoformat(time1)
     time2 = datetime.time.fromisoformat(time2)
     return model.requirement5(cont, time1, time2)
+
+
+def requirement6(cont, lat, longi, distance):
+    lat = float(lat)
+    longi = float(longi)
+    distance = float(distance)
+    return model.requirement6(cont, lat, longi,distance)
+
+
