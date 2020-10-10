@@ -148,6 +148,19 @@ while True:
         print('total de accidentes', SeverityEntry['total'])
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
+    elif int(inputs[0]) == 5:
+        print("\nBuscando crimenes en un rango de fechas: ")
+        lat= input("latitud")
+        longi = input('longitud')
+        distancia=input('distancia')
+        t1 = perf_counter()
+        SeverityEntry = controller.requirement5(cont, fecha1, fecha2)
+        pairs = [('Severity', 'key'), ('accidentes', 'value'), ('porcentaje', 'percent')]
+        Print1(SeverityEntry['list'],pairs)
+        print('total de accidentes', SeverityEntry['total'])
+        t2 = perf_counter()
+        print("tiempo de carga:", t2 - t1)
+    
     else:
         break
 
