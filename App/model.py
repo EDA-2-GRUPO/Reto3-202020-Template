@@ -284,10 +284,10 @@ def requirement6(cont, Latitude, Longitude, distance):
 
     def weekFreqInCircleRangeDobOmap(second_omap, entry):
         move = (distance ** 2 - (second_omap['key'] - Latitude) ** 2) ** (1 / 2)
-        Nom.operationRange(second_omap, Longitude - move, Longitude + move, frequentWeekday, entry)
+        Nom.operationRange(second_omap["value"], Longitude - move, Longitude + move, frequentWeekday, entry)
         return entry
 
-    Nom.operationRange(cont['ZoneIndexLatLng'], Latitude - distance, Latitude - distance, weekFreqInCircleRangeDobOmap,
+    Nom.operationRange(cont['ZoneIndexLatLng'], Latitude - distance, Latitude + distance, weekFreqInCircleRangeDobOmap,
                        weekdayFrequency)
 
     return weekdayFrequency

@@ -157,9 +157,7 @@ while True:
         t1 = perf_counter()
         SeverityEntry = controller.requirement6(cont, lat, longi, distancia)
         print(SeverityEntry)
-        Print1(SeverityEntry['list'],pairs)
-
-        print('total de accidentes', SeverityEntry['total'])
+        print('total de accidentes', "SeverityEntry['total']")
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
     
