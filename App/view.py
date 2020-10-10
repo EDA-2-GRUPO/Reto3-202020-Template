@@ -144,18 +144,9 @@ while True:
         t1 = perf_counter()
         SeverityEntry = controller.requirement5(cont, fecha1, fecha2)
         pairs = [('Severity', 'key'), ('accidentes', 'value'), ('porcentaje', 'percent')]
-        Print1(SeverityEntry['list'],pairs)
+        Print1(SeverityEntry['list'], pairs)
         print('total de accidentes', SeverityEntry['total'])
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
     else:
         break
-
-t1 = perf_counter()
-for _ in range(320000):
-    try:
-        pass
-    except KeyError:
-        pass
-t2 = perf_counter()
-print(t2 - t1)

@@ -150,8 +150,6 @@ def addZoneIndex(LngEntry, weekday):
     weekdayIndex = LngEntry['weekdayIndex']
     updateIndex(weekdayIndex, weekday)
 
-    pass
-
 
 def addDateIndex(datentry, SevKey, stateKey):
     """
@@ -282,13 +280,8 @@ def requirement5(cont, date1, date2):
 def requirement6(cont, Latitude, Longitude, distance):
     weekdayFrequency = mp.newMap(7, maptype='PROBING', comparefunction=compareOffenses)
 
-    def weekFreqInCircleRangeDobOmap(second_omap, entry):
-        move = (distance ** 2 - (second_omap['key'] - Latitude) ** 2) ** (1 / 2)
-        Nom.operationRange(second_omap, Longitude - move, Longitude + move, frequentWeekday, entry)
-        return entry
-
-    Nom.operationRange(cont['ZoneIndexLatLng'], Latitude - distance, Latitude - distance, weekFreqInCircleRangeDobOmap,
-                       weekdayFrequency)
+    Nom.operationRange(cont['ZoneIndexLatLng'], Latitude - distance, Latitude + distance,
+                       secondCircleRangeDobOmap(Longitude, Latitude, distance, frequentWeekday), weekdayFrequency)
 
     return weekdayFrequency
 
@@ -297,17 +290,16 @@ def requirement6(cont, Latitude, Longitude, distance):
 # Funciones auxiliares
 # ==============================
 
-
-def frequentSeverity(dateRoot, returnEntry):
-    frequencyInMapForOmp(dateRoot, returnEntry, 'SeverityIndex')
-
-
-def frequentState(dateRoot, returnEntry):
-    frequencyInMapForOmp(dateRoot, returnEntry, 'StateIndex')
+def frequentWeekday():
+    return frequencyInMapForOmp('weekdayIndex')
 
 
-def frequentWeekday(zoneRoot, returnEntry):
-    frequencyInMapForOmp(zoneRoot, returnEntry, 'weekdayIndex')
+def frequentSeverity():
+    return frequencyInMapForOmp('SeverityIndex')
+
+
+def frequentState():
+    return frequencyInMapForOmp('StateIndex')
 
 
 def HoursAndMinutes(time):
@@ -328,6 +320,16 @@ def AddPercents(ListAndTotal):
 # ===================================
 
 
+def frequencyInMapForOmp(mapIndex):
+    def resultFunc(dateRoot, returnEntry, ):
+        dateEntry = dateRoot['value']
+        acMap = dateEntry[mapIndex]
+        Nmp.operationSet(acMap, frequencyInMap, returnEntry)
+        return returnEntry
+
+    return resultFunc
+
+
 def TotalAndFrequentOmp(root, returnEntry):
     dateEntry = root['value']
     num_accidents = dateEntry['numAccidents']
@@ -339,11 +341,11 @@ def TotalAndFrequentOmp(root, returnEntry):
     returnEntry['total'] += num_accidents
 
 
-def frequencyInMapForOmp(dateRoot, returnEntry, mapIndex):
-    dateEntry = dateRoot['value']
-    acMap = dateEntry[mapIndex]
-    Nmp.operationSet(acMap, frequencyInMap, returnEntry)
-    return returnEntry
+def secondCircleRangeDobOmap(Longitude, Latitude, distance, secondOperation):
+    def resultFunction(second_omap, entry):
+        move = (distance ** 2 - (second_omap['key'] - Latitude) ** 2) ** (1 / 2)
+        Nom.operationRange(second_omap['value'], Longitude - move, Longitude + move, secondOperation, entry)
+    return resultFunction
 
 
 # ===================================
