@@ -170,8 +170,8 @@ def compareDates(date1, date2):
     else:
         return -1
 def aprox(eltiempoala):
-      hour=dt.hour
-      minu=dt.minute
+      hour=eltiempoala.hour
+      minu=eltiempoala.minute
       if hour<24 and minu<30:
        if (minu>=15 and minu<=30):
           minu= "30"
