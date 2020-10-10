@@ -25,6 +25,7 @@ import config
 from DISClib.ADT import list as lt
 from App import controller
 from DISClib.ADT import map as mp
+
 assert config
 from time import perf_counter
 from DISClib.DataStructures import listiterator as it
@@ -149,17 +150,18 @@ while True:
         print('total de accidentes', SeverityEntry['total'])
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
+
     elif int(inputs[0]) == 6:
         print("\nBuscando crimenes en un rango de fechas: ")
-        lat= input("latitud")
-        longi = input('longitud')
-        distancia=input('distancia')
+        lat = input("latitud")
+        lng = input('longitud')
+        distancia = input('distancia')
+        pairs = [('Severity', 'key'), ('accidentes', 'value')]
         t1 = perf_counter()
-        SeverityEntry = controller.requirement6(cont, lat, longi, distancia)
-        print(SeverityEntry)
-        print('total de accidentes', "SeverityEntry['total']")
+        SeverityEntry = controller.requirement6(cont, lat, lng, distancia)
+        Print1(SeverityEntry['list'], pairs)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
-    
+
     else:
         break

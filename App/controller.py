@@ -101,6 +101,6 @@ def requirement6(cont, lat, longi, distance):
     lat = float(lat)
     longi = float(longi)
     distance = float(distance)
-    return model.requirement6(cont, lat, longi,distance)
+    return model.requirement6(cont, lat, longi, distance)
 
 
