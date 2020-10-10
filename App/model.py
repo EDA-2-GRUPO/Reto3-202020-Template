@@ -169,7 +169,26 @@ def compareDates(date1, date2):
         return 1
     else:
         return -1
-
+def aprox(eltiempoala):
+      hour=dt.hour
+      minu=dt.minute
+      if hour<24 and minu<30:
+       if (minu>=15 and minu<=30):
+          minu= "30"
+       elif (minu>30 and minu<59):
+          minu= "00"
+          hour+=1 
+       elif (minu>=0 and minu<15):
+          minu = "00"
+      else:
+         minu="30"
+      if hour<10:
+         hour="0"+str(hour)
+      else:
+         hour = str(hour)
+      time =hour+":"+minu
+      time2 = datetime.time.fromisoformat(time)
+      return time2
 
 def compareOffenses(offense1, offense2):
     """
