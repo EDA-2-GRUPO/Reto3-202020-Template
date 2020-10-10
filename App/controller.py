@@ -96,6 +96,9 @@ def requirement5(cont, time1, time2):
     time2 = datetime.time.fromisoformat(time2)
     return model.requirement5(cont, time1, time2)
 def requirement6(cont, lat, longi, distance):
+    lat = float(lat)
+    longi = float(longi)
+    distance= float(distance)
     return model.requirement6(cont, lat, longi,distance)
 
 

@@ -24,7 +24,7 @@ import sys
 import config
 from DISClib.ADT import list as lt
 from App import controller
-
+from DISClib.ADT import map as mp
 assert config
 from time import perf_counter
 from DISClib.DataStructures import listiterator as it
@@ -56,11 +56,12 @@ def printMenu():
     print("Bienvenido")
     print("w- Inicializar Analizador")
     print("q- Cargar información de accidentes")
-    print("1- Requerimento 1")
-    print("2- Requerimento 2")
-    print("3- Requerimento 3")
-    print("4- Requerimento 4")
-    print("5- Requerimento 5")
+    print("1- Requerimiento 1")
+    print("2- Requerimiento 2")
+    print("3- Requerimiento 3")
+    print("4- Requerimiento 4")
+    print("5- Requerimiento 5")
+    print("6- Requerimiento 6")
     print("0- Salir")
     print("*******************************************")
 
@@ -148,14 +149,16 @@ while True:
         print('total de accidentes', SeverityEntry['total'])
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
-    elif int(inputs[0]) == 5:
+    elif int(inputs[0]) == 6:
         print("\nBuscando crimenes en un rango de fechas: ")
         lat= input("latitud")
         longi = input('longitud')
         distancia=input('distancia')
         t1 = perf_counter()
         SeverityEntry = controller.requirement6(cont, lat, longi, distancia)
+        print(SeverityEntry)
         Print1(SeverityEntry['list'],pairs)
+
         print('total de accidentes', SeverityEntry['total'])
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
