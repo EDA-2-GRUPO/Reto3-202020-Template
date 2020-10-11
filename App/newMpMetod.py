@@ -38,7 +38,7 @@ def operationSetProbe(mp, operation, returnEntry={}):
 
     for pos in range(lt.size(mp['table'])):
         entry = lt.getElement(mp['table'], pos + 1)
-        if entry['key'] and entry['key'] != '__EMPTY__':
+        if entry['key'] is not None and entry['key'] != '__EMPTY__':
             operation(entry, returnEntry)
     return returnEntry
 

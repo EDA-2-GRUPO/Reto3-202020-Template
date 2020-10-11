@@ -20,6 +20,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  """
 import config
+import math as mt
 from DISClib.ADT import list as lt
 from DISClib.DataStructures import mapentry as me
 from DISClib.ADT import map as mp
@@ -53,9 +54,9 @@ def newAnalyzer():
     Retorna el analizador inicializado.
     """
     analyzer = {'numAccidents': 0,
-                'dateIndex': om.newMap(omaptype='BST', comparefunction=compareDates),
-                'timeIndex': om.newMap(omaptype='BST', comparefunction=compareDates),
-                'ZoneIndexLatLng': om.newMap(omaptype='BST', comparefunction=compareDates)
+                'dateIndex': om.newMap(omaptype='BST', comparefunction=compareOmpLst),
+                'timeIndex': om.newMap(omaptype='BST', comparefunction=compareOmpLst),
+                'ZoneIndexLatLng': om.newMap(omaptype='BST', comparefunction=compareOmpLst)
                 }
 
     return analyzer
@@ -91,11 +92,11 @@ def updateDateIndex(omap, occurredDate, SevKey, stateKey):
     """
     entry = om.get(omap, occurredDate)
 
-    if entry is None:
+    if entry:
+        dateEntry = me.getValue(entry)
+    else:
         dateEntry = newDateEntry()
         om.put(omap, occurredDate, dateEntry)
-    else:
-        dateEntry = me.getValue(entry)
 
     addDateIndex(dateEntry, SevKey, stateKey)
     return omap
@@ -114,11 +115,11 @@ def updateTimeIndex(omap, occurredTime, SevKey):
     """
 
     entry = om.get(omap, occurredTime)
-    if entry is None:
+    if entry:
+        timeEntry = me.getValue(entry)
+    else:
         timeEntry = newTimeEntry()
         om.put(omap, occurredTime, timeEntry)
-    else:
-        timeEntry = me.getValue(entry)
 
     addTimeIndex(timeEntry, SevKey)
     return omap
@@ -138,11 +139,11 @@ def updateLatitudeIndex(DoubleOmp, Latitude, Longitude, weekday):
     """
     entry = om.get(DoubleOmp, Latitude)
 
-    if entry is None:
-        LtEntry = om.newMap('RBT', compareDates)
-        om.put(DoubleOmp, Latitude, LtEntry)
-    else:
+    if entry:
         LtEntry = me.getValue(entry)
+    else:
+        LtEntry = om.newMap('RBT', compareOmpLst)
+        om.put(DoubleOmp, Latitude, LtEntry)
 
     updateLongitudeIndex(LtEntry, Longitude, weekday)
     return DoubleOmp
@@ -161,11 +162,12 @@ def updateLongitudeIndex(LtEntry, Longitude, weekday):
     """
     entry = om.get(LtEntry, Longitude)
 
-    if entry is None:
+    if entry:
+        LngEntry = me.getValue(entry)
+
+    else:
         LngEntry = newZoneEntry()
         om.put(LtEntry, Longitude, LngEntry)
-    else:
-        LngEntry = me.getValue(entry)
 
     addZoneIndex(LngEntry, weekday)
     return LtEntry
@@ -236,10 +238,10 @@ def updateIndex(Index, indexKey):
 
     """
     indexEntry = mp.get(Index, indexKey)
-    if not indexEntry:
-        mp.put(Index, indexKey, 1)
-    else:
+    if indexEntry:
         indexEntry['value'] += 1
+    else:
+        mp.put(Index, indexKey, 1)
 
     return Index
 
@@ -251,11 +253,11 @@ def newDateEntry():
     """
     entry = {'SeverityIndex': mp.newMap(numelements=3,
                                         maptype='PROBING',
-                                        comparefunction=compareOffenses),
+                                        comparefunction=compareMp),
 
              'StateIndex': mp.newMap(numelements=50,
                                      maptype='PROBING',
-                                     comparefunction=compareOffenses),
+                                     comparefunction=compareMp),
 
              'numAccidents': 0}
 
@@ -269,7 +271,7 @@ def newTimeEntry():
     """
     entry = {'SeverityIndex': mp.newMap(numelements=3,
                                         maptype='PROBING',
-                                        comparefunction=compareOffenses),
+                                        comparefunction=compareMp),
              'numAccidents': 0}
 
     return entry
@@ -281,9 +283,7 @@ def newZoneEntry():
     binario.
 
     """
-    entry = {'weekdayIndex': mp.newMap(numelements=5,
-                                       maptype='PROBING',
-                                       comparefunction=compareOffenses),
+    entry = {'weekdayIndex': mp.newMap(numelements=7, comparefunction=compareMp),
              'numAccidents': 0}
 
     return entry
@@ -312,7 +312,7 @@ def requirement2(cont, date):
 
 def requirement3(cont, date1, date2):
     severityFrequency = Nom.operationRange(cont['dateIndex'], date1, date2, frequencyInMapForOmp('SeverityIndex'),
-                                           mp.newMap(3, maptype='PROBING', comparefunction=compareOffenses))
+                                           mp.newMap(3, maptype='PROBING', comparefunction=compareMp))
     mostFrequent = Nmp.operationSet(severityFrequency, TotalAndFrequentMp, {'maxKey': None, 'maxValue': -1, 'total': 0})
 
     return mostFrequent
@@ -320,7 +320,7 @@ def requirement3(cont, date1, date2):
 
 def requirement4(cont, date1, date2):
     stateFrequency = Nom.operationRange(cont['dateIndex'], date1, date2, frequencyInMapForOmp('StateIndex'),
-                                        mp.newMap(40, maptype='PROBING', comparefunction=compareOffenses))
+                                        mp.newMap(40, maptype='PROBING', comparefunction=compareMp))
     mostFrequent = Nmp.operationSet(stateFrequency, TotalAndFrequentMp, {'maxKey': None, 'maxValue': -1, 'total': 0})
     return mostFrequent
 
@@ -328,7 +328,7 @@ def requirement4(cont, date1, date2):
 def requirement5(cont, date1, date2):
     severityFrequency = Nom.operationRange(cont['timeIndex'], date1, date2,
                                            frequencyInMapForOmp('SeverityIndex'),
-                                           mp.newMap(3, maptype='PROBING', comparefunction=compareOffenses))
+                                           mp.newMap(3, maptype='PROBING', comparefunction=compareMp))
     SeverityListAndTotal = Nmp.operationSet(severityFrequency, makeListAndTotalMp,
                                             {'list': lt.newList(), 'total': 0})
     AddPercents(SeverityListAndTotal)
@@ -338,7 +338,7 @@ def requirement5(cont, date1, date2):
 def requirement6(cont, Lat, Lng, dist):
     weekdayFrequency = Nom.operationRange(cont['ZoneIndexLatLng'], Lat - dist, Lat + dist,
                                           sndCircleRangeDobOmap(Lat, Lng, dist, frequencyInMapForOmp('weekdayIndex')),
-                                          mp.newMap(7, maptype='PROBING', comparefunction=compareOffenses))
+                                          mp.newMap(7, maptype='CHAINING', comparefunction=compareMp))
     weekdayListAndTotal = Nmp.operationSet(weekdayFrequency, makeListAndTotalMp, {'list': lt.newList(), 'total': 0})
 
     return weekdayListAndTotal
@@ -371,6 +371,8 @@ def proxyTime(o_time):
             minute = 0
         elif minute <= 30:
             minute = 30
+        elif hour == 23:
+            minute = 59
         else:
             minute = 0
             hour += 1
@@ -388,7 +390,7 @@ def proxyTime(o_time):
 
 
 def frequencyInMapForOmp(mapIndex):
-    def resultFunc(dateRoot, returnEntry, ):
+    def resultFunc(dateRoot, returnEntry):
         dateEntry = dateRoot['value']
         acMap = dateEntry[mapIndex]
         Nmp.operationSet(acMap, frequencyInMap, returnEntry)
@@ -410,7 +412,7 @@ def TotalAndFrequentOmp(root, returnEntry):
 
 def sndCircleRangeDobOmap(x, y, distance, secondOperation):
     def resultFunction(root, entry):
-        move = ((distance ** 2) - (root['key'] - x) ** 2) ** (1 / 2)
+        move = mt.sqrt(mt.pow(distance, 2) - mt.pow(root['key'] - x, 2))
         Nom.operationRange(root['value'], y - move, y + move, secondOperation, entry)
 
     return resultFunction
@@ -455,40 +457,29 @@ def TotalAndFrequentMp(entry, returnEntry):
 # ==============================
 # Funciones de Comparacion
 # ==============================
-def compareIds(id1, id2):
-    """
-    Compara dos crimenes
-    """
-    if (id1 == id2):
-        return 0
-    elif id1 > id2:
-        return 1
-    else:
-        return -1
 
-
-def compareDates(date1, date2):
+def compareOmpLst(date1, date2):
     """
     Compara dos ids de libros, id es un identificador
     y entry una pareja llave-valor
     """
-    if (date1 == date2):
+    if date1 == date2:
         return 0
-    elif (date1 > date2):
+    elif date1 > date2:
         return 1
     else:
         return -1
 
 
-def compareOffenses(offense1, offense2):
+def compareMp(offense1, offense2):
     """
     Compara dos ids de libros, id es un identificador
     y entry una pareja llave-valor
     """
     offense = me.getKey(offense2)
-    if (offense1 == offense):
+    if offense1 == offense:
         return 0
-    elif (offense1 > offense):
+    elif offense1 > offense:
         return 1
     else:
         return -1

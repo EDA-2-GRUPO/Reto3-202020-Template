@@ -156,10 +156,11 @@ while True:
         lat = input("latitud")
         lng = input('longitud')
         distancia = input('distancia')
-        pairs = [('Severity', 'key'), ('accidentes', 'value')]
+        pairs = [('Weekday', 'key'), ('accidentes', 'value')]
         t1 = perf_counter()
         SeverityEntry = controller.requirement6(cont, lat, lng, distancia)
         Print1(SeverityEntry['list'], pairs)
+        print(SeverityEntry['total'])
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
 
