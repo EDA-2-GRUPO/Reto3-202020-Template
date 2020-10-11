@@ -87,8 +87,9 @@ while True:
 
     if inputs[0] == "w":
         print("\nInicializando....")
+        tipo_de_mapa=input("inserte 1 para BTS y 2 para RBT")
         # cont es el controlador que se usará de acá en adelante
-        cont = controller.init()
+        cont = controller.init(tipo_de_mapa)
 
     elif inputs[0] == "q":
         print("\nCargando información de crimenes ....")
