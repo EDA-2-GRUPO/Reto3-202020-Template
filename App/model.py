@@ -79,60 +79,86 @@ def addAccident(analyzer, accident):
 
 def updateDateIndex(omap, occurredDate, SevKey, stateKey):
     """
-    Se toma la fecha del crimen y se busca si ya existe en el arbol
-    dicha fecha.  Si es asi, se adiciona a su lista de crimenes
-    y se actualiza el indice de tipos de crimenes.
 
-    Si no se encuentra creado un nodo para esa fecha en el arbol
-    se crea y se actualiza el indice de tipos de crimenes
+    Args:
+        omap:
+        occurredDate: datetime con el dia en que sucedio, en formato YY-MM-dd
+        SevKey: str con el nivel de severidad
+        stateKey: str con el estado de ocurrencia
+
+    Returns:
+
     """
     entry = om.get(omap, occurredDate)
 
     if entry is None:
-        datentry = newDataEntry()
-        om.put(omap, occurredDate, datentry)
+        dateEntry = newDateEntry()
+        om.put(omap, occurredDate, dateEntry)
     else:
-        datentry = me.getValue(entry)
+        dateEntry = me.getValue(entry)
 
-    addDateIndex(datentry, SevKey, stateKey)
+    addDateIndex(dateEntry, SevKey, stateKey)
     return omap
 
 
 def updateTimeIndex(omap, occurredTime, SevKey):
     """
-    Se toma la fecha del crimen y se busca si ya existe en el arbol
-    dicha fecha.  Si es asi, se adiciona a su lista de crimenes
-    y se actualiza el indice de tipos de crimenes.
 
-    Si no se encuentra creado un nodo para esa fecha en el arbol
-    se crea y se actualiza el indice de tipos de crimenes
+    Args:
+        omap:
+        occurredTime: datetime con el la Hora con minutos en que sucedio, en formato HH:MM
+        SevKey: str con el nivel de severidad
+
+    Returns:
+
     """
 
     entry = om.get(omap, occurredTime)
     if entry is None:
-        datentry = newTimeEntry()
-        om.put(omap, occurredTime, datentry)
+        timeEntry = newTimeEntry()
+        om.put(omap, occurredTime, timeEntry)
     else:
-        datentry = me.getValue(entry)
+        timeEntry = me.getValue(entry)
 
-    addTimeIndex(datentry, SevKey)
+    addTimeIndex(timeEntry, SevKey)
     return omap
 
 
-def updateLatitudeIndex(omap, Latitude, Longitude, weekday):
-    entry = om.get(omap, Latitude)
+def updateLatitudeIndex(DoubleOmp, Latitude, Longitude, weekday):
+    """
+
+    Args:
+        DoubleOmp:
+        Latitude: cordenada Latitud
+        Longitude: cordenada Longitud
+        weekday: dia del la semana representado del 1 al 7
+
+    Returns:
+
+    """
+    entry = om.get(DoubleOmp, Latitude)
 
     if entry is None:
         LtEntry = om.newMap('RBT', compareDates)
-        om.put(omap, Latitude, LtEntry)
+        om.put(DoubleOmp, Latitude, LtEntry)
     else:
         LtEntry = me.getValue(entry)
 
     updateLongitudeIndex(LtEntry, Longitude, weekday)
-    return omap
+    return DoubleOmp
 
 
 def updateLongitudeIndex(LtEntry, Longitude, weekday):
+    """
+
+    Args:
+        LtEntry:
+        Longitude: cordenada Longitud
+        weekday: dia del la semana representado del 1 al 7
+
+    Returns:
+
+    """
     entry = om.get(LtEntry, Longitude)
 
     if entry is None:
@@ -145,43 +171,70 @@ def updateLongitudeIndex(LtEntry, Longitude, weekday):
     return LtEntry
 
 
-def addZoneIndex(LngEntry, weekday):
-    LngEntry['numAccidents'] += 1
-    weekdayIndex = LngEntry['weekdayIndex']
+def addZoneIndex(zoneEntry, weekday):
+    """
+        Actualiza los sub Index del zoneEntry
+
+    Args:
+        zoneEntry:
+        weekday: dia del la semana representado del 1 al 7
+
+    Returns:
+
+    """
+    zoneEntry['numAccidents'] += 1
+    weekdayIndex = zoneEntry['weekdayIndex']
     updateIndex(weekdayIndex, weekday)
 
 
-def addDateIndex(datentry, SevKey, stateKey):
+def addDateIndex(dateEntry, SevKey, stateKey):
     """
-    Actualiza un indice de tipo de crimenes.  Este indice tiene una lista
-    de crimenes y una tabla de hash cuya llave es el tipo de crimen y
-    el valor es una lista con los crimenes de dicho tipo en la fecha que
-    se está consultando (dada por el nodo del arbol)
+    Actualiza los sub Index del dateEntry
+    Args:
+        dateEntry:
+        SevKey: str con el nivel de severidad
+        stateKey: str con el estado de ocurrencia
+
+    Returns:
+
     """
-    datentry['numAccidents'] += 1
-    SeverityIndex = datentry['SeverityIndex']
+    dateEntry['numAccidents'] += 1
+    SeverityIndex = dateEntry['SeverityIndex']
     updateIndex(SeverityIndex, SevKey)
-    StateIndex = datentry['StateIndex']
+    StateIndex = dateEntry['StateIndex']
     updateIndex(StateIndex, stateKey)
 
-    return datentry
+    return dateEntry
 
 
-def addTimeIndex(datentry, SevKey):
+def addTimeIndex(timeEntry, SevKey):
     """
-    Actualiza un indice de tipo de crimenes.  Este indice tiene una lista
-    de crimenes y una tabla de hash cuya llave es el tipo de crimen y
-    el valor es una lista con los crimenes de dicho tipo en la fecha que
-    se está consultando (dada por el nodo del arbol)
+    Actualiza los sub Index del TimeEntry
+
+    Args:
+        timeEntry:
+        SevKey: str con el nivel de severidad
+
+    Returns:
+
     """
-    datentry['numAccidents'] += 1
-    SeverityIndex = datentry['SeverityIndex']
+    timeEntry['numAccidents'] += 1
+    SeverityIndex = timeEntry['SeverityIndex']
     updateIndex(SeverityIndex, SevKey)
 
-    return datentry
+    return timeEntry
 
 
 def updateIndex(Index, indexKey):
+    """
+    Actualiza el conteo del mapa Index con su indexkey
+    Args:
+        Index: El map
+        indexKey: la llave que se quiere actualizar
+
+    Returns:
+
+    """
     indexEntry = mp.get(Index, indexKey)
     if not indexEntry:
         mp.put(Index, indexKey, 1)
@@ -191,7 +244,7 @@ def updateIndex(Index, indexKey):
     return Index
 
 
-def newDataEntry():
+def newDateEntry():
     """
     Crea una entrada en el indice por fechas, es decir en el arbol
     binario.
@@ -210,6 +263,10 @@ def newDataEntry():
 
 
 def newTimeEntry():
+    """
+    Crea una entrada en el indice por horas, es decir en el arbol
+    binario.
+    """
     entry = {'SeverityIndex': mp.newMap(numelements=3,
                                         maptype='PROBING',
                                         comparefunction=compareOffenses),
@@ -219,6 +276,11 @@ def newTimeEntry():
 
 
 def newZoneEntry():
+    """
+    Crea una entrada en el indice por Latitud Longitud, es decir en el doble arbol
+    binario.
+
+    """
     entry = {'weekdayIndex': mp.newMap(numelements=5,
                                        maptype='PROBING',
                                        comparefunction=compareOffenses),
