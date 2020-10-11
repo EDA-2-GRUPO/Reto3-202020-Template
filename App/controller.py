@@ -92,8 +92,8 @@ def requirement4(cont, date1, date2):
 
 
 def requirement5(cont, time1, time2):
-    time1 = datetime.time.fromisoformat(time1)
-    time2 = datetime.time.fromisoformat(time2)
+    time1 = model.proxyTime(datetime.time.fromisoformat(time1))
+    time2 = model.proxyTime(datetime.time.fromisoformat(time2))
     return model.requirement5(cont, time1, time2)
 
 

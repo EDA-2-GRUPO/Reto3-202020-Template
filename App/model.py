@@ -281,6 +281,7 @@ def requirement6(cont, Lat, Lng, dist):
 
     return weekdayListAndTotal
 
+
 # ==============================
 # Funciones auxiliares
 # ==============================
@@ -297,6 +298,26 @@ def AddPercents(ListAndTotal):
     for _ in range(lt.size(sList)):
         el = it.next(iterator)
         el['percent'] = round(el['value'] / total * 100, 2)
+
+
+def proxyTime(o_time):
+    hour = o_time.hour
+    minute = o_time.minute
+
+    if hour < 24:
+        if minute < 15:
+            minute = 0
+        elif minute <= 30:
+            minute = 30
+        else:
+            minute = 0
+            hour += 1
+    else:
+        hour = 23
+        minute = 59
+
+    new_time = datetime.time(hour, minute)
+    return new_time
 
 
 # ===================================
@@ -329,6 +350,7 @@ def sndCircleRangeDobOmap(x, y, distance, secondOperation):
     def resultFunction(root, entry):
         move = ((distance ** 2) - (root['key'] - x) ** 2) ** (1 / 2)
         Nom.operationRange(root['value'], y - move, y + move, secondOperation, entry)
+
     return resultFunction
 
 
@@ -375,7 +397,7 @@ def compareIds(id1, id2):
     """
     Compara dos crimenes
     """
-    if id1 == id2:
+    if (id1 == id2):
         return 0
     elif id1 > id2:
         return 1
@@ -388,33 +410,13 @@ def compareDates(date1, date2):
     Compara dos ids de libros, id es un identificador
     y entry una pareja llave-valor
     """
-    if date1 == date2:
+    if (date1 == date2):
         return 0
-    elif date1 > date2:
+    elif (date1 > date2):
         return 1
     else:
         return -1
-def aprox(eltiempoala):
-      hour=eltiempoala.hour
-      minu=eltiempoala.minute
-      if hour<24 and minu<30:
-       if (minu>=15 and minu<=30):
-          minu= "30"
-       elif (minu>30 and minu<59):
-          minu= "00"
-          hour+=1 
-       elif (minu>=0 and minu<15):
-          minu = "00"
-      else:
-         hour=1
-         minu="00"
-      if hour<10:
-         hour="0"+str(hour)
-      else:
-         hour = str(hour)
-      time =hour+":"+minu
-      time2 = datetime.time.fromisoformat(time)
-      return time2
+
 
 def compareOffenses(offense1, offense2):
     """
@@ -422,9 +424,9 @@ def compareOffenses(offense1, offense2):
     y entry una pareja llave-valor
     """
     offense = me.getKey(offense2)
-    if offense1 == offense:
+    if (offense1 == offense):
         return 0
-    elif offense1 > offense:
+    elif (offense1 > offense):
         return 1
     else:
         return -1
