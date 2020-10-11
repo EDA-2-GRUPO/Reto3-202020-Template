@@ -20,7 +20,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  """
 import config
-import math as mt
+import numpy as np
 from DISClib.ADT import list as lt
 from DISClib.DataStructures import mapentry as me
 from DISClib.ADT import map as mp
@@ -28,7 +28,7 @@ from DISClib.ADT import orderedmap as om
 from DISClib.DataStructures import listiterator as it
 from App import newOrderMetod as Nom
 from App import newMpMetod as Nmp
-
+from DISClib.Algorithms.Sorting.insertionsort import insertionSort
 import datetime
 
 assert config
@@ -300,7 +300,8 @@ def requirement1(cont, date):
     dateEntry = me.getValue(om.get(cont['dateIndex'], date))
     severityMap = dateEntry['SeverityIndex']
     totalAccident = dateEntry['numAccidents']
-    ListEntry = Nmp.operationSet(severityMap, makeListMp, lt.newList())
+    ListEntry = Nmp.operationSet(severityMap, makeListMp, lt.newList('ARRAY_LIST'))
+    insertionSort(ListEntry, orderByKey)
     return {'list': ListEntry, 'total': totalAccident}
 
 
@@ -330,7 +331,8 @@ def requirement5(cont, date1, date2):
                                            frequencyInMapForOmp('SeverityIndex'),
                                            mp.newMap(3, maptype='PROBING', comparefunction=compareMp))
     SeverityListAndTotal = Nmp.operationSet(severityFrequency, makeListAndTotalMp,
-                                            {'list': lt.newList(), 'total': 0})
+                                            {'list': lt.newList('ARRAY_LIST'), 'total': 0})
+    insertionSort(SeverityListAndTotal['list'], orderByKey)
     AddPercents(SeverityListAndTotal)
     return SeverityListAndTotal
 
@@ -339,8 +341,11 @@ def requirement6(cont, Lat, Lng, dist):
     weekdayFrequency = Nom.operationRange(cont['ZoneIndexLatLng'], Lat - dist, Lat + dist,
                                           sndCircleRangeDobOmap(Lat, Lng, dist, frequencyInMapForOmp('weekdayIndex')),
                                           mp.newMap(7, maptype='CHAINING', comparefunction=compareMp))
-    weekdayListAndTotal = Nmp.operationSet(weekdayFrequency, makeListAndTotalMp, {'list': lt.newList(), 'total': 0})
 
+    weekdayListAndTotal = Nmp.operationSet(weekdayFrequency, makeListAndTotalMp,
+                                           {'list': lt.newList('ARRAY_LIST'), 'total': 0})
+    insertionSort(weekdayListAndTotal['list'], orderByKey)
+    weekdayFromIntToStr(weekdayListAndTotal['list'])
     return weekdayListAndTotal
 
 
@@ -376,12 +381,18 @@ def proxyTime(o_time):
         else:
             minute = 0
             hour += 1
-    else:
-        hour = 23
-        minute = 59
 
     new_time = datetime.time(hour, minute)
     return new_time
+
+
+def weekdayFromIntToStr(weekdayList):
+    weekday_list = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    iterator = it.newIterator(weekdayList)
+    for _ in range(lt.size(weekdayList)):
+        el = it.next(iterator)
+        el['key'] = weekday_list[el['key']]
+    return weekdayList
 
 
 # ===================================
@@ -412,7 +423,7 @@ def TotalAndFrequentOmp(root, returnEntry):
 
 def sndCircleRangeDobOmap(x, y, distance, secondOperation):
     def resultFunction(root, entry):
-        move = mt.sqrt(mt.pow(distance, 2) - mt.pow(root['key'] - x, 2))
+        move = np.sqrt(distance**2 - (root['key']-x)**2)
         Nom.operationRange(root['value'], y - move, y + move, secondOperation, entry)
 
     return resultFunction
@@ -457,6 +468,12 @@ def TotalAndFrequentMp(entry, returnEntry):
 # ==============================
 # Funciones de Comparacion
 # ==============================
+def orderByKey(el1, el2):
+    if el1['key'] > el2['key']:
+        return 0
+    else:
+        return 1
+
 
 def compareOmpLst(date1, date2):
     """

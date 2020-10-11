@@ -1,13 +1,14 @@
 import config
 from DISClib.Utils import error as error
 from DISClib.ADT import list as lt
-# from DISClib.DataStructures.rbt import keySetTree
 
+# from DISClib.DataStructures.rbt import keySetTree
+print('otro2')
 assert config
 
 """
-Se crearon nuevos "metodos" siguiendo la logica de recorrido in-order y siguiendo las implementacion hecha en el 
-dataStructure, se creo las funciones con sus variantes y combinaciones:
+Se crearon nuevos "metodos" siguiendo la logica de recorrido pre-order(o in-order, no me decido) y siguiendo las 
+implementacion hechas en el dataStructure, se creo las funciones con sus variantes y combinaciones:
 Before: recorre los valores antes de una key
 Pair: Simplemento devuelve el conjunto llave-valor
 Operation: realiza alguna operacion con la rama mientras la recorre
@@ -16,6 +17,7 @@ Para los requerimientos solo se utiliza las funciones Operation y sus variantes,
 
 Tal como se realizaron las implementaciones  es posible utilizar las funciones tanto en BST como RBT
 """
+
 
 # se crea las funciones Operation
 
@@ -89,8 +91,8 @@ def operationBefore(omap, key_bef, operation, entry={}):
 def operationSetTree(root, operation, entry):
     try:
         if root is not None:
-            operationSetTree(root['left'], operation, entry)
             operation(root, entry)
+            operationSetTree(root['left'], operation, entry)
             operationSetTree(root['right'], operation, entry)
         return entry
     except Exception as exp:
@@ -102,10 +104,10 @@ def operationRangeTree(root, keylo, keyhi, operation, entry, cmpfunction):
         if root is not None:
             complo = cmpfunction(keylo, root['key'])
             comphi = cmpfunction(keyhi, root['key'])
-            if complo < 0:
-                operationRangeTree(root['left'], keylo, keyhi, operation, entry, cmpfunction)
             if (complo <= 0) and (comphi >= 0):
                 operation(root, entry)
+            if complo < 0:
+                operationRangeTree(root['left'], keylo, keyhi, operation, entry, cmpfunction)
             if comphi > 0:
                 operationRangeTree(root['right'], keylo, keyhi, operation, entry, cmpfunction)
         return entry
@@ -121,8 +123,8 @@ def operationBeforeTree(root, key, operation, entry, comparefunction):
         if cmp < 0:
             return operationBeforeTree(root['left'], key, operation, entry, comparefunction)
         elif cmp > 0:
-            operationSetTree(root['left'], operation, entry)
             operation(root, entry)
+            operationSetTree(root['left'], operation, entry)
             operationBeforeTree(root['right'], key, operation, entry, comparefunction)
             return entry
         else:
@@ -301,85 +303,85 @@ def operationBeforeTree(root, key, operation, entry, comparefunction):
 #     except Exception as exp:
 #         error.reraise(exp, 'RBT:BeforeValues')
 # pruebas
-if __name__ == '__main__':
-    from DISClib.DataStructures.rbt import newMap, put, keySet, values, valueSet, get
-    from DISClib.DataStructures import listiterator as it
-
-
-    def compare(el1, el2):
-        if el1 == el2:
-            return 0
-        elif el1 < el2:
-            return -1
-        return 1
-
-
-    def gen(root, m):
-        nw = root['value']
-        try:
-            ac = m['value']
-            if nw > ac:
-                m['value'] = nw
-                m['key'] = root['key']
-
-        except KeyError:
-            m['key'] = root['key']
-            m['value'] = nw
-            m['total'] = ""
-
-
-    def gen2(list_):
-        iter = it.newIterator(list_)
-        el = it.next(iter)
-        m = {}
-        m['key'] = el['key']
-        m['value'] = el['value']
-        m['total'] = ""
-
-        for _ in range(lt.size(list_) - 1):
-            el = it.next(iter)
-            nw = el['value']
-            ac = m['value']
-            if nw > ac:
-                m['value'] = nw
-                m['key'] = el['key']
-
-        return m
-
-
-    def gen3(list_, s):
-        iter = it.newIterator(list_)
-        el = it.next(iter)
-        m = {}
-        m['key'] = el
-        m['value'] = get(s, el)['value']
-        m['total'] = ""
-
-        for _ in range(lt.size(list_) - 1):
-            el = it.next(iter)
-            nw = get(s, el)['value']
-            ac = m['value']
-            if nw > ac:
-                m['value'] = nw
-                m['key'] = el
-        return m
-
-
-    from random import randint
-    import time
-
-    s = newMap(compare)
-    for _ in range(367282):
-        # el = randint(1, 100)
-        put(s, _, chr(_ + 97))
-
-    # h = values(s, 23, 30)
-    # q = valueSet(s)
-    t1 = time.perf_counter()
-    # t = pairsRange(s, 175662, 345555)
-    # # # e = keySet(s)
-    # y = gen2(t)
-    y = operationRange(s, 175662, 345555, gen)
-    # y = iteration(s, gen)
-    t2 = time.perf_counter()
-    print(t2 - t1)
+# if __name__ == '__main__':
+#     from DISClib.DataStructures.rbt import newMap, put, keySet, values, valueSet, get
+#     from DISClib.DataStructures import listiterator as it
+#
+#
+#     def compare(el1, el2):
+#         if el1 == el2:
+#             return 0
+#         elif el1 < el2:
+#             return -1
+#         return 1
+#
+#
+#     def gen(root, m):
+#         nw = root['value']
+#         try:
+#             ac = m['value']
+#             if nw > ac:
+#                 m['value'] = nw
+#                 m['key'] = root['key']
+#
+#         except KeyError:
+#             m['key'] = root['key']
+#             m['value'] = nw
+#             m['total'] = ""
+#
+#
+#     def gen2(list_):
+#         iter = it.newIterator(list_)
+#         el = it.next(iter)
+#         m = {}
+#         m['key'] = el['key']
+#         m['value'] = el['value']
+#         m['total'] = ""
+#
+#         for _ in range(lt.size(list_) - 1):
+#             el = it.next(iter)
+#             nw = el['value']
+#             ac = m['value']
+#             if nw > ac:
+#                 m['value'] = nw
+#                 m['key'] = el['key']
+#
+#         return m
+#
+#
+#     def gen3(list_, s):
+#         iter = it.newIterator(list_)
+#         el = it.next(iter)
+#         m = {}
+#         m['key'] = el
+#         m['value'] = get(s, el)['value']
+#         m['total'] = ""
+#
+#         for _ in range(lt.size(list_) - 1):
+#             el = it.next(iter)
+#             nw = get(s, el)['value']
+#             ac = m['value']
+#             if nw > ac:
+#                 m['value'] = nw
+#                 m['key'] = el
+#         return m
+#
+#
+#     from random import randint
+#     import time
+#
+#     s = newMap(compare)
+#     for _ in range(367282):
+#         # el = randint(1, 100)
+#         put(s, _, chr(_ + 97))
+#
+#     # h = values(s, 23, 30)
+#     # q = valueSet(s)
+#     t1 = time.perf_counter()
+#     # t = pairsRange(s, 175662, 345555)
+#     # # # e = keySet(s)
+#     # y = gen2(t)
+#     y = operationRange(s, 175662, 345555, gen)
+#     # y = iteration(s, gen)
+#     t2 = time.perf_counter()
+#     print(t2 - t1)

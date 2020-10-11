@@ -19,16 +19,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  """
-
 import sys
 import config
 from DISClib.ADT import list as lt
 from App import controller
-from DISClib.ADT import map as mp
-
-assert config
 from time import perf_counter
 from DISClib.DataStructures import listiterator as it
+assert config
 
 """
 La vista se encarga de la interacción con el usuario.
