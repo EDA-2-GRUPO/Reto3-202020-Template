@@ -40,8 +40,12 @@ recae sobre el controlador.
 # ___________________________________________________
 
 
-def init():
-    analyzer = model.newAnalyzer()
+def init(tipo):
+    if tipo == 1:
+      tipo = "BTS"  
+    else:
+      tipo = "RBT"
+    analyzer = model.newAnalyzer(tipo)
     return analyzer
 
 

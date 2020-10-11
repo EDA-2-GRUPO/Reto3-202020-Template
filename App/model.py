@@ -44,7 +44,7 @@ es decir contiene los modelos con los datos en memoria
 # -----------------------------------------------------
 # API del TAD Catalogo de accidentes
 # -----------------------------------------------------
-def newAnalyzer():
+def newAnalyzer(tipo):
     """ Inicializa el analizador
 
     Crea una lista vacia para guardar todos los crimenes
@@ -54,9 +54,9 @@ def newAnalyzer():
     Retorna el analizador inicializado.
     """
     analyzer = {'numAccidents': 0,
-                'dateIndex': om.newMap(omaptype='BST', comparefunction=compareOmpLst),
-                'timeIndex': om.newMap(omaptype='BST', comparefunction=compareOmpLst),
-                'ZoneIndexLatLng': om.newMap(omaptype='BST', comparefunction=compareOmpLst)
+                'dateIndex': om.newMap(omaptype=tipo, comparefunction=compareOmpLst),
+                'timeIndex': om.newMap(omaptype=tipo, comparefunction=compareOmpLst),
+                'ZoneIndexLatLng': om.newMap(omaptype=tipo, comparefunction=compareOmpLst)
                 }
 
     return analyzer
