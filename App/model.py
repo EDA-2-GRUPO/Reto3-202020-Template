@@ -20,12 +20,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  """
 import config
-import numpy as np
-from DISClib.ADT import list as lt
-from DISClib.DataStructures import mapentry as me
-from DISClib.ADT import map as mp
-from DISClib.ADT import orderedmap as om
+
+import math as mt
+from DISClib.DataStructures import liststructure as lt
 from DISClib.DataStructures import listiterator as it
+
+from DISClib.DataStructures import mapentry as me
+from DISClib.DataStructures import mapstructure as mp
+from DISClib.DataStructures import orderedmapstructure as om
+
 from App import newOrderMetod as Nom
 from App import newMpMetod as Nmp
 from DISClib.Algorithms.Sorting.insertionsort import insertionSort
@@ -142,7 +145,7 @@ def updateLatitudeIndex(DoubleOmp, Latitude, Longitude, weekday):
     if entry:
         LtEntry = me.getValue(entry)
     else:
-        LtEntry = om.newMap('RBT', compareOmpLst)
+        LtEntry = om.newMap(DoubleOmp['type'], compareOmpLst)
         om.put(DoubleOmp, Latitude, LtEntry)
 
     updateLongitudeIndex(LtEntry, Longitude, weekday)
@@ -423,7 +426,7 @@ def TotalAndFrequentOmp(root, returnEntry):
 
 def sndCircleRangeDobOmap(x, y, distance, secondOperation):
     def resultFunction(root, entry):
-        move = np.sqrt(distance**2 - (root['key']-x)**2)
+        move = mt.sqrt(distance**2 - (root['key']-x)**2)
         Nom.operationRange(root['value'], y - move, y + move, secondOperation, entry)
 
     return resultFunction

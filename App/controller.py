@@ -24,7 +24,6 @@ import config as cf
 from App import model
 import datetime
 import csv
-from DISClib.ADT import orderedmap as om
 
 """
 El controlador se encarga de mediar entre la vista y el modelo.
@@ -40,11 +39,8 @@ recae sobre el controlador.
 # ___________________________________________________
 
 
-def init(tipo):
-    if tipo == 1:
-      tipo = "BTS"  
-    else:
-      tipo = "RBT"
+def init(in_t):
+    tipo = 'BST' if in_t == '1' else 'RBT'
     analyzer = model.newAnalyzer(tipo)
     return analyzer
 
