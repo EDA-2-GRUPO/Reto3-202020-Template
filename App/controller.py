@@ -58,22 +58,22 @@ def loadData(cont, crimefile, crimefile2,crimefile3,crimefile4,archivos):
        crimesfile = cf.data_dir + crimefile
        input_file = csv.DictReader(open(crimesfile, encoding="utf-8"), delimiter=",")
        for crime in input_file:
-          model.addAccident(analyzer, crime) 
+          model.addAccident(cont, crime) 
     if "2" in archivos:
        crimesfile = cf.data_dir + crimefile2
        input_file = csv.DictReader(open(crimesfile, encoding="utf-8"), delimiter=",")
        for crime in input_file:
-          model.addAccident(analyzer, crime) 
+          model.addAccident(cont, crime) 
     if "3" in archivos:
        crimesfile = cf.data_dir + crimefile3
        input_file = csv.DictReader(open(crimesfile, encoding="utf-8"), delimiter=",")
        for crime in input_file:
-          model.addAccident(analyzer, crime) 
+          model.addAccident(cont, crime) 
     if "4" in archivos:
        crimesfile = cf.data_dir + crimefile4
        input_file = csv.DictReader(open(crimesfile, encoding="utf-8"), delimiter=",")
        for crime in input_file:
-          model.addAccident(analyzer, crime) 
+          model.addAccident(cont, crime) 
 
 
 # ___________________________________________________
