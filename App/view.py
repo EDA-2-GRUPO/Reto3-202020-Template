@@ -25,6 +25,7 @@ from DISClib.ADT.list import size as lts
 from App import controller
 from time import perf_counter
 from DISClib.DataStructures import listiterator as it
+from DISClib.DataStructures import orderedmapstructure as om
 
 assert config
 
@@ -90,6 +91,7 @@ def Print2(entry, reference):
 cont = {}
 
 while True:
+
     printMenu()
     inputs = input('Seleccione una opción para continuar\n>')
 
@@ -111,9 +113,11 @@ while True:
         controller.loadData(cont, list_files)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
+        print(om.height(cont["dateIndex"]))
+        print(om.size(cont["dateIndex"]))
 
     elif int(inputs[0]) == 1:
-        fecha = input("Ingrese la fecha a consultar")
+        fecha = input("Ingrese la fecha a consultar\n")
         t1 = perf_counter()
         print("\nBuscando accidentes para la fecha: ", )
         dateEntry = controller.requirement1(cont, fecha)
@@ -124,7 +128,7 @@ while True:
         print("tiempo de carga:", t2 - t1)
 
     elif int(inputs[0]) == 2:
-        fecha = input("Ingrese la fecha posterior a la busqueda: ")
+        fecha = input("Ingrese la fecha posterior a la busqueda: \n")
         t1 = perf_counter()
         print("\nBuscando accidentes antes de la fecha: ", fecha)
         w = controller.requirement2(cont, fecha)
@@ -134,7 +138,7 @@ while True:
         print("tiempo de carga:", t2 - t1)
 
     elif int(inputs[0]) == 3:
-        print("\nBuscando accidentes en un rango de fechas: ")
+        print("\nBuscando accidentes en un rango de fechas: \n")
         fecha1 = input("fecha 1")
         fecha2 = input('fecha 2')
         t1 = perf_counter()
@@ -148,7 +152,7 @@ while True:
         fecha1 = input("fecha1")
         fecha2 = input('fecha2')
         t1 = perf_counter()
-        print("\nBuscando accidentes en un rango de fechas: ")
+        print("\nBuscando accidentes en un rango de fechas: \n")
         w = controller.requirement4(cont, fecha1, fecha2)
         print('para el rango de fechas: ', fecha1, 'a', fecha2)
         reference2 = ['Estado con mas accidentes', 'numero maximo de accidentes', 'total accidentes']
@@ -158,10 +162,10 @@ while True:
         print("tiempo de carga:", t2 - t1)
 
     elif int(inputs[0]) == 5:
-        hora1 = input("time1")
-        hora2 = input('time2')
+        hora1 = input("time1: ")
+        hora2 = input('time2: ')
         t1 = perf_counter()
-        print("\nBuscando crimenes en un rango de horas: ")
+        print("\nBuscando crimenes en un rango de horas: \n")
         SeverityEntry = controller.requirement5(cont, hora1, hora2)
         pairs5 = [('Severity', 'key'), ('accidentes', 'value'), ('porcentaje', 'percent')]
         Print1(SeverityEntry['list'], pairs5)
