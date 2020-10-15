@@ -42,8 +42,8 @@ operación seleccionada.
 
 
 crimefile = 'us_accidents_dis_2016.csv'
-crimefile2 = 'us_accidents_dis_2016.csv'
-crimefile3 = 'us_accidents_dis_2016.csv'
+crimefile2 = 'us_accidents_dis_2017.csv'
+crimefile3 = 'us_accidents_dis_2018.csv'
 crimefile4 = "us_accidents_dis_2019.csv"
 
 
