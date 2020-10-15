@@ -54,6 +54,7 @@ def loadData(analyzer, list_files):
     """
     Carga los datos de los archivos CSV en el modelo
     """
+    count_t = 0
     for file in list_files:
         accident_file = cf.data_dir + file
         input_file = csv.DictReader(open(accident_file, encoding="utf-8"), delimiter=",")
@@ -65,7 +66,9 @@ def loadData(analyzer, list_files):
             if not count % 10000:
                 print(count, 'cargados')
         del input_file
+        count_t += count
         print(file, 'cargado', count, 'datos cargados')
+    print('se han cargado en total', count_t, 'datos')
     return analyzer
 
 
