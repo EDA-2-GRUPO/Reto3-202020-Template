@@ -50,19 +50,30 @@ def init(in_t):
 #  de datos en los modelos
 # ___________________________________________________
 
-def loadData(analyzer, accidentsfile2016, accidentsfile2019):
+def loadData(cont, crimefile, crimefile2,crimefile3,crimefile4,archivos):
     """
     Carga los datos de los archivos CSV en el modelo
     """
-    crimesfile = cf.data_dir + accidentsfile2016
-    input_file = csv.DictReader(open(crimesfile, encoding="utf-8"), delimiter=",")
-    for crime in input_file:
-        model.addAccident(analyzer, crime)
-    # crimesfile2 = cf.data_dir + accidentsfile2019
-    # input_file2 = csv.DictReader(open(crimesfile2, encoding="utf-8"),delimiter=",")
-    # for crime in input_file2:
-    #     model.addAccident(analyzer, crime)
-    # return analyzer
+    if "1" in archivos:
+       crimesfile = cf.data_dir + crimefile
+       input_file = csv.DictReader(open(crimesfile, encoding="utf-8"), delimiter=",")
+       for crime in input_file:
+          model.addAccident(analyzer, crime) 
+    if "2" in archivos:
+       crimesfile = cf.data_dir + crimefile2
+       input_file = csv.DictReader(open(crimesfile, encoding="utf-8"), delimiter=",")
+       for crime in input_file:
+          model.addAccident(analyzer, crime) 
+    if "3" in archivos:
+       crimesfile = cf.data_dir + crimefile3
+       input_file = csv.DictReader(open(crimesfile, encoding="utf-8"), delimiter=",")
+       for crime in input_file:
+          model.addAccident(analyzer, crime) 
+    if "4" in archivos:
+       crimesfile = cf.data_dir + crimefile4
+       input_file = csv.DictReader(open(crimesfile, encoding="utf-8"), delimiter=",")
+       for crime in input_file:
+          model.addAccident(analyzer, crime) 
 
 
 # ___________________________________________________
