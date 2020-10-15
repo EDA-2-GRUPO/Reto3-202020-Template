@@ -41,10 +41,8 @@ operación seleccionada.
 # ___________________________________________________
 
 
-crimefile = 'us_accidents_dis_2016.csv'
-crimefile2 = 'us_accidents_dis_2017.csv'
-crimefile3 = 'us_accidents_dis_2018.csv'
-crimefile4 = "us_accidents_dis_2019.csv"
+dict_files = {'1': 'us_accidents_dis_2016.csv', '2': 'us_accidents_dis_2017.csv',
+              '3': "us_accidents_dis_2018.csv", '4': "us_accidents_dis_2019.csv"}
 
 
 # ___________________________________________________
@@ -84,10 +82,13 @@ Menu principal
 
 
 def Print2(entry, reference):
+    i = 0
     for v in entry.values():
-        print(reference, ':', str(v))
-    pass
+        print(reference[i], ':', str(v))
+        i += 1
 
+
+cont = {}
 
 while True:
 
@@ -99,12 +100,17 @@ while True:
         C1 = input("inserte 1 para BST y 2 para RBT")
         # cont es el controlador que se usará de acá en adelante
         cont = controller.init(C1)
-        
+
     elif inputs[0] == "q":
-        print("\nCargando información de accidentes ....\n")
-        archivos = input("1=2016, 2=2017,3=2018,4=2019\n(si quiere más de uno dijiteel numero separado por coma)\nEj: 1,2 \n")
+        list_files = []
+        print("\nCargando información de accidentes ....")
+        print(' En formato 1,2,3,4')
+        C2 = input('ingrese los años 2016: 1, 2017: 2, 2018: 3, 2019: 4')
         t1 = perf_counter()
-        controller.loadData(cont, crimefile, crimefile2,crimefile3,crimefile4,archivos)
+        for nm in C2.split(','):
+            list_files.append(dict_files[nm])
+
+        controller.loadData(cont, list_files)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
         print(om.height(cont["dateIndex"]))
