@@ -128,7 +128,7 @@ def size(map):
     Raises:
         Exception
     """
-    if (map['type'] == 'BST'):
+    if map['type'] == 'BST':
         return bst.size(map)
     else:
         return rbt.size(map)
@@ -289,7 +289,7 @@ def select(map, k):
     Retorna la siguiente llave a la k-esima llave mas pequeña de la tabla
     Args:
         map: La tabla de simbolos
-        pos: la pos-esima llave mas pequeña
+        k: la k-esima llave mas pequeña
     Returns:
         La llave más pequeña mayor o igual a Key
     Raises:
@@ -348,7 +348,7 @@ def height(map):
     Raises:
         Exception
     """
-    if (map['type'] == 'BST'):
+    if map['type'] == 'BST':
         return bst.height(map)
     else:
         return rbt.height(map)

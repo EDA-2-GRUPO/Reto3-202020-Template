@@ -50,19 +50,23 @@ def init(in_t):
 #  de datos en los modelos
 # ___________________________________________________
 
-def loadData(analyzer, accidentsfile2016, accidentsfile2019):
+def loadData(analyzer, list_files):
     """
     Carga los datos de los archivos CSV en el modelo
     """
-    crimesfile = cf.data_dir + accidentsfile2016
-    input_file = csv.DictReader(open(crimesfile, encoding="utf-8"), delimiter=",")
-    for crime in input_file:
-        model.addAccident(analyzer, crime)
-    # crimesfile2 = cf.data_dir + accidentsfile2019
-    # input_file2 = csv.DictReader(open(crimesfile2, encoding="utf-8"),delimiter=",")
-    # for crime in input_file2:
-    #     model.addAccident(analyzer, crime)
-    # return analyzer
+    for file in list_files:
+        accident_file = cf.data_dir + file
+        input_file = csv.DictReader(open(accident_file, encoding="utf-8"), delimiter=",")
+        count = 0
+        print(file, 'cargando')
+        for accident in input_file:
+            model.addAccident(analyzer, accident)
+            count += 1
+            if not count % 10000:
+                print(count, 'cargados')
+        del input_file
+        print(file, 'cargado', count, 'datos cargados')
+    return analyzer
 
 
 # ___________________________________________________
@@ -102,5 +106,3 @@ def requirement6(cont, lat, longi, distance):
     longi = float(longi)
     distance = float(distance)
     return model.requirement6(cont, lat, longi, distance)
-
-

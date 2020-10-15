@@ -40,8 +40,8 @@ operación seleccionada.
 # ___________________________________________________
 
 
-crimefile = 'us_accidents_dis_2016.csv'
-crimefile2 = "us_accidents_dis_2019.csv"
+dict_files = {'1': 'us_accidents_dis_2016.csv', '2': 'us_accidents_dis_2017.csv',
+              '3': "us_accidents_dis_2018.csv", '4': "us_accidents_dis_2019.csv"}
 
 
 # ___________________________________________________
@@ -81,13 +81,15 @@ Menu principal
 
 
 def Print2(entry, reference):
+    i = 0
     for v in entry.values():
-        print(reference, ':', str(v))
-    pass
+        print(reference[i], ':', str(v))
+        i += 1
 
+
+cont = {}
 
 while True:
-
     printMenu()
     inputs = input('Seleccione una opción para continuar\n>')
 
@@ -98,9 +100,15 @@ while True:
         cont = controller.init(C1)
 
     elif inputs[0] == "q":
+        list_files = []
         print("\nCargando información de accidentes ....")
+        print(' En formato 1,2,3,4')
+        C2 = input('ingrese los años 2016: 1, 2017: 2, 2018: 3, 2019: 4')
         t1 = perf_counter()
-        controller.loadData(cont, crimefile, crimefile2)
+        for nm in C2.split(','):
+            list_files.append(dict_files[nm])
+
+        controller.loadData(cont, list_files)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
 

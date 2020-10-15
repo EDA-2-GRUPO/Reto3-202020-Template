@@ -3,7 +3,6 @@ from DISClib.Utils import error as error
 from DISClib.ADT import list as lt
 
 # from DISClib.DataStructures.rbt import keySetTree
-print('otro2')
 assert config
 
 """
