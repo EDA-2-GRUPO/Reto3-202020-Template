@@ -1,9 +1,3 @@
-Responder preguntas y marcar con el nombre de los integrantes
-Grupo 2
-Nombre:
-Juan david Dias Ipus 
-Erich Giusseppe Soto Parada
-Preguntas
 Pregunta 1: ¿Qué diferencia existe entre las alturas de los dos árboles (BST y RBT) ?, ¿por qué pasa esto?
 RBT tiene una altura de 11 mientras que BTS tiene una altura de 14, esto pasa porque RBT esta implementado para estar balanceado mientras que BTS no, y por lo tanto BTS puede llegar a tener ramas más cargadas.
 
@@ -26,3 +20,4 @@ Memoria Utilizada 1:No hay cambio a la hora de correr el programa, por tanto es 
 Memoria inicial2: 5,50GB
 Memoria Utilizada2 = 5,62GB-5,50GB=0,12GB
 Entre mayor sea la cantidad de datos mayor memoria va a ser utilizada. (aunque de manera poco significativa)
+
