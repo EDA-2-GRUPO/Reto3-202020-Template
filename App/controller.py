@@ -54,28 +54,31 @@ def loadData(cont, crimefile, crimefile2,crimefile3,crimefile4,archivos):
     """
     Carga los datos de los archivos CSV en el modelo
     """
+    print(archivos)
     if "1" in archivos:
+       print("Cargand0 2016 ...")
        crimesfile = cf.data_dir + crimefile
        input_file = csv.DictReader(open(crimesfile, encoding="utf-8"), delimiter=",")
        for crime in input_file:
           model.addAccident(cont, crime) 
     if "2" in archivos:
-       crimesfile = cf.data_dir + crimefile2
-       input_file = csv.DictReader(open(crimesfile, encoding="utf-8"), delimiter=",")
-       for crime in input_file:
-          model.addAccident(cont, crime) 
+       print("Cargand0 2017 ...")
+       crimesfile2 = cf.data_dir + crimefile2
+       input_file2 = csv.DictReader(open(crimesfile2, encoding="utf-8"), delimiter=",")
+       for crime2 in input_file2:
+          model.addAccident(cont, crime2) 
     if "3" in archivos:
-       crimesfile = cf.data_dir + crimefile3
-       input_file = csv.DictReader(open(crimesfile, encoding="utf-8"), delimiter=",")
-       for crime in input_file:
-          model.addAccident(cont, crime) 
+       print("Cargand0 2018 ...")
+       crimesfile3 = cf.data_dir + crimefile3
+       input_file3 = csv.DictReader(open(crimesfile3, encoding="utf-8"), delimiter=",")
+       for crime3 in input_file3:
+          model.addAccident(cont, crime3) 
     if "4" in archivos:
-       crimesfile = cf.data_dir + crimefile4
-       input_file = csv.DictReader(open(crimesfile, encoding="utf-8"), delimiter=",")
-       for crime in input_file:
-          model.addAccident(cont, crime) 
-
-
+       print("Cargand0 2019 ...")
+       crimesfile4 = cf.data_dir + crimefile4
+       input_file4 = csv.DictReader(open(crimesfile4, encoding="utf-8"), delimiter=",")
+       for crime4 in input_file4:
+          model.addAccident(cont, crime4) 
 # ___________________________________________________
 #  Funciones para consultas
 # ___________________________________________________
