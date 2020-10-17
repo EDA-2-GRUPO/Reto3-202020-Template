@@ -69,15 +69,15 @@ def addAccident(analyzer, accident):
     analyzer['numAccidents'] += 1
     SevKey = int(accident['Severity'])
     stateKey = accident['State']
-    """Latitude = float(accident['Start_Lat'])
-    Longitude = float(accident['Start_Lng'])"""
+    Latitude = float(accident['Start_Lat'])
+    Longitude = float(accident['Start_Lng'])
     occurredTf = datetime.datetime.strptime(accident['Start_Time'], '%Y-%m-%d %H:%M:%S')
     occurredDate = occurredTf.date()
-    """weekday = occurredDate.weekday()
-    occurredTime = HoursAndMinutes(occurredTf.time())"""
+    weekday = occurredDate.weekday()
+    occurredTime = HoursAndMinutes(occurredTf.time())
     updateDateIndex(analyzer['dateIndex'], occurredDate, SevKey, stateKey)
-    """updateTimeIndex(analyzer['timeIndex'], occurredTime, SevKey)
-    updateLatitudeIndex(analyzer['ZoneIndexLatLng'], Latitude, Longitude, weekday)"""
+    updateTimeIndex(analyzer['timeIndex'], occurredTime, SevKey)
+    updateLatitudeIndex(analyzer['ZoneIndexLatLng'], Latitude, Longitude, weekday)
     return analyzer
 
 
