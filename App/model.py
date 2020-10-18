@@ -59,7 +59,8 @@ def newAnalyzer(tipo):
     analyzer = {'numAccidents': 0,
                 'dateIndex': om.newMap(omaptype=tipo, comparefunction=compareOmpLst),
                 'timeIndex': om.newMap(omaptype=tipo, comparefunction=compareOmpLst),
-                'ZoneIndexLatLng': om.newMap(omaptype=tipo, comparefunction=compareOmpLst)
+                'ZoneIndexLatLng': {'DoubleMap': om.newMap(omaptype=tipo, comparefunction=compareOmpLst),
+                                    'num_zones': 0}
                 }
 
     return analyzer
@@ -69,14 +70,14 @@ def addAccident(analyzer, accident):
     SevKey = int(accident['Severity'])
     occurredTf = datetime.datetime.strptime(accident['Start_Time'], '%Y-%m-%d %H:%M:%S')
     analyzer['numAccidents'] += 1
-    updateDateIndex(analyzer['dateIndex'], occurredTf.date(), SevKey, accident['State'])
-    updateTimeIndex(analyzer['timeIndex'], HoursAndMinutes(occurredTf.time()), SevKey)
-    updateZoneIndex(analyzer['ZoneIndexLatLng'], float(accident['Start_Lat']), float(accident['Start_Lng']),
-                        occurredTf.weekday())
+    updateDateOmap(analyzer['dateIndex'], occurredTf.date(), SevKey, accident['State'])
+    updateTimeOmap(analyzer['timeIndex'], HoursAndMinutes(occurredTf.time()), SevKey)
+    updateZoneDoubleOmap(analyzer['ZoneIndexLatLng'], float(accident['Start_Lat']), float(accident['Start_Lng']),
+                         occurredTf.weekday())
     return analyzer
 
 
-def updateDateIndex(omap, occurredDate, SevKey, stateKey):
+def updateDateOmap(omap, occurredDate, SevKey, stateKey):
     """
 
     Args:
@@ -91,16 +92,19 @@ def updateDateIndex(omap, occurredDate, SevKey, stateKey):
     entry = om.get(omap, occurredDate)
 
     if entry:
-        dateEntry = me.getValue(entry)
+        dateEntry = entry['value']  # lo correcto es me.get(entry), se usa para optimizar de aqui en adelante
     else:
         dateEntry = newDateEntry()
         om.put(omap, occurredDate, dateEntry)
 
-    addDateIndex(dateEntry, SevKey, stateKey)
+    dateEntry['numAccidents'] += 1
+    updateIndex(dateEntry['SeverityIndex'], SevKey)
+    updateIndex(dateEntry['StateIndex'], stateKey)
+
     return omap
 
 
-def updateTimeIndex(omap, occurredTime, SevKey):
+def updateTimeOmap(omap, occurredTime, SevKey):
     """
 
     Args:
@@ -114,23 +118,25 @@ def updateTimeIndex(omap, occurredTime, SevKey):
 
     entry = om.get(omap, occurredTime)
     if entry:
-        timeEntry = me.getValue(entry)
+        timeEntry = entry['value']
     else:
         timeEntry = newTimeEntry()
         om.put(omap, occurredTime, timeEntry)
 
-    addTimeIndex(timeEntry, SevKey)
+    timeEntry['numAccidents'] += 1
+    updateIndex(timeEntry['SeverityIndex'], SevKey)
+
     return omap
 
 
-def updateZoneIndex(LatLng, Latitude, Longitude, weekday):
+def updateZoneDoubleOmap(LatLng, Latitude, Longitude, weekday):
     """
 
     Args:
         LatLng: entry con un map y un conyteo de cordenadas
         Latitude: cordenada Latitud
         Longitude: cordenada Longitud
-        weekday: dia del la semana representado del 1 al 7
+        weekday: dia del la semana representado del 0 al 6
 
     Returns:
 
@@ -139,7 +145,7 @@ def updateZoneIndex(LatLng, Latitude, Longitude, weekday):
     entryLt = om.get(DoubleOmp, Latitude)
 
     if entryLt:
-        LtEntry = me.getValue(entryLt)
+        LtEntry = entryLt['value']
     else:
         LtEntry = om.newMap(DoubleOmp['type'], compareOmpLst)
         om.put(DoubleOmp, Latitude, LtEntry)
@@ -147,75 +153,22 @@ def updateZoneIndex(LatLng, Latitude, Longitude, weekday):
     entryLng = om.get(LtEntry, Longitude)
 
     if entryLng:
-        LngEntry = me.getValue(entryLng)
+        LngEntry = entryLng['value']
 
     else:
         LngEntry = newZoneEntry()
         om.put(LtEntry, Longitude, LngEntry)
         LatLng['num_zones'] += 1
 
-    addZoneIndex(LngEntry, weekday)
+    LngEntry['numAccidents'] += 1
+    updateIndex(LngEntry['weekdayIndex'], weekday)
 
     return DoubleOmp
 
 
-def addZoneIndex(zoneEntry, weekday):
-    """
-        Actualiza los sub Index del zoneEntry
-
-    Args:
-        zoneEntry:
-        weekday: dia del la semana representado del 1 al 7
-
-    Returns:
-
-    """
-    zoneEntry['numAccidents'] += 1
-    weekdayIndex = zoneEntry['weekdayIndex']
-    updateIndex(weekdayIndex, weekday)
-
-
-def addDateIndex(dateEntry, SevKey, stateKey):
-    """
-    Actualiza los sub Index del dateEntry
-    Args:
-        dateEntry:
-        SevKey: str con el nivel de severidad
-        stateKey: str con el estado de ocurrencia
-
-    Returns:
-
-    """
-    dateEntry['numAccidents'] += 1
-    SeverityIndex = dateEntry['SeverityIndex']
-    updateIndex(SeverityIndex, SevKey)
-    StateIndex = dateEntry['StateIndex']
-    updateIndex(StateIndex, stateKey)
-
-    return dateEntry
-
-
-def addTimeIndex(timeEntry, SevKey):
-    """
-    Actualiza los sub Index del TimeEntry
-
-    Args:
-        timeEntry:
-        SevKey: str con el nivel de severidad
-
-    Returns:
-
-    """
-    timeEntry['numAccidents'] += 1
-    SeverityIndex = timeEntry['SeverityIndex']
-    updateIndex(SeverityIndex, SevKey)
-
-    return timeEntry
-
-
 def updateIndex(Index, indexKey):
     """
-    Actualiza el conteo del mapa Index con su indexkey
+    Actualiza el conteo del mapa Index con su indexKey
     Args:
         Index: El map
         indexKey: la llave que se quiere actualizar
@@ -237,13 +190,9 @@ def newDateEntry():
     Crea una entrada en el indice por fechas, es decir en el arbol
     binario.
     """
-    entry = {'SeverityIndex': mp.newMap(numelements=3,
-                                        maptype='PROBING',
-                                        comparefunction=compareMp),
+    entry = {'SeverityIndex': MakeMapFormat(4),
 
-             'StateIndex': mp.newMap(numelements=50,
-                                     maptype='PROBING',
-                                     comparefunction=compareMp),
+             'StateIndex': MakeMapFormat(40, 'CHAINING'),
 
              'numAccidents': 0}
 
@@ -255,9 +204,7 @@ def newTimeEntry():
     Crea una entrada en el indice por horas, es decir en el arbol
     binario.
     """
-    entry = {'SeverityIndex': mp.newMap(numelements=3,
-                                        maptype='PROBING',
-                                        comparefunction=compareMp),
+    entry = {'SeverityIndex': MakeMapFormat(4),
              'numAccidents': 0}
 
     return entry
@@ -269,10 +216,21 @@ def newZoneEntry():
     binario.
 
     """
-    entry = {'weekdayIndex': mp.newMap(numelements=7, comparefunction=compareMp),
+    entry = {'weekdayIndex': MakeMapFormat(7),
              'numAccidents': 0}
 
     return entry
+
+
+def MakeMaxFormat(Total=False):
+    if Total:
+        return {'maxKey': None, 'maxValue': -1, 'total': 0}
+    else:
+        return {'maxKey': None, 'maxValue': -1}
+
+
+def MakeMapFormat(els, Type='PROBING'):
+    return mp.newMap(els, maptype=Type, comparefunction=compareMp)
 
 
 # Funciones para agregar informacion al catalogo
@@ -282,49 +240,44 @@ def newZoneEntry():
 # Funciones de consulta
 # ==============================
 
-def requirement1(cont, date):
-    dateEntry = me.getValue(om.get(cont['dateIndex'], date))
-    severityMap = dateEntry['SeverityIndex']
-    totalAccident = dateEntry['numAccidents']
-    ListEntry = Nmp.operationSet(severityMap, makeListMp, lt.newList('ARRAY_LIST'))
+def requirement1(dateOmap, date):
+    dateRoot = om.get(dateOmap, date)
+    if not dateRoot:
+        return None
+    dateEntry = dateRoot['value']
+    ListEntry = Nmp.operationSet(dateEntry['SeverityIndex'], makeListMp, lt.newList('ARRAY_LIST'))
     insertionSort(ListEntry, orderByKey)
-    return {'list': ListEntry, 'total': totalAccident}
+    return {'list': ListEntry, 'total': dateEntry['numAccidents']}
 
 
-def requirement2(cont, date):
-    mostFrequent = Nom.operationBefore(cont['dateIndex'], date, TotalAndFrequentOmp,
-                                       {'maxKey': None, 'maxValue': -1, 'total': 0})
-    return mostFrequent
+def requirement2(dateOmap, date):
+    mostFrequentDate = Nom.operationBefore(dateOmap, date, TotalAndFrequentOmp, MakeMaxFormat(True))
+    return mostFrequentDate
 
 
-def requirement3(cont, date1, date2):
-    severityFrequency = Nom.operationRange(cont['dateIndex'], date1, date2, frequencyInMapForOmp('SeverityIndex'),
-                                           mp.newMap(3, maptype='PROBING', comparefunction=compareMp))
-    mostFrequentSeverity = Nmp.operationSet(severityFrequency, TotalAndFrequentMp, {'maxKey': None, 'maxValue': -1,
-                                                                                    'total': 0})
+def requirement3(dateOmap, date1, date2):
+    severityFrequency = Nom.operationRange(dateOmap, date1, date2, frequencyInMapForOmp('SeverityIndex'),
+                                           MakeMapFormat(3))
+    mostFrequentSeverity = Nmp.operationSet(severityFrequency, TotalAndFrequentMp, MakeMaxFormat(True))
 
     return mostFrequentSeverity
 
 
-def requirement4(cont, date1, date2):
-    re_format = {'KeyFrequent': {'maxKey': None, 'maxValue': -1},
-                 'map': mp.newMap(40, maptype='PROBING', comparefunction=compareMp)}
+def requirement4(dateOmap, date1, date2):
+    stateFrequencyAndMfDate = Nom.operationRange(dateOmap, date1, date2, FrequencyInMapAndFrequentKey('StateIndex'),
+                                                 {'KeyFrequent': MakeMaxFormat(), 'map': MakeMapFormat(40)})
 
-    stateFrequencyAndMfKey = Nom.operationRange(cont['dateIndex'], date1, date2,
-                                                mixFrequencyInMapAndFrequent('StateIndex'),
-                                                re_format)
+    mostFrequentState = Nmp.operationSet(stateFrequencyAndMfDate['map'], FrequentMp, MakeMaxFormat(False))
 
-    mostFrequentState = Nmp.operationSet(stateFrequencyAndMfKey['map'], FrequentMp, {'maxKey': None, 'maxValue': -1})
-
-    mfState_mfKey = {'mKey': re_format['KeyFrequent'], 'mState': mostFrequentState}
+    mfState_mfKey = {'mKey': stateFrequencyAndMfDate['KeyFrequent'], 'mState': mostFrequentState}
 
     return mfState_mfKey
 
 
-def requirement5(cont, date1, date2):
-    severityFrequency = Nom.operationRange(cont['timeIndex'], date1, date2,
-                                           frequencyInMapForOmp('SeverityIndex'),
-                                           mp.newMap(3, maptype='PROBING', comparefunction=compareMp))
+def requirement5(timeOmap, time1, time2):
+    severityFrequency = Nom.operationRange(timeOmap, time1, time2,
+                                           frequencyInMapForOmp('SeverityIndex'), MakeMapFormat(3))
+
     SeverityListAndTotal = Nmp.operationSet(severityFrequency, makeListAndTotalMp,
                                             {'list': lt.newList('ARRAY_LIST'), 'total': 0})
 
@@ -333,10 +286,10 @@ def requirement5(cont, date1, date2):
     return SeverityListAndTotal
 
 
-def requirement6(cont, Lat, Lng, dist):
-    weekdayFrequency = Nom.operationRange(cont['ZoneIndexLatLng']['DoubleMap'], Lat - dist, Lat + dist,
+def requirement6(zoneOmap, Lat, Lng, dist):
+    weekdayFrequency = Nom.operationRange(zoneOmap, Lat - dist, Lat + dist,
                                           sndCircleRangeDobOmap(Lat, Lng, dist, frequencyInMapForOmp('weekdayIndex')),
-                                          mp.newMap(7, maptype='CHAINING', comparefunction=compareMp))
+                                          MakeMapFormat(7))
 
     weekdayListAndTotal = Nmp.operationSet(weekdayFrequency, makeListAndTotalMp,
                                            {'list': lt.newList('ARRAY_LIST'), 'total': 0})
@@ -349,19 +302,44 @@ def requirement6(cont, Lat, Lng, dist):
 # ==============================
 # Funciones auxiliares
 # ==============================
+
+
 def sizeOmap(omap):
-    return om.size(omap)
+    try:
+        return om.size(omap)
+    except TypeError:
+        return 0
 
 
 def heightOmap(omap):
-    return om.height(omap)
+    try:
+        return om.height(omap)
+    except TypeError:
+        return 0
 
 
 def HoursAndMinutes(time):
+    """
+    solo tiene en cuenta las horas y los minutos de time
+    Args:
+        time: datetime.time
+
+    Returns:
+
+    """
     return datetime.time(hour=time.hour, minute=time.minute)
 
 
 def AddPercents(ListAndTotal):
+    """
+    Añade los porcentajes a una lista contenida en un dict que ademas tiene
+    el valor total del conteo
+    Args:
+        ListAndTotal:
+
+    Returns:
+
+    """
     sList = ListAndTotal['list']
     iterator = it.newIterator(sList)
     for _ in range(lt.size(sList)):
@@ -370,13 +348,20 @@ def AddPercents(ListAndTotal):
 
 
 def proxyTime(o_time):
+    """
+    Aproxima las horas con minutos
+    Args:
+        o_time: datetime.time
+
+    Returns:
+
+    """
+
     hour = o_time.hour
     minute = o_time.minute
 
-    if minute < 15:
-        minute = 0
-    elif minute <= 30:
-        minute = 30
+    if minute <= 30:
+        minute = round(minute / 30) * 30
     elif hour == 23:
         minute = 59
     else:
@@ -388,6 +373,15 @@ def proxyTime(o_time):
 
 
 def weekdayFromIntToStr(weekdayList):
+    """
+    Para los entry de una lista Transforma el numero de dia de la semana
+    al nombre de este dia
+    Args:
+        weekdayList:
+
+    Returns:
+
+    """
     weekday_list = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
     iterator = it.newIterator(weekdayList)
     for _ in range(lt.size(weekdayList)):
@@ -396,49 +390,87 @@ def weekdayFromIntToStr(weekdayList):
     return weekdayList
 
 
-def mostFrequent(num_accidents, returnEntry, root_entry):
-    if num_accidents > returnEntry['maxValue']:
-        returnEntry['maxKey'] = root_entry['key']
-        returnEntry['maxValue'] = num_accidents
+"""
+Hay codigo repetido de a 3 a 5 lineas  que se podrian contraer, sobre todo en las funciones que tienen Frequent en su 
+nombre, sin embargo las lineas de codigo que aorraban era pocas mas o menos 20, pero podian tener un rendimientO 
+alrededor de 20% menor por su llamado (estamos hablando de numeros muy pequños igual, fue por gusto), aclarar que las 
+funciones son llamadas cada vez que se itera dentro del arbol o del map
+"""
 
 
 # ===================================
 # Funciones auxiliares para Order Map
 # ===================================**
 
-def FrequentOmp(root, returnEntry):
-    num_accidents = root['value']['numAccidents']
-    mostFrequent(num_accidents, returnEntry, root)
-    return returnEntry
-
 
 def TotalAndFrequentOmp(root, returnEntry):
-    num_accidents = root['value']['numAccidents']
-    mostFrequent(num_accidents, returnEntry, root)
-    returnEntry['total'] += num_accidents
+    """Funcion auxiliar para buscar en un orderMap visto como histograma la key
+    con mayor numero de accidentes, y el valor total del conteo
+    """
+    num_acc = root['value']['numAccidents']
+    if num_acc > returnEntry['maxValue']:
+        returnEntry['maxValue'] = num_acc
+        returnEntry['maxKey'] = root['key']
+    returnEntry['total'] += num_acc
     return returnEntry
 
 
 def frequencyInMapForOmp(mapIndex):
-    def resultFunc(dateRoot, returnEntry):
-        acMap = dateRoot['value'][mapIndex]
+    """
+    Funcion axuliar para realizar la frecuencia acumulada de los maps, vistos como histogramas, dentro
+    de cada rama del Omap
+    Args:
+        mapIndex: el indice del mapa buscado
+    """
+
+    def resultFunc(root, returnEntry):
+        acMap = root['value'][mapIndex]
         Nmp.operationSet(acMap, frequencyInMap, returnEntry)
         return returnEntry
+
     return resultFunc
 
 
-def mixFrequencyInMapAndFrequent(mapIndex):
+def FrequencyInMapAndFrequentKey(mapIndex):
+    """
+    Funcion axuliar que es la union de frequencyInMapForOmp y TotalAndFrequentOmap, sin realizar
+    el conteo total
+    returnEntry: tiene un formato {'map': mewmap, 'KeyFrequent': maxEntry}
+    Args:
+        mapIndex: el indice del mapa
+    """
     def resultFunc(root, returnEntry):
-        frequencyInMapForOmp(mapIndex)(root, returnEntry['map'])
-        FrequentOmp(root, returnEntry['KeyFrequent'])
+        rValue = root['value']
+        num_acc = rValue['numAccidents']
+        key_freq = returnEntry['KeyFrequent']
+        if num_acc > key_freq['maxValue']:
+            key_freq['maxValue'] = num_acc
+            key_freq['maxKey'] = root['key']
+        Nmp.operationSet(rValue[mapIndex], frequencyInMap, returnEntry['map'])
         return returnEntry
+
     return resultFunc
 
 
 def sndCircleRangeDobOmap(x, y, distance, secondOperation):
+    """
+    Funcion axuliar para crear una operacion en un DobleOmap (order map dentro de order map)
+    para un rango dado que representa un 'circulo', definido por un punto en el primer order map,
+    un punto en el segundo, y un radio
+    Args:
+        x: cordenada x (primer order map)
+        y: cordenada y (segundo order map)
+        distance: radio en el que se busca
+        secondOperation: operacion que se quiere realizar en el segundo Omap
+
+    Returns:
+        una
+    """
+
     def resultFunction(root, entry):
         move = mt.sqrt(distance ** 2 - (root['key'] - x) ** 2)
         Nom.operationRange(root['value'], y - move, y + move, secondOperation, entry)
+        return entry
 
     return resultFunction
 
@@ -448,11 +480,31 @@ def sndCircleRangeDobOmap(x, y, distance, secondOperation):
 # ===================================
 
 def makeListMp(entry, ListEntry):
+    """
+    Funcion Auxiliar para crear un dict con una lista con las entradas
+    de un map.
+    Args:
+        entry: una entrada de un map
+        returnEntry: un entry con una Lista, y un valor de total
+
+    Returns:
+
+    """
     lt.addLast(ListEntry, entry)
     return ListEntry
 
 
 def makeListAndTotalMp(entry, returnEntry):
+    """
+    Funcion Auxiliar para crear un dict con una lista con las entradas
+    de un map, y el valor total que almacenan las llaves
+    Args:
+        entry: una entrada de un map
+        returnEntry: un entry con una Lista, y un valor de total
+
+    Returns:
+
+    """
     lt.addLast(returnEntry['list'], entry)
     returnEntry['total'] += entry['value']
     return returnEntry
@@ -460,9 +512,10 @@ def makeListAndTotalMp(entry, returnEntry):
 
 def frequencyInMap(entry, returnEntry):
     """
-
+    Funcion Auxiliar para sacar la frecuencia de las llaves
+    en un mapa visto como histagrama
     Args:
-        entry: un ll
+        entry: una entrada de un map
         returnEntry: un Map
 
     Returns:
@@ -479,14 +532,39 @@ def frequencyInMap(entry, returnEntry):
 
 
 def FrequentMp(entry, returnEntry):
-    acn = entry['value']
-    mostFrequent(acn, returnEntry, entry)
+    """
+    Funcion Auxiliar para obtener la llave mas frecuente de un map
+    visto como histograma
+    Args:
+        entry: una entrada de un map
+        returnEntry: un entry con una Lista, y un valor de total
+
+    Returns:
+
+    """
+    num_acc = entry['value']
+    if num_acc > returnEntry['maxValue']:
+        returnEntry['maxValue'] = num_acc
+        returnEntry['maxKey'] = entry['key']
+    return returnEntry
 
 
 def TotalAndFrequentMp(entry, returnEntry):
-    acn = entry['value']
-    mostFrequent(acn, returnEntry, entry)
-    returnEntry['total'] += acn
+    """
+    Funcion Auxiliar para obtener la llave mas frecuente de un map
+    visto como histograma,  y obtener el total del conteo
+    Args:
+        entry: una entrada de un map
+        returnEntry: un entry con un maxKey, un maxValue y un valor de total
+
+    Returns:
+
+    """
+    num_acc = entry['value']
+    if num_acc > returnEntry['maxValue']:
+        returnEntry['maxValue'] = num_acc
+        returnEntry['maxKey'] = entry['key']
+    returnEntry['total'] += num_acc
     return returnEntry
 
 
@@ -495,6 +573,11 @@ def TotalAndFrequentMp(entry, returnEntry):
 # ==============================
 
 def orderByKey(el1, el2):
+    """
+    funcion de comparacion mayor de dos entrys
+    apartir de sus llaves
+
+    """
     if el1['key'] > el2['key']:
         return 0
     else:
@@ -503,8 +586,7 @@ def orderByKey(el1, el2):
 
 def compareOmpLst(date1, date2):
     """
-    Compara dos ids de libros, id es un identificador
-    y entry una pareja llave-valor
+    Compara dos elementos
     """
     if date1 == date2:
         return 0
@@ -514,15 +596,14 @@ def compareOmpLst(date1, date2):
         return -1
 
 
-def compareMp(offense1, offense2):
+def compareMp(key1, el2):
     """
-    Compara dos ids de libros, id es un identificador
-    y entry una pareja llave-valor
+    Comparacion para Map
     """
-    offense = me.getKey(offense2)
-    if offense1 == offense:
+    key2 = el2['key']
+    if key1 == key2:
         return 0
-    elif offense1 > offense:
+    elif key1 > key2:
         return 1
     else:
         return -1

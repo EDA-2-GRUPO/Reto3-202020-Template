@@ -69,7 +69,6 @@ def printMenu():
 Menu principal
 """
 
-
 """
 Funciones de Printeo
 """
@@ -97,7 +96,19 @@ Funciones de Printeo
 """
 
 
-cont = {}
+def inicializar():
+    print("\nInicializando....")
+    C1 = input("inserte 1 para BST y 2 para RBT")
+    # cont es el controlador que se usará de acá en adelante
+    cont_i = controller.init(C1)
+    return cont_i
+
+
+cont = inicializar()
+dateIndex = cont.get('dateIndex')
+timeIndex = cont.get('timeIndex')
+zoneIndex = cont.get("ZoneIndexLatLng")
+cargo = False
 
 while True:
 
@@ -105,10 +116,9 @@ while True:
     inputs = input('Seleccione una opción para continuar\n>')
 
     if inputs[0] == "w":
-        print("\nInicializando....")
-        C1 = input("inserte 1 para BST y 2 para RBT")
-        # cont es el controlador que se usará de acá en adelante
-        cont = controller.init(C1)
+        del cont
+        cont = inicializar()
+        cargo = False
 
     elif inputs[0] == "q":
         list_files = []
@@ -118,94 +128,149 @@ while True:
         t1 = perf_counter()
         for nm in C2.split(','):
             list_files.append(dict_files[nm])
-
         controller.loadData(cont, list_files)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
-        print('Cantidad de fechas restrigadas: ', controller.sizeOmap(cont['dateIndex']))
-        print('altura del dateIndex: ', controller.heightOmap(cont["dateIndex"]))
-        print('Cantidad de Horas registradas: ', controller.sizeOmap(cont['timeIndex']))
-        print('altura del TimeIndex: ', controller.heightOmap(cont["timeIndex"]))
-        print('Cantidad de cordenadas registradas: ', cont["ZoneIndexLatLng"]['num_zones'])
-        print('altura del IndexLat: ', controller.heightOmap(cont["ZoneIndexLatLng"]['DoubleMap']))
+        cargo = True
+        print('Cantidad de fechas restrigadas: ', controller.sizeOmap(dateIndex))
+        print('altura del dateIndex: ', controller.heightOmap(dateIndex))
+        print('Cantidad de Horas registradas: ', controller.sizeOmap(timeIndex))
+        print('altura del TimeIndex: ', controller.heightOmap(timeIndex))
+        print('Cantidad de cordenadas registradas: ', zoneIndex['num_zones'])
+        print('altura del primer Omap Latitude: ', controller.heightOmap(zoneIndex['DoubleMap']))
 
     elif int(inputs[0]) == 1:
-        fecha = input("Ingrese la fecha a consultar\n")
-        t1 = perf_counter()
-        print("\nBuscando accidentes para la fecha: ", fecha)
-        dateEntry = controller.requirement1(cont, fecha)
-        pairs1 = [('accidentes', 'value')]
-        print('|| Accidentes por severidad ||\n')
-        PrintListEntry(dateEntry['list'], pairs1)
-        print('total de accidentes', dateEntry['total'])
-        t2 = perf_counter()
-        print("tiempo de carga:", t2 - t1)
+        if not cargo:
+            print('necesita cargar los datos')
+            continue
+        elif controller.sizeOmap(dateIndex) == 0:
+            print('no se ha cargado el dateIndex')
+            continue
+        else:
+            fecha = input("Ingrese la fecha a consultar\n")
+            t1 = perf_counter()
+            print('...')
+            dateEntry = controller.requirement1(dateIndex, fecha)
+            if dateEntry is None:
+                print('No se encontro la fecha')
+                continue
+            pairs1 = [('accidentes', 'value')]
+            print('para la fecha', fecha, '\n')
+            print('|| Accidentes por severidad ||')
+            PrintListEntry(dateEntry['list'], pairs1)
+            print('total de accidentes', dateEntry['total'])
+            print('')
+            t2 = perf_counter()
+            print("tiempo de carga:", t2 - t1)
 
     elif int(inputs[0]) == 2:
-        fecha = input("Ingrese la fecha posterior a la busqueda: \n")
-        t1 = perf_counter()
-        print("\nBuscando accidentes antes de la fecha: ", fecha)
-        w = controller.requirement2(cont, fecha)
-        print('|| fecha con mas accidentes antes de la fecha ingresada ||\n')
-        reference2 = ['fecha con mas accidentes', 'numero maximo de accidentes', 'total accidentes']
-        PrintMaxEntry(w, reference2)
-        t2 = perf_counter()
-        print("tiempo de carga:", t2 - t1)
+        if not cargo:
+            print('necesita cargar los datos')
+            continue
+        elif controller.sizeOmap(dateIndex) == 0:
+            print('no se ha cargado el dateIndex')
+            continue
+        else:
+            fecha = input("Ingrese la fecha posterior a la busqueda: \n")
+            t1 = perf_counter()
+            print('...')
+            maxSeverity = controller.requirement2(dateIndex, fecha)
+            print('para antes de la fecha: ', fecha, '\n')
+            print('|| fecha con mas accidentes ||')
+            reference2 = ['fecha', 'numero de accidentes', 'total accidentes']
+            PrintMaxEntry(maxSeverity, reference2)
+            print('')
+            t2 = perf_counter()
+            print("tiempo de carga:", t2 - t1)
 
     elif int(inputs[0]) == 3:
-        print("\nBuscando accidentes en un rango de fechas: \n")
-        fecha1 = input("fecha 1")
-        fecha2 = input('fecha 2')
-        t1 = perf_counter()
-        w = controller.requirement3(cont, fecha1, fecha2)
-        print('|| Severidad mas frecuente antes de la fecha ||\n')
-        reference2 = ['Severidad mas comun', 'numero maximo de accidentes', 'total accidentes']
-        PrintMaxEntry(w, reference2)
-        t2 = perf_counter()
-        print("tiempo de carga:", t2 - t1)
+        if not cargo:
+            print('necesita cargar los datos')
+            continue
+        elif controller.sizeOmap(dateIndex) == 0:
+            print('no se ha cargado el dateIndex')
+            continue
+        else:
+            fecha1 = input('fecha 1\n')
+            fecha2 = input('fecha 2\n')
+            t1 = perf_counter()
+            print('...')
+            maxSeverity = controller.requirement3(dateIndex, fecha1, fecha2)
+            print('para el rango de fechas: ', fecha1, 'a', fecha2, '\n')
+            print('|| Severidad mas frecuente ||')
+            reference2 = ['Severidad', 'numero de accidentes', 'total accidentes']
+            PrintMaxEntry(maxSeverity, reference2)
+            t2 = perf_counter()
+            print('')
+            print("tiempo de carga:", t2 - t1)
 
     elif int(inputs[0]) == 4:
-        fecha1 = input("fecha1")
-        fecha2 = input('fecha2')
-        t1 = perf_counter()
-        print("\nBuscando accidentes en un rango de fechas: \n")
-        w = controller.requirement4(cont, fecha1, fecha2)
-        print('para el rango de fechas: ', fecha1, 'a', fecha2)
-        reference2_1 = ['Estado', 'accidentes']
-        reference2_2 = ['Fecha', 'accidentes']
-        print('|| Estado con mas accidentes en el rango de fechas ||')
-        PrintMaxEntry(w['mState'], reference2_1)
-        print('|| Fecha con mas accidentes en el rango de fechas ||')
-        PrintMaxEntry(w['mKey'], reference2_2)
-        t2 = perf_counter()
-        print("tiempo de carga:", t2 - t1)
+        if not cargo:
+            print('necesita cargar los datos')
+            continue
+        elif controller.sizeOmap(dateIndex) == 0:
+            print('no se ha cargado el dateIndex')
+            continue
+        else:
+            fecha1 = input("fecha1")
+            fecha2 = input('fecha2')
+            t1 = perf_counter()
+            print('...')
+            maxStateAndDate = controller.requirement4(dateIndex, fecha1, fecha2)
+            print('para el rango de fechas: ', fecha1, 'a', fecha2, '\n')
+            reference2_1 = ['Estado', 'accidentes']
+            reference2_2 = ['Fecha', 'accidentes']
+            print('|| Estado con mas accidentes ||')
+            PrintMaxEntry(maxStateAndDate['mState'], reference2_1)
+            print('|| Fecha con mas accidentes ||')
+            PrintMaxEntry(maxStateAndDate['mKey'], reference2_2)
+            print('')
+            t2 = perf_counter()
+            print("tiempo de carga:", t2 - t1)
 
     elif int(inputs[0]) == 5:
-        hora1 = input("time1: ")
-        hora2 = input('time2: ')
-        t1 = perf_counter()
-        print("\nBuscando crimenes en un rango de horas: \n")
-        SeverityEntry = controller.requirement5(cont, hora1, hora2)
-        pairs5 = [('accidentes', 'value'), ('porcentaje', 'percent')]
-        print('|| Accidentes por severidad ||\n')
-        PrintListEntry(SeverityEntry['list'], pairs5)
-        print('total de accidentes', SeverityEntry['total'])
-        t2 = perf_counter()
-        print("tiempo de carga:", t2 - t1)
+        if not cargo:
+            print('necesita cargar los datos')
+            continue
+        elif controller.sizeOmap(timeIndex) == 0:
+            print('no se ha cargado el timeIndex')
+            continue
+        else:
+            hora1 = controller.proxyTime(input("time1: "))
+            hora2 = controller.proxyTime(input('time2: '))
+            pairs5 = [('accidentes', 'value'), ('porcentaje', 'percent')]
+            t1 = perf_counter()
+            print('...')
+            SeverityEntry = controller.requirement5(timeIndex, hora1, hora2)
+            print('para el rango de horas: ', hora1, 'a', hora2, '\n')
+            print('|| Accidentes por severidad ||')
+            PrintListEntry(SeverityEntry['list'], pairs5)
+            print('total de accidentes', SeverityEntry['total'])
+            t2 = perf_counter()
+            print('')
+            print("tiempo de carga:", t2 - t1)
 
     elif int(inputs[0]) == 6:
-        lat = input("latitud: ")
-        lng = input('longitud: ')
-        distancia = input('distancia: ')
-        pairs6 = [('accidentes', 'value')]
-        t1 = perf_counter()
-        print("\nBuscando accidentes en la zona ingresada: ")
-        weekdayEntry = controller.requirement6(cont, lat, lng, distancia)
-        print('|| Accidentes por dia de la semana||\n')
-        PrintListEntry(weekdayEntry['list'], pairs6)
-        print('total de accidentes :', weekdayEntry['total'])
-        t2 = perf_counter()
-        print("tiempo de carga:", t2 - t1)
-
+        if not cargo:
+            print('necesita cargar los datos')
+            continue
+        elif controller.sizeOmap(zoneIndex['DoubleMap']) == 0:
+            print('no se ha cargado el zoneIndex')
+            continue
+        else:
+            lat = input("latitud: ")
+            lng = input('longitud: ')
+            distancia = input('distancia: ')
+            pairs6 = [('accidentes', 'value')]
+            t1 = perf_counter()
+            print("\nBuscando accidentes en la zona ingresada: \n")
+            weekdayEntry = controller.requirement6(zoneIndex['DoubleMap'], lat, lng, distancia)
+            print('|| Accidentes por dia de la semana||')
+            PrintListEntry(weekdayEntry['list'], pairs6)
+            print('total de accidentes :', weekdayEntry['total'])
+            t2 = perf_counter()
+            print('')
+            print("tiempo de carga:", t2 - t1)
     else:
         break
+    input('presione cualquier tecla para continuar')
