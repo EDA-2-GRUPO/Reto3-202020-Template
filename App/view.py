@@ -25,7 +25,6 @@ from DISClib.ADT.list import size as lts
 from App import controller
 from time import perf_counter
 from DISClib.DataStructures import listiterator as it
-from DISClib.DataStructures import orderedmapstructure as om
 
 assert config
 
@@ -56,24 +55,14 @@ def printMenu():
     print("Bienvenido")
     print("w- Inicializar Analizador")
     print("q- Cargar información de accidentes")
-    print("1- Requerimiento 1")
-    print("2- Requerimiento 2")
-    print("3- Requerimiento 3")
-    print("4- Requerimiento 4")
-    print("5- Requerimiento 5")
-    print("6- Requerimiento 6")
+    print("1- accidentes en una fecha")
+    print("2- accidentes anteriores a una fecha")
+    print("3- accidentes en un rango de fechas, por severidad")
+    print("4- el estado con mas accidentes (en rango de fechas)")
+    print("5- accidentes por rango de horas")
+    print("6- zona geográfica mas accidentada")
     print("0- Salir")
     print("*******************************************")
-
-
-def Print1(g, pairs):
-    iterator = it.newIterator(g)
-    for _ in range(lts(g)):
-        el = it.next(iterator)
-        text = ""
-        for pair in pairs:
-            text += pair[0] + " : " + str(el[pair[1]]) + "  "
-        print(text)
 
 
 """
@@ -81,11 +70,31 @@ Menu principal
 """
 
 
-def Print2(entry, reference):
+"""
+Funciones de Printeo
+"""
+
+
+def PrintListEntry(g, pairs):
+    iterator = it.newIterator(g)
+    for _ in range(lts(g)):
+        el = it.next(iterator)
+        text = '[ ' + str(el['key']) + ' ]   '
+        for pair in pairs:
+            text += pair[0] + " : " + str(el[pair[1]]) + "  "
+        print(text)
+
+
+def PrintMaxEntry(entry, reference):
     i = 0
     for v in entry.values():
-        print(reference[i], ':', str(v))
+        print(reference[i], ':', v)
         i += 1
+
+
+"""
+Funciones de Printeo
+"""
 
 
 cont = {}
@@ -113,16 +122,21 @@ while True:
         controller.loadData(cont, list_files)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
-        print(om.height(cont["dateIndex"]))
-        print(om.size(cont["dateIndex"]))
+        print('Cantidad de fechas restrigadas: ', controller.sizeOmap(cont['dateIndex']))
+        print('altura del dateIndex: ', controller.heightOmap(cont["dateIndex"]))
+        print('Cantidad de Horas registradas: ', controller.sizeOmap(cont['timeIndex']))
+        print('altura del TimeIndex: ', controller.heightOmap(cont["timeIndex"]))
+        print('Cantidad de cordenadas registradas: ', cont["ZoneIndexLatLng"]['num_zones'])
+        print('altura del IndexLat: ', controller.heightOmap(cont["ZoneIndexLatLng"]['DoubleMap']))
 
     elif int(inputs[0]) == 1:
         fecha = input("Ingrese la fecha a consultar\n")
         t1 = perf_counter()
-        print("\nBuscando accidentes para la fecha: ", )
+        print("\nBuscando accidentes para la fecha: ", fecha)
         dateEntry = controller.requirement1(cont, fecha)
-        pairs1 = [('Severity', 'key'), ('accidentes', 'value')]
-        Print1(dateEntry['list'], pairs1)
+        pairs1 = [('accidentes', 'value')]
+        print('|| Accidentes por severidad ||\n')
+        PrintListEntry(dateEntry['list'], pairs1)
         print('total de accidentes', dateEntry['total'])
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
@@ -132,8 +146,9 @@ while True:
         t1 = perf_counter()
         print("\nBuscando accidentes antes de la fecha: ", fecha)
         w = controller.requirement2(cont, fecha)
+        print('|| fecha con mas accidentes antes de la fecha ingresada ||\n')
         reference2 = ['fecha con mas accidentes', 'numero maximo de accidentes', 'total accidentes']
-        Print2(w, reference2)
+        PrintMaxEntry(w, reference2)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
 
@@ -143,8 +158,9 @@ while True:
         fecha2 = input('fecha 2')
         t1 = perf_counter()
         w = controller.requirement3(cont, fecha1, fecha2)
-        reference2 = ['tipo mas comun', 'numero maximo de accidentes', 'total accidentes']
-        Print2(w, reference2)
+        print('|| Severidad mas frecuente antes de la fecha ||\n')
+        reference2 = ['Severidad mas comun', 'numero maximo de accidentes', 'total accidentes']
+        PrintMaxEntry(w, reference2)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
 
@@ -155,9 +171,12 @@ while True:
         print("\nBuscando accidentes en un rango de fechas: \n")
         w = controller.requirement4(cont, fecha1, fecha2)
         print('para el rango de fechas: ', fecha1, 'a', fecha2)
-        reference2 = ['Estado con mas accidentes', 'numero maximo de accidentes', 'total accidentes']
-        Print2(w, reference2)
-        # Printlistafinal(w)
+        reference2_1 = ['Estado', 'accidentes']
+        reference2_2 = ['Fecha', 'accidentes']
+        print('|| Estado con mas accidentes en el rango de fechas ||')
+        PrintMaxEntry(w['mState'], reference2_1)
+        print('|| Fecha con mas accidentes en el rango de fechas ||')
+        PrintMaxEntry(w['mKey'], reference2_2)
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
 
@@ -167,8 +186,9 @@ while True:
         t1 = perf_counter()
         print("\nBuscando crimenes en un rango de horas: \n")
         SeverityEntry = controller.requirement5(cont, hora1, hora2)
-        pairs5 = [('Severity', 'key'), ('accidentes', 'value'), ('porcentaje', 'percent')]
-        Print1(SeverityEntry['list'], pairs5)
+        pairs5 = [('accidentes', 'value'), ('porcentaje', 'percent')]
+        print('|| Accidentes por severidad ||\n')
+        PrintListEntry(SeverityEntry['list'], pairs5)
         print('total de accidentes', SeverityEntry['total'])
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
@@ -177,12 +197,13 @@ while True:
         lat = input("latitud: ")
         lng = input('longitud: ')
         distancia = input('distancia: ')
-        pairs6 = [('Weekday', 'key'), ('accidentes', 'value')]
+        pairs6 = [('accidentes', 'value')]
         t1 = perf_counter()
         print("\nBuscando accidentes en la zona ingresada: ")
-        SeverityEntry = controller.requirement6(cont, lat, lng, distancia)
-        Print1(SeverityEntry['list'], pairs6)
-        print('total de accidentes :', SeverityEntry['total'])
+        weekdayEntry = controller.requirement6(cont, lat, lng, distancia)
+        print('|| Accidentes por dia de la semana||\n')
+        PrintListEntry(weekdayEntry['list'], pairs6)
+        print('total de accidentes :', weekdayEntry['total'])
         t2 = perf_counter()
         print("tiempo de carga:", t2 - t1)
 

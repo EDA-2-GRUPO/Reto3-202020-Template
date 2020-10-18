@@ -65,6 +65,7 @@ def loadData(analyzer, list_files):
             count += 1
             if not count % 10000:
                 print(count, 'cargados')
+            del accident
         del input_file
         count_t += count
         print(file, 'cargado', count, 'datos cargados')
@@ -109,3 +110,11 @@ def requirement6(cont, lat, longi, distance):
     longi = float(longi)
     distance = float(distance)
     return model.requirement6(cont, lat, longi, distance)
+
+
+def heightOmap(omap):
+    return model.heightOmap(omap)
+
+
+def sizeOmap(omap):
+    return model.sizeOmap(omap)

@@ -59,25 +59,21 @@ def newAnalyzer(tipo):
     analyzer = {'numAccidents': 0,
                 'dateIndex': om.newMap(omaptype=tipo, comparefunction=compareOmpLst),
                 'timeIndex': om.newMap(omaptype=tipo, comparefunction=compareOmpLst),
-                'ZoneIndexLatLng': om.newMap(omaptype=tipo, comparefunction=compareOmpLst)
+                'ZoneIndexLatLng': {'DoubleMap': om.newMap(omaptype=tipo, comparefunction=compareOmpLst),
+                                    'num_zones': 0}
                 }
 
     return analyzer
 
 
 def addAccident(analyzer, accident):
-    analyzer['numAccidents'] += 1
     SevKey = int(accident['Severity'])
-    stateKey = accident['State']
-    """Latitude = float(accident['Start_Lat'])
-    Longitude = float(accident['Start_Lng'])"""
     occurredTf = datetime.datetime.strptime(accident['Start_Time'], '%Y-%m-%d %H:%M:%S')
-    occurredDate = occurredTf.date()
-    """weekday = occurredDate.weekday()
-    occurredTime = HoursAndMinutes(occurredTf.time())"""
-    updateDateIndex(analyzer['dateIndex'], occurredDate, SevKey, stateKey)
-    """updateTimeIndex(analyzer['timeIndex'], occurredTime, SevKey)
-    updateLatitudeIndex(analyzer['ZoneIndexLatLng'], Latitude, Longitude, weekday)"""
+    analyzer['numAccidents'] += 1
+    updateDateIndex(analyzer['dateIndex'], occurredTf.date(), SevKey, accident['State'])
+    updateTimeIndex(analyzer['timeIndex'], HoursAndMinutes(occurredTf.time()), SevKey)
+    updateLatitudeIndex(analyzer['ZoneIndexLatLng'], float(accident['Start_Lat']), float(accident['Start_Lng']),
+                        occurredTf.weekday())
     return analyzer
 
 
@@ -128,11 +124,11 @@ def updateTimeIndex(omap, occurredTime, SevKey):
     return omap
 
 
-def updateLatitudeIndex(DoubleOmp, Latitude, Longitude, weekday):
+def updateLatitudeIndex(LatLng, Latitude, Longitude, weekday):
     """
 
     Args:
-        DoubleOmp:
+        LatLng: entry con un map y un conyteo de cordenadas
         Latitude: cordenada Latitud
         Longitude: cordenada Longitud
         weekday: dia del la semana representado del 1 al 7
@@ -140,40 +136,28 @@ def updateLatitudeIndex(DoubleOmp, Latitude, Longitude, weekday):
     Returns:
 
     """
-    entry = om.get(DoubleOmp, Latitude)
+    DoubleOmp = LatLng['DoubleMap']
+    entryLt = om.get(DoubleOmp, Latitude)
 
-    if entry:
-        LtEntry = me.getValue(entry)
+    if entryLt:
+        LtEntry = me.getValue(entryLt)
     else:
         LtEntry = om.newMap(DoubleOmp['type'], compareOmpLst)
         om.put(DoubleOmp, Latitude, LtEntry)
 
-    updateLongitudeIndex(LtEntry, Longitude, weekday)
-    return DoubleOmp
+    entryLng = om.get(LtEntry, Longitude)
 
-
-def updateLongitudeIndex(LtEntry, Longitude, weekday):
-    """
-
-    Args:
-        LtEntry:
-        Longitude: cordenada Longitud
-        weekday: dia del la semana representado del 1 al 7
-
-    Returns:
-
-    """
-    entry = om.get(LtEntry, Longitude)
-
-    if entry:
-        LngEntry = me.getValue(entry)
+    if entryLng:
+        LngEntry = me.getValue(entryLng)
 
     else:
         LngEntry = newZoneEntry()
         om.put(LtEntry, Longitude, LngEntry)
+        LatLng['num_zones'] += 1
 
     addZoneIndex(LngEntry, weekday)
-    return LtEntry
+
+    return DoubleOmp
 
 
 def addZoneIndex(zoneEntry, weekday):
@@ -317,16 +301,25 @@ def requirement2(cont, date):
 def requirement3(cont, date1, date2):
     severityFrequency = Nom.operationRange(cont['dateIndex'], date1, date2, frequencyInMapForOmp('SeverityIndex'),
                                            mp.newMap(3, maptype='PROBING', comparefunction=compareMp))
-    mostFrequent = Nmp.operationSet(severityFrequency, TotalAndFrequentMp, {'maxKey': None, 'maxValue': -1, 'total': 0})
+    mostFrequentSeverity = Nmp.operationSet(severityFrequency, TotalAndFrequentMp, {'maxKey': None, 'maxValue': -1,
+                                                                                    'total': 0})
 
-    return mostFrequent
+    return mostFrequentSeverity
 
 
 def requirement4(cont, date1, date2):
-    stateFrequency = Nom.operationRange(cont['dateIndex'], date1, date2, frequencyInMapForOmp('StateIndex'),
-                                        mp.newMap(40, maptype='PROBING', comparefunction=compareMp))
-    mostFrequent = Nmp.operationSet(stateFrequency, TotalAndFrequentMp, {'maxKey': None, 'maxValue': -1, 'total': 0})
-    return mostFrequent
+    re_format = {'KeyFrequent': {'maxKey': None, 'maxValue': -1},
+                 'map': mp.newMap(40, maptype='PROBING', comparefunction=compareMp)}
+
+    stateFrequencyAndMfKey = Nom.operationRange(cont['dateIndex'], date1, date2,
+                                                mixFrequencyInMapAndFrequent('StateIndex'),
+                                                re_format)
+
+    mostFrequentState = Nmp.operationSet(stateFrequencyAndMfKey['map'], FrequentMp, {'maxKey': None, 'maxValue': -1})
+
+    mfState_mfKey = {'mKey': re_format['KeyFrequent'], 'mState': mostFrequentState}
+
+    return mfState_mfKey
 
 
 def requirement5(cont, date1, date2):
@@ -335,18 +328,20 @@ def requirement5(cont, date1, date2):
                                            mp.newMap(3, maptype='PROBING', comparefunction=compareMp))
     SeverityListAndTotal = Nmp.operationSet(severityFrequency, makeListAndTotalMp,
                                             {'list': lt.newList('ARRAY_LIST'), 'total': 0})
+
     insertionSort(SeverityListAndTotal['list'], orderByKey)
     AddPercents(SeverityListAndTotal)
     return SeverityListAndTotal
 
 
 def requirement6(cont, Lat, Lng, dist):
-    weekdayFrequency = Nom.operationRange(cont['ZoneIndexLatLng'], Lat - dist, Lat + dist,
+    weekdayFrequency = Nom.operationRange(cont['ZoneIndexLatLng']['DoubleMap'], Lat - dist, Lat + dist,
                                           sndCircleRangeDobOmap(Lat, Lng, dist, frequencyInMapForOmp('weekdayIndex')),
                                           mp.newMap(7, maptype='CHAINING', comparefunction=compareMp))
 
     weekdayListAndTotal = Nmp.operationSet(weekdayFrequency, makeListAndTotalMp,
                                            {'list': lt.newList('ARRAY_LIST'), 'total': 0})
+
     insertionSort(weekdayListAndTotal['list'], orderByKey)
     weekdayFromIntToStr(weekdayListAndTotal['list'])
     return weekdayListAndTotal
@@ -355,6 +350,12 @@ def requirement6(cont, Lat, Lng, dist):
 # ==============================
 # Funciones auxiliares
 # ==============================
+def sizeOmap(omap):
+    return om.size(omap)
+
+
+def heightOmap(omap):
+    return om.height(omap)
 
 
 def HoursAndMinutes(time):
@@ -364,26 +365,24 @@ def HoursAndMinutes(time):
 def AddPercents(ListAndTotal):
     sList = ListAndTotal['list']
     iterator = it.newIterator(sList)
-    total = ListAndTotal['total']
     for _ in range(lt.size(sList)):
         el = it.next(iterator)
-        el['percent'] = round(el['value'] / total * 100, 2)
+        el['percent'] = round(el['value'] / ListAndTotal['total'] * 100, 2)
 
 
 def proxyTime(o_time):
     hour = o_time.hour
     minute = o_time.minute
 
-    if hour < 24:
-        if minute < 15:
-            minute = 0
-        elif minute <= 30:
-            minute = 30
-        elif hour == 23:
-            minute = 59
-        else:
-            minute = 0
-            hour += 1
+    if minute < 15:
+        minute = 0
+    elif minute <= 30:
+        minute = 30
+    elif hour == 23:
+        minute = 59
+    else:
+        minute = 0
+        hour += 1
 
     new_time = datetime.time(hour, minute)
     return new_time
@@ -398,35 +397,49 @@ def weekdayFromIntToStr(weekdayList):
     return weekdayList
 
 
+def mostFrequent(num_accidents, returnEntry, root_entry):
+    if num_accidents > returnEntry['maxValue']:
+        returnEntry['maxKey'] = root_entry['key']
+        returnEntry['maxValue'] = num_accidents
+
+
 # ===================================
 # Funciones auxiliares para Order Map
-# ===================================
+# ===================================**
+
+def FrequentOmp(root, returnEntry):
+    num_accidents = root['value']['numAccidents']
+    mostFrequent(num_accidents, returnEntry, root)
+    return returnEntry
+
+
+def TotalAndFrequentOmp(root, returnEntry):
+    num_accidents = root['value']['numAccidents']
+    mostFrequent(num_accidents, returnEntry, root)
+    returnEntry['total'] += num_accidents
+    return returnEntry
 
 
 def frequencyInMapForOmp(mapIndex):
     def resultFunc(dateRoot, returnEntry):
-        dateEntry = dateRoot['value']
-        acMap = dateEntry[mapIndex]
+        acMap = dateRoot['value'][mapIndex]
         Nmp.operationSet(acMap, frequencyInMap, returnEntry)
+        return returnEntry
+    return resultFunc
+
+
+def mixFrequencyInMapAndFrequent(mapIndex):
+    def resultFunc(root, returnEntry):
+        frequencyInMapForOmp(mapIndex)(root, returnEntry['map'])
+        FrequentOmp(root, returnEntry['KeyFrequent'])
         return returnEntry
 
     return resultFunc
 
 
-def TotalAndFrequentOmp(root, returnEntry):
-    num_accidents = root['value']['numAccidents']
-
-    if num_accidents > returnEntry['maxValue']:
-        returnEntry['maxKey'] = root['key']
-        returnEntry['maxValue'] = num_accidents
-
-    returnEntry['total'] += num_accidents
-    return returnEntry
-
-
 def sndCircleRangeDobOmap(x, y, distance, secondOperation):
     def resultFunction(root, entry):
-        move = mt.sqrt(distance**2 - (root['key']-x)**2)
+        move = mt.sqrt(distance ** 2 - (root['key'] - x) ** 2)
         Nom.operationRange(root['value'], y - move, y + move, secondOperation, entry)
 
     return resultFunction
@@ -435,6 +448,7 @@ def sndCircleRangeDobOmap(x, y, distance, secondOperation):
 # ===================================
 # Funciones auxiliares para Map
 # ===================================
+
 def makeListMp(entry, ListEntry):
     lt.addLast(ListEntry, entry)
     return ListEntry
@@ -447,30 +461,41 @@ def makeListAndTotalMp(entry, returnEntry):
 
 
 def frequencyInMap(entry, returnEntry):
+    """
+
+    Args:
+        entry: un ll
+        returnEntry: un Map
+
+    Returns:
+
+    """
     key = entry['key']
     num_acc = entry['value']
-    Ek = mp.get(returnEntry, key)
-    if Ek:
-        Ek['value'] += num_acc
-    else:
+    try:
+        mp.get(returnEntry, key)['value'] += num_acc
+    except TypeError:
         mp.put(returnEntry, key, num_acc)
 
     return returnEntry
 
 
+def FrequentMp(entry, returnEntry):
+    acn = entry['value']
+    mostFrequent(acn, returnEntry, entry)
+
+
 def TotalAndFrequentMp(entry, returnEntry):
     acn = entry['value']
-    if acn > returnEntry['maxValue']:
-        returnEntry['maxValue'] = acn
-        returnEntry['maxKey'] = entry['key']
+    mostFrequent(acn, returnEntry, entry)
     returnEntry['total'] += acn
-
     return returnEntry
 
 
 # ==============================
 # Funciones de Comparacion
 # ==============================
+
 def orderByKey(el1, el2):
     if el1['key'] > el2['key']:
         return 0

@@ -1,8 +1,5 @@
 import config
 from DISClib.Utils import error as error
-from DISClib.ADT import list as lt
-
-# from DISClib.DataStructures.rbt import keySetTree
 assert config
 
 """
@@ -90,8 +87,8 @@ def operationBefore(omap, key_bef, operation, entry={}):
 def operationSetTree(root, operation, entry):
     try:
         if root is not None:
-            operation(root, entry)
             operationSetTree(root['left'], operation, entry)
+            operation(root, entry)
             operationSetTree(root['right'], operation, entry)
         return entry
     except Exception as exp:
@@ -103,10 +100,10 @@ def operationRangeTree(root, keylo, keyhi, operation, entry, cmpfunction):
         if root is not None:
             complo = cmpfunction(keylo, root['key'])
             comphi = cmpfunction(keyhi, root['key'])
-            if (complo <= 0) and (comphi >= 0):
-                operation(root, entry)
             if complo < 0:
                 operationRangeTree(root['left'], keylo, keyhi, operation, entry, cmpfunction)
+            if (complo <= 0) and (comphi >= 0):
+                operation(root, entry)
             if comphi > 0:
                 operationRangeTree(root['right'], keylo, keyhi, operation, entry, cmpfunction)
         return entry
@@ -122,8 +119,8 @@ def operationBeforeTree(root, key, operation, entry, comparefunction):
         if cmp < 0:
             return operationBeforeTree(root['left'], key, operation, entry, comparefunction)
         elif cmp > 0:
-            operation(root, entry)
             operationSetTree(root['left'], operation, entry)
+            operation(root, entry)
             operationBeforeTree(root['right'], key, operation, entry, comparefunction)
             return entry
         else:
