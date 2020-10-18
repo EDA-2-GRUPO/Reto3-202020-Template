@@ -59,8 +59,7 @@ def newAnalyzer(tipo):
     analyzer = {'numAccidents': 0,
                 'dateIndex': om.newMap(omaptype=tipo, comparefunction=compareOmpLst),
                 'timeIndex': om.newMap(omaptype=tipo, comparefunction=compareOmpLst),
-                'ZoneIndexLatLng': {'DoubleMap': om.newMap(omaptype=tipo, comparefunction=compareOmpLst),
-                                    'num_zones': 0}
+                'ZoneIndexLatLng': om.newMap(omaptype=tipo, comparefunction=compareOmpLst)
                 }
 
     return analyzer
@@ -72,7 +71,7 @@ def addAccident(analyzer, accident):
     analyzer['numAccidents'] += 1
     updateDateIndex(analyzer['dateIndex'], occurredTf.date(), SevKey, accident['State'])
     updateTimeIndex(analyzer['timeIndex'], HoursAndMinutes(occurredTf.time()), SevKey)
-    updateLatitudeIndex(analyzer['ZoneIndexLatLng'], float(accident['Start_Lat']), float(accident['Start_Lng']),
+    updateZoneIndex(analyzer['ZoneIndexLatLng'], float(accident['Start_Lat']), float(accident['Start_Lng']),
                         occurredTf.weekday())
     return analyzer
 
@@ -124,7 +123,7 @@ def updateTimeIndex(omap, occurredTime, SevKey):
     return omap
 
 
-def updateLatitudeIndex(LatLng, Latitude, Longitude, weekday):
+def updateZoneIndex(LatLng, Latitude, Longitude, weekday):
     """
 
     Args:
@@ -433,7 +432,6 @@ def mixFrequencyInMapAndFrequent(mapIndex):
         frequencyInMapForOmp(mapIndex)(root, returnEntry['map'])
         FrequentOmp(root, returnEntry['KeyFrequent'])
         return returnEntry
-
     return resultFunc
 
 
