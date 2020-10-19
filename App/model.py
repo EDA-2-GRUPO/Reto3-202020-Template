@@ -58,8 +58,10 @@ def newAnalyzer():
 
 def addAccident(analyzer, date):
     updateDateIndex(analyzer['dateIndex'], date)
+    updateCountry(analyzer['pais'], date)
     return analyzer
 
+    
 
 def updateDateIndex(map, date):
     """
@@ -81,8 +83,6 @@ def updateDateIndex(map, date):
 
     addDateIndex(datentry, date)
     return map
-
-
 def addDateIndex(datentry, accident):
     """
     Actualiza un indice de tipo de crimenes.  Este indice tiene una lista
@@ -90,33 +90,41 @@ def addDateIndex(datentry, accident):
     el valor es una lista con los crimenes de dicho tipo en la fecha que
     se está consultando (dada por el nodo del arbol)
     """
-    lst = datentry['lstaccidentes']
-    lt.addLast(lst, accident)
+    lst = int(datentry['lstaccidentes'])
+    datentry['lstaccidentes']=lst+1
 
     SeverityIndex = datentry['SeverityIndex']
     SevKey = accident['Severity']
-    SeverityEntry = m.get(SeverityIndex, SevKey)
-    if SeverityEntry is None:
-        entry = lt.newList('SINGLELINKED', compareOffenses)
-        m.put(SeverityIndex, SevKey, entry)
-    else:
-        entry = me.getValue(SeverityEntry)
+    updatemap(SeverityIndex,SevKey)
 
-    lt.addLast(entry, accident)
+    Contry=datentry['Country']
+    contKey = accident['Country']
+    updatemap(Contry,contKey)
+    def updatemap(mapa, llave):
+        esta=m.get(mapa, llave)
+        if esta is None:
+            entry = lt.newList('SINGLELINKED', compareOffenses)
+            lt.addLast(entry,0)
+            m.put(mapa, llave, entry)
+        else:
+            entry = me.getValue(esta)
+        ele_ante=lt.getElement(entry, 0)
+        lt.deleteElement(entry, 0)
+        lt.addLast(entry, ele_ante+1)
     return datentry
-
 
 def newDataEntry():
     """
     Crea una entrada en el indice por fechas, es decir en el arbol
     binario.
     """
-    entry = {'SeverityIndex': m.newMap(numelements=10,
+    entry = {'SeverityIndex': m.newMap(numelements=2,
                                        maptype='PROBING',
                                        comparefunction=compareOffenses),
-
-             'lstaccidentes': lt.newList('SINGLE_LINKED', compareDates)}
-
+             'lstaccidentes': 0,
+             'Country': m.newMap(numelements=10,
+                                       maptype='CHAINING',
+                                       comparefunction=compareOffenses)}
     return entry
 
 
@@ -163,7 +171,7 @@ def requerimient3(cont,lista):
     listakeys = lt.newList("ARRAY_LIST",compareIds)
     while lstit.hasNext(w):
         x = lstit.next(w)
-        listaa= lt.size(om.get(cont['dateIndex'], x)["value"]["lstaccidentes"])
+        listaa= om.get(cont['dateIndex'], x)["value"]["lstaccidentes"]
         ntotal+=listaa
         g = om.get(cont['dateIndex'], x)["value"]["SeverityIndex"]
         listallaves= mp.keySet(g)
