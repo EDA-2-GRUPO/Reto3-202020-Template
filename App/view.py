@@ -128,14 +128,14 @@ def main(cont):
     cargo = False
     while True:
         printMenu()
-        inputs = input('Seleccione una opción para continuar\n>')
-
-        if inputs[0] == "w":
+        inputs = input('Seleccione una opción para continuar\n>') + ' '
+        intp = inputs[0]
+        if  intp == "w":
             del cont
             cont = inicializar()
             cargo = False
 
-        elif inputs[0] == "q":
+        elif intp == "q":
             list_files = []
             print("\nCargando información de accidentes ....")
             print(' En formato 1,2,3,4')
@@ -150,7 +150,7 @@ def main(cont):
             infoPrints()
             del list_files, C2, t1, t2
 
-        elif int(inputs[0]) == 1:
+        elif intp == '1':
             if not validacion(cargo, dateIndex, 'dateIndex'):
                 continue
             else:
@@ -171,7 +171,7 @@ def main(cont):
                 print("tiempo de carga:", t2 - t1)
                 del dateEntry, fecha, t1, t2
 
-        elif int(inputs[0]) == 2:
+        elif intp == '2':
             if not validacion(cargo, dateIndex, 'dateIndex'):
                 continue
             else:
@@ -187,7 +187,7 @@ def main(cont):
                 print("tiempo de carga:", t2 - t1)
                 del fecha, maxSeverity, t1, t2
 
-        elif int(inputs[0]) == 3:
+        elif intp == '3':
             if not validacion(cargo, dateIndex, 'dateIndex'):
                 continue
             else:
@@ -204,7 +204,7 @@ def main(cont):
                 print("tiempo de carga:", t2 - t1)
                 del fecha1, fecha2, maxSeverity, t1, t2
 
-        elif int(inputs[0]) == 4:
+        elif intp == '4':
             if not validacion(cargo, dateIndex, 'dateIndex'):
                 continue
             else:
@@ -223,7 +223,7 @@ def main(cont):
                 print("tiempo de carga:", t2 - t1)
                 del fecha1, fecha2, maxStateAndDate, t1, t2
 
-        elif int(inputs[0]) == 5:
+        elif intp == '5':
             if not validacion(cargo, timeIndex, 'timeIndex'):
                 continue
             else:
@@ -241,8 +241,8 @@ def main(cont):
                 print("tiempo de carga:", t2 - t1)
                 del hora1, hora2, SeverityEntry, t1, t2
 
-        elif int(inputs[0]) == 6:
-            if not validacion(cargo, zoneIndex, 'zoneIndex'):
+        elif intp == '6':
+            if not validacion(cargo, zoneIndex['DoubleMap'], 'zoneIndex'):
                 continue
             else:
                 lat = input("latitud: ")
@@ -259,12 +259,12 @@ def main(cont):
                 print("tiempo de carga:", t2 - t1)
                 del lat, lng, distancia, weekdayEntry, t1, t2
 
-        elif int(inputs[0]) == 0:
-            print('opcion no valida')
-            continue
+        elif intp == '0':
+            break
 
         else:
-            break
+            print('opcion no valida')
+            continue
         input('presione cualquier tecla para continuar')
 
 

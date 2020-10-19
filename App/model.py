@@ -76,8 +76,8 @@ def addAccident(analyzer, accident):
     analyzer['numAccidents'] += 1
     updateDateOmap(analyzer['dateIndex'], occurredTf.date(), SevKey, accident['State'])
     updateTimeOmap(analyzer['timeIndex'], HoursAndMinutes(occurredTf.time()), SevKey)
-    updateZoneDoubleOmap(analyzer['ZoneIndexLatLng'], float(accident['Start_Lat']), float(accident['Start_Lng']),
-                         occurredTf.weekday())
+    # updateZoneDoubleOmap(analyzer['ZoneIndexLatLng'], float(accident['Start_Lat']), float(accident['Start_Lng']),
+    #                      occurredTf.weekday())
     return analyzer
 
 
