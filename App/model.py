@@ -58,7 +58,6 @@ def newAnalyzer():
 
 def addAccident(analyzer, date):
     updateDateIndex(analyzer['dateIndex'], date)
-    updateCountry(analyzer['pais'], date)
     return analyzer
 
     
@@ -90,16 +89,6 @@ def addDateIndex(datentry, accident):
     el valor es una lista con los crimenes de dicho tipo en la fecha que
     se está consultando (dada por el nodo del arbol)
     """
-    lst = int(datentry['lstaccidentes'])
-    datentry['lstaccidentes']=lst+1
-
-    SeverityIndex = datentry['SeverityIndex']
-    SevKey = accident['Severity']
-    updatemap(SeverityIndex,SevKey)
-
-    Contry=datentry['Country']
-    contKey = accident['Country']
-    updatemap(Contry,contKey)
     def updatemap(mapa, llave):
         esta=m.get(mapa, llave)
         if esta is None:
@@ -111,6 +100,17 @@ def addDateIndex(datentry, accident):
         ele_ante=lt.getElement(entry, 0)
         lt.deleteElement(entry, 0)
         lt.addLast(entry, ele_ante+1)
+    lst = int(datentry['lstaccidentes'])
+    datentry['lstaccidentes']=lst+1
+   
+    SeverityIndex = datentry['SeverityIndex']
+    SevKey = accident['Severity']
+    updatemap(SeverityIndex,SevKey)
+
+    Contry=datentry['Country']
+    contKey = accident['Country']
+    updatemap(Contry,contKey)
+    
     return datentry
 
 def newDataEntry():
@@ -200,6 +200,9 @@ def requerimient3(cont,lista):
     lt.addLast(listafinal, mayor)
     lt.addLast(listafinal, ntotal)
     return listafinal
+"""def rq4(cont,lista):
+
+def repaction():"""
 # ==============================
 # Funciones de Comparacion
 # ==============================
