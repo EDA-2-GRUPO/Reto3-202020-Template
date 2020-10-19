@@ -31,8 +31,8 @@ from DISClib.Algorithms.Sorting.insertionsort import insertionSort
 from DISClib.DataStructures import mapstructure as mp
 from DISClib.DataStructures import orderedmapstructure as om
 # Modulos propios de operaciones en Omap y map, para implementacion del curso
-from App import newOrderMetod as Nom
-from App import newMpMetod as Nmp
+from App import operationInOrderMap as Op_om
+from App import operationInMap as Op_mp
 
 assert config
 
@@ -65,6 +65,10 @@ def newAnalyzer(tipo):
 
     return analyzer
 
+# ===================================
+# Funciones para agregar informacion al catalogo
+# ===================================**
+
 
 def addAccident(analyzer, accident):
     SevKey = int(accident['Severity'])
@@ -92,7 +96,7 @@ def updateDateOmap(omap, occurredDate, SevKey, stateKey):
     entry = om.get(omap, occurredDate)
 
     if entry:
-        dateEntry = entry['value']  # lo correcto es me.get(entry), se usa para optimizar de aqui en adelante
+        dateEntry = entry['value']  # lo correcto es me.getValue(entry), se usa para optimizar de aqui en adelante
     else:
         dateEntry = {'SeverityIndex': MakeMapFormat(4), 'StateIndex': MakeMapFormat(40, 'CHAINING'),
                      'numAccidents': 0}
@@ -209,29 +213,29 @@ def requirement1(dateOmap, date):
     if not dateRoot:
         return None
     dateEntry = dateRoot['value']
-    ListEntry = Nmp.operationSet(dateEntry['SeverityIndex'], makeListMp, lt.newList('ARRAY_LIST'))
+    ListEntry = Op_mp.operationSet(dateEntry['SeverityIndex'], makeListMp, lt.newList('ARRAY_LIST'))
     insertionSort(ListEntry, orderByKey)
     return {'list': ListEntry, 'total': dateEntry['numAccidents']}
 
 
 def requirement2(dateOmap, date):
-    mostFrequentDate = Nom.operationBefore(dateOmap, date, TotalAndFrequentOmp, MakeMaxFormat(True))
+    mostFrequentDate = Op_om.operationBefore(dateOmap, date, TotalAndFrequentOmp, MakeMaxFormat(True))
     return mostFrequentDate
 
 
 def requirement3(dateOmap, date1, date2):
-    severityFrequency = Nom.operationRange(dateOmap, date1, date2, frequencyInMapForOmp('SeverityIndex'),
-                                           MakeMapFormat(3))
-    mostFrequentSeverity = Nmp.operationSet(severityFrequency, TotalAndFrequentMp, MakeMaxFormat(True))
+    severityFrequency = Op_om.operationRange(dateOmap, date1, date2, frequencyInMapForOmp('SeverityIndex'),
+                                             MakeMapFormat(3))
+    mostFrequentSeverity = Op_mp.operationSet(severityFrequency, TotalAndFrequentMp, MakeMaxFormat(True))
 
     return mostFrequentSeverity
 
 
 def requirement4(dateOmap, date1, date2):
-    stateFrequencyAndMfDate = Nom.operationRange(dateOmap, date1, date2, FrequencyInMapAndFrequentKey('StateIndex'),
-                                                 {'KeyFrequent': MakeMaxFormat(), 'map': MakeMapFormat(40)})
+    stateFrequencyAndMfDate = Op_om.operationRange(dateOmap, date1, date2, FrequencyInMapAndFrequentKey('StateIndex'),
+                                                   {'KeyFrequent': MakeMaxFormat(), 'map': MakeMapFormat(40)})
 
-    mostFrequentState = Nmp.operationSet(stateFrequencyAndMfDate['map'], FrequentMp, MakeMaxFormat(False))
+    mostFrequentState = Op_mp.operationSet(stateFrequencyAndMfDate['map'], FrequentMp, MakeMaxFormat(False))
 
     mfState_mfKey = {'mKey': stateFrequencyAndMfDate['KeyFrequent'], 'mState': mostFrequentState}
 
@@ -239,11 +243,11 @@ def requirement4(dateOmap, date1, date2):
 
 
 def requirement5(timeOmap, time1, time2):
-    severityFrequency = Nom.operationRange(timeOmap, time1, time2,
-                                           frequencyInMapForOmp('SeverityIndex'), MakeMapFormat(3))
+    severityFrequency = Op_om.operationRange(timeOmap, time1, time2,
+                                             frequencyInMapForOmp('SeverityIndex'), MakeMapFormat(3))
 
-    SeverityListAndTotal = Nmp.operationSet(severityFrequency, makeListAndTotalMp,
-                                            {'list': lt.newList('ARRAY_LIST'), 'total': 0})
+    SeverityListAndTotal = Op_mp.operationSet(severityFrequency, makeListAndTotalMp,
+                                              {'list': lt.newList('ARRAY_LIST'), 'total': 0})
 
     insertionSort(SeverityListAndTotal['list'], orderByKey)
     AddPercents(SeverityListAndTotal)
@@ -251,12 +255,12 @@ def requirement5(timeOmap, time1, time2):
 
 
 def requirement6(zoneOmap, Lat, Lng, dist):
-    weekdayFrequency = Nom.operationRange(zoneOmap, Lat - dist, Lat + dist,
-                                          sndCircleRangeDobOmap(Lat, Lng, dist, frequencyInMapForOmp('weekdayIndex')),
-                                          MakeMapFormat(7))
+    weekdayFrequency = Op_om.operationRange(zoneOmap, Lat - dist, Lat + dist,
+                                            sndCircleRangeDobOmap(Lat, Lng, dist, frequencyInMapForOmp('weekdayIndex')),
+                                            MakeMapFormat(7))
 
-    weekdayListAndTotal = Nmp.operationSet(weekdayFrequency, makeListAndTotalMp,
-                                           {'list': lt.newList('ARRAY_LIST'), 'total': 0})
+    weekdayListAndTotal = Op_mp.operationSet(weekdayFrequency, makeListAndTotalMp,
+                                             {'list': lt.newList('ARRAY_LIST'), 'total': 0})
 
     insertionSort(weekdayListAndTotal['list'], orderByKey)
     weekdayFromIntToStr(weekdayListAndTotal['list'])
@@ -388,7 +392,7 @@ def frequencyInMapForOmp(mapIndex):
     """
 
     def resultFunc(root, returnEntry):
-        Nmp.operationSet(root['value'][mapIndex], frequencyInMap, returnEntry)
+        Op_mp.operationSet(root['value'][mapIndex], frequencyInMap, returnEntry)
         return returnEntry
 
     return resultFunc
@@ -410,7 +414,7 @@ def FrequencyInMapAndFrequentKey(mapIndex):
         if num_acc > key_freq['maxValue']:
             key_freq['maxValue'] = num_acc
             key_freq['maxKey'] = root['key']
-        Nmp.operationSet(rValue[mapIndex], frequencyInMap, returnEntry['map'])
+        Op_mp.operationSet(rValue[mapIndex], frequencyInMap, returnEntry['map'])
         return returnEntry
 
     return resultFunc
@@ -433,7 +437,7 @@ def sndCircleRangeDobOmap(x, y, distance, secondOperation):
 
     def resultFunction(root, entry):
         move = sqrt(distance ** 2 - (root['key'] - x) ** 2)
-        Nom.operationRange(root['value'], y - move, y + move, secondOperation, entry)
+        Op_om.operationRange(root['value'], y - move, y + move, secondOperation, entry)
         return entry
 
     return resultFunction
