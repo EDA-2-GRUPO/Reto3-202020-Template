@@ -58,6 +58,7 @@ def newAnalyzer():
 
 def addAccident(analyzer, date):
     updateDateIndex(analyzer['dateIndex'], date)
+
     return analyzer
 
     
@@ -162,6 +163,17 @@ def recorrido(cont, lista):
     lt.addLast(listafinal, mayor)
     lt.addLast(listafinal, contar)
     return listafinal
+def requerimeint04(cont,lista):
+    ntotal=0
+    w = lstit.newIterator(lista)
+    mapau = m.newMap(numelements=11,maptype='PROBING',comparefunction=compareOffenses)
+    listafinal = lt.newList("ARRAY_LIST")
+    listakeys = lt.newList("ARRAY_LIST",compareIds)
+    while lstit.hasNext(w):
+        x = lstit.next(w)
+        listaa= om.get(cont['dateIndex'], x)["value"]["lstaccidentes"]
+        ntotal+=listaa
+        g = om.get(cont['dateIndex'], x)["value"]["Contry"]
 
 def requerimient3(cont,lista):
     ntotal=0
@@ -174,6 +186,7 @@ def requerimient3(cont,lista):
         listaa= om.get(cont['dateIndex'], x)["value"]["lstaccidentes"]
         ntotal+=listaa
         g = om.get(cont['dateIndex'], x)["value"]["SeverityIndex"]
+
         listallaves= mp.keySet(g)
         iteseg= lstit.newIterator(listallaves)
         while lstit.hasNext(iteseg):
