@@ -21,7 +21,7 @@
  """
 
 import config as cf
-from App import model
+from App import model as md
 import datetime
 import csv
 
@@ -41,7 +41,7 @@ recae sobre el controlador.
 
 def init(in_t):
     tipo = 'BST' if in_t == '1' else 'RBT'
-    analyzer = model.newAnalyzer(tipo)
+    analyzer = md.newAnalyzer(tipo)
     return analyzer
 
 
@@ -61,7 +61,7 @@ def loadData(analyzer, list_files):
         count = 0
         print(file, 'cargando')
         for accident in input_file:
-            model.addAccident(analyzer, accident)
+            md.addAccident(analyzer, accident)
             count += 1
             if not count % 10000:
                 print(count, 'cargados')
@@ -79,45 +79,45 @@ def loadData(analyzer, list_files):
 
 def requirement1(dateOmap, date):
     Date = datetime.datetime.strptime(date, '%Y-%m-%d')
-    return model.requirement1(dateOmap, Date.date())
+    return md.requirement1(dateOmap, Date.date())
 
 
 def requirement2(dateOmap, date):
     Date = datetime.datetime.strptime(date, '%Y-%m-%d')
-    return model.requirement2(dateOmap, Date.date())
+    return md.requirement2(dateOmap, Date.date())
 
 
 def requirement3(dateOmap, date1, date2):
     date1 = datetime.datetime.strptime(date1, '%Y-%m-%d')
     date2 = datetime.datetime.strptime(date2, '%Y-%m-%d')
-    return model.requirement3(dateOmap, date1.date(), date2.date())
+    return md.requirement3(dateOmap, date1.date(), date2.date())
 
 
 def requirement4(dateOmap, date1, date2):
     date1 = datetime.datetime.strptime(date1, '%Y-%m-%d')
     date2 = datetime.datetime.strptime(date2, '%Y-%m-%d')
-    return model.requirement4(dateOmap, date1.date(), date2.date())
+    return md.requirement4(dateOmap, date1.date(), date2.date())
 
 
 def requirement5(timeOmap, time1, time2):
-    return model.requirement5(timeOmap, time1, time2)
+    return md.requirement5(timeOmap, time1, time2)
 
 
 def requirement6(zoneOmap, lat, longi, distance):
     lat = float(lat)
     longi = float(longi)
     distance = float(distance)
-    return model.requirement6(zoneOmap, lat, longi, distance)
+    return md.requirement6(zoneOmap, lat, longi, distance)
 
 
 def heightOmap(omap):
-    return model.heightOmap(omap)
+    return md.heightOmap(omap)
 
 
 def sizeOmap(omap):
-    return model.sizeOmap(omap)
+    return md.sizeOmap(omap)
 
 
 def proxyTime(time_string):
     time = datetime.time.fromisoformat(time_string)
-    return model.proxyTime(time)
+    return md.proxyTime(time)

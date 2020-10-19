@@ -20,19 +20,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  """
 import config
-
-import math as mt
+# Modulos externos nativos
+from math import sqrt
+from datetime import datetime, time
+# Modulos Curso complementarios de lista, iteradores, y sorting
 from DISClib.DataStructures import liststructure as lt
 from DISClib.DataStructures import listiterator as it
-
-from DISClib.DataStructures import mapentry as me
+from DISClib.Algorithms.Sorting.insertionsort import insertionSort
+# Modulos Curso de mapas Omap y map
 from DISClib.DataStructures import mapstructure as mp
 from DISClib.DataStructures import orderedmapstructure as om
-
+# Modulos propios de operaciones en Omap y map, para implementacion del curso
 from App import newOrderMetod as Nom
 from App import newMpMetod as Nmp
-from DISClib.Algorithms.Sorting.insertionsort import insertionSort
-import datetime
 
 assert config
 
@@ -68,7 +68,7 @@ def newAnalyzer(tipo):
 
 def addAccident(analyzer, accident):
     SevKey = int(accident['Severity'])
-    occurredTf = datetime.datetime.strptime(accident['Start_Time'], '%Y-%m-%d %H:%M:%S')
+    occurredTf = datetime.strptime(accident['Start_Time'], '%Y-%m-%d %H:%M:%S')
     analyzer['numAccidents'] += 1
     updateDateOmap(analyzer['dateIndex'], occurredTf.date(), SevKey, accident['State'])
     updateTimeOmap(analyzer['timeIndex'], HoursAndMinutes(occurredTf.time()), SevKey)
@@ -81,7 +81,7 @@ def updateDateOmap(omap, occurredDate, SevKey, stateKey):
     """
 
     Args:
-        omap:
+        omap: omap de date
         occurredDate: datetime con el dia en que sucedio, en formato YY-MM-dd
         SevKey: str con el nivel de severidad
         stateKey: str con el estado de ocurrencia
@@ -94,7 +94,8 @@ def updateDateOmap(omap, occurredDate, SevKey, stateKey):
     if entry:
         dateEntry = entry['value']  # lo correcto es me.get(entry), se usa para optimizar de aqui en adelante
     else:
-        dateEntry = newDateEntry()
+        dateEntry = {'SeverityIndex': MakeMapFormat(4), 'StateIndex': MakeMapFormat(40, 'CHAINING'),
+                     'numAccidents': 0}
         om.put(omap, occurredDate, dateEntry)
 
     dateEntry['numAccidents'] += 1
@@ -108,7 +109,7 @@ def updateTimeOmap(omap, occurredTime, SevKey):
     """
 
     Args:
-        omap:
+        omap: omap de time
         occurredTime: datetime con el la Hora con minutos en que sucedio, en formato HH:MM
         SevKey: str con el nivel de severidad
 
@@ -120,7 +121,7 @@ def updateTimeOmap(omap, occurredTime, SevKey):
     if entry:
         timeEntry = entry['value']
     else:
-        timeEntry = newTimeEntry()
+        timeEntry = {'SeverityIndex': MakeMapFormat(4), 'numAccidents': 0}
         om.put(omap, occurredTime, timeEntry)
 
     timeEntry['numAccidents'] += 1
@@ -133,7 +134,7 @@ def updateZoneDoubleOmap(LatLng, Latitude, Longitude, weekday):
     """
 
     Args:
-        LatLng: entry con un map y un conyteo de cordenadas
+        LatLng: entry con un omap y un conteo de cordenadas
         Latitude: cordenada Latitud
         Longitude: cordenada Longitud
         weekday: dia del la semana representado del 0 al 6
@@ -156,7 +157,7 @@ def updateZoneDoubleOmap(LatLng, Latitude, Longitude, weekday):
         LngEntry = entryLng['value']
 
     else:
-        LngEntry = newZoneEntry()
+        LngEntry = {'weekdayIndex': MakeMapFormat(7), 'numAccidents': 0}
         om.put(LtEntry, Longitude, LngEntry)
         LatLng['num_zones'] += 1
 
@@ -183,43 +184,6 @@ def updateIndex(Index, indexKey):
         mp.put(Index, indexKey, 1)
 
     return Index
-
-
-def newDateEntry():
-    """
-    Crea una entrada en el indice por fechas, es decir en el arbol
-    binario.
-    """
-    entry = {'SeverityIndex': MakeMapFormat(4),
-
-             'StateIndex': MakeMapFormat(40, 'CHAINING'),
-
-             'numAccidents': 0}
-
-    return entry
-
-
-def newTimeEntry():
-    """
-    Crea una entrada en el indice por horas, es decir en el arbol
-    binario.
-    """
-    entry = {'SeverityIndex': MakeMapFormat(4),
-             'numAccidents': 0}
-
-    return entry
-
-
-def newZoneEntry():
-    """
-    Crea una entrada en el indice por Latitud Longitud, es decir en el doble arbol
-    binario.
-
-    """
-    entry = {'weekdayIndex': MakeMapFormat(7),
-             'numAccidents': 0}
-
-    return entry
 
 
 def MakeMaxFormat(Total=False):
@@ -318,16 +282,16 @@ def heightOmap(omap):
         return 0
 
 
-def HoursAndMinutes(time):
+def HoursAndMinutes(o_time):
     """
     solo tiene en cuenta las horas y los minutos de time
     Args:
-        time: datetime.time
+        o_time: datetime.time
 
     Returns:
 
     """
-    return datetime.time(hour=time.hour, minute=time.minute)
+    return time(o_time.hour, o_time.minute)
 
 
 def AddPercents(ListAndTotal):
@@ -356,7 +320,6 @@ def proxyTime(o_time):
     Returns:
 
     """
-
     hour = o_time.hour
     minute = o_time.minute
 
@@ -368,7 +331,7 @@ def proxyTime(o_time):
         minute = 0
         hour += 1
 
-    new_time = datetime.time(hour, minute)
+    new_time = time(hour, minute)
     return new_time
 
 
@@ -424,8 +387,7 @@ def frequencyInMapForOmp(mapIndex):
     """
 
     def resultFunc(root, returnEntry):
-        acMap = root['value'][mapIndex]
-        Nmp.operationSet(acMap, frequencyInMap, returnEntry)
+        Nmp.operationSet(root['value'][mapIndex], frequencyInMap, returnEntry)
         return returnEntry
 
     return resultFunc
@@ -439,6 +401,7 @@ def FrequencyInMapAndFrequentKey(mapIndex):
     Args:
         mapIndex: el indice del mapa
     """
+
     def resultFunc(root, returnEntry):
         rValue = root['value']
         num_acc = rValue['numAccidents']
@@ -468,7 +431,7 @@ def sndCircleRangeDobOmap(x, y, distance, secondOperation):
     """
 
     def resultFunction(root, entry):
-        move = mt.sqrt(distance ** 2 - (root['key'] - x) ** 2)
+        move = sqrt(distance ** 2 - (root['key'] - x) ** 2)
         Nom.operationRange(root['value'], y - move, y + move, secondOperation, entry)
         return entry
 
