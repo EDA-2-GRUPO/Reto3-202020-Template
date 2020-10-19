@@ -309,6 +309,7 @@ def AddPercents(ListAndTotal):
     for _ in range(lt.size(sList)):
         el = it.next(iterator)
         el['percent'] = round(el['value'] / ListAndTotal['total'] * 100, 2)
+    return ListAndTotal
 
 
 def proxyTime(o_time):
