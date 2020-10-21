@@ -190,27 +190,10 @@ def updateIndex(Index, indexKey):
     return Index
 
 
-def MakeMaxFormat(Total=False):
-    if Total:
-        return {'key': None, 'value': -1, 'total': 0}
-    else:
-        return {'key': None, 'value': -1}
-
-
-def MakeMapFormat(els, Type='PROBING'):
-    return mp.newMap(els, maptype=Type, comparefunction=compareMp)
-
-
-def MakeListFormat(Type='ARRAY_LIST'):
-    return {'list': newList(Type), 'total': 0}
-
-
-# Funciones para agregar informacion al catalogo
-
-
 # ==============================
 # Funciones de consulta
 # ==============================
+
 def getDateValue(dateOmap, date):
     dateRoot = om.get(dateOmap, date)
     if not dateRoot:
@@ -234,93 +217,6 @@ def operationSetMp(hMap, operation, returnEntry):
 # ==============================
 # Funciones auxiliares
 # ==============================
-
-
-def sizeOmap(omap):
-    try:
-        return om.size(omap)
-    except TypeError:
-        return 0
-
-
-def heightOmap(omap):
-    try:
-        return om.height(omap)
-    except TypeError:
-        return 0
-
-
-def HoursAndMinutes(o_time):
-    """
-    solo tiene en cuenta las horas y los minutos de time
-    Args:
-        o_time: datetime.time
-
-    Returns:
-
-    """
-    return time(o_time.hour, o_time.minute)
-
-
-def AddPercents(ListAndTotal):
-    """
-    Añade los porcentajes a una lista contenida en un dict que ademas tiene
-    el valor total del conteo
-    Args:
-        ListAndTotal:
-
-    Returns:
-
-    """
-    sList = ListAndTotal['list']
-    iterator = it.newIterator(sList)
-    for _ in range(sList['size']):
-        el = it.next(iterator)
-        el['percent'] = round(el['value'] / ListAndTotal['total'] * 100, 2)
-    return ListAndTotal
-
-
-def proxyTime(o_time):
-    """
-    Aproxima las horas con minutos
-    Args:
-        o_time: datetime.time
-
-    Returns:
-
-    """
-    hour = o_time.hour
-    minute = o_time.minute
-
-    if minute <= 30:
-        minute = round(minute / 30) * 30
-    elif hour == 23:
-        minute = 59
-    else:
-        minute = 0
-        hour += 1
-
-    new_time = time(hour, minute)
-    return new_time
-
-
-def weekdayFromIntToStr(weekdayList):
-    """
-    Para los entry de una lista Transforma el numero de dia de la semana
-    al nombre de este dia
-    Args:
-        weekdayList:
-
-    Returns:
-
-    """
-    weekday_list = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-    iterator = it.newIterator(weekdayList)
-    for _ in range(weekdayList['size']):
-        el = it.next(iterator)
-        el['key'] = weekday_list[el['key']]
-    return weekdayList
-
 
 """
 Hay codigo repetido, de a 3 a 5 lineas  que se podrian contraer, sobre todo en las funciones que tienen Frequent en su 
@@ -387,8 +283,8 @@ def FrequencyInMapAndFrequentKey(mapIndex):
 def sndCircleRangeDobOmap(x, y, distance, secondOperation):
     """
     Funcion axuliar para crear una operacion en un DobleOmap (order map dentro de order map)
-    para un rango dado que representa un 'circulo', definido por un punto en el primer order map,
-    un punto en el segundo, y un radio
+    para un rango dado que representa un 'circulo', definido por una key en el primer order map (x),
+    una key en el segundo (y), y un radio
     Args:
         x: cordenada x (primer order map)
         y: cordenada y (segundo order map)
@@ -498,7 +394,89 @@ def TotalAndFrequentMp(entry, maxEntry):
 
 
 # ==============================
-# Funciones de Comparacion
+# Funciones de Formatos
+# ==============================
+
+def MakeMaxFormat(Total=False):
+    if Total:
+        return {'key': None, 'value': -1, 'total': 0}
+    else:
+        return {'key': None, 'value': -1}
+
+
+def MakeMapFormat(els, Type='PROBING'):
+    return mp.newMap(els, maptype=Type, comparefunction=compareMp)
+
+
+def MakeListFormat(Type='ARRAY_LIST'):
+    return {'list': newList(Type), 'total': 0}
+
+
+# =========================================
+# Funciones ajustes de dato e info
+# =========================================
+
+def HoursAndMinutes(o_time):
+    return time(o_time.hour, o_time.minute)
+
+
+def proxyTime(o_time):
+    """
+    Aproxima las horas con minutos
+    Args:
+        o_time: datetime.time
+    """
+    hour = o_time.hour
+    minute = o_time.minute
+    if minute <= 30:
+        minute = round(minute / 30) * 30
+    elif hour == 23:
+        minute = 59
+    else:
+        minute = 0
+        hour += 1
+    new_time = time(hour, minute)
+    return new_time
+
+
+def AddPercents(ListAndTotal):
+    """
+    Añade los porcentajes a una lista contenida en un dict que ademas tiene
+    el valor total del conteo
+    Args:
+        ListAndTotal:
+
+    Returns:
+
+    """
+    sList = ListAndTotal['list']
+    iterator = it.newIterator(sList)
+    for _ in range(sList['size']):
+        el = it.next(iterator)
+        el['percent'] = round(el['value'] / ListAndTotal['total'] * 100, 2)
+    return ListAndTotal
+
+
+def weekdayFromIntToStr(weekdayList):
+    """
+    Para los entry de una lista Transforma el numero de dia de la semana
+    al nombre de este dia
+    Args:
+        weekdayList:
+
+    Returns:
+
+    """
+    weekday_list = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    iterator = it.newIterator(weekdayList)
+    for _ in range(weekdayList['size']):
+        el = it.next(iterator)
+        el['key'] = weekday_list[el['key']]
+    return weekdayList
+
+
+# ==============================
+# Funciones de Comparacion e Info
 # ==============================
 
 def orderByKey(el1, el2):
@@ -536,3 +514,17 @@ def compareMp(key1, el2):
         return 1
     else:
         return -1
+
+
+def sizeOmap(omap):
+    try:
+        return om.size(omap)
+    except TypeError:
+        return 0
+
+
+def heightOmap(omap):
+    try:
+        return om.height(omap)
+    except TypeError:
+        return 0
