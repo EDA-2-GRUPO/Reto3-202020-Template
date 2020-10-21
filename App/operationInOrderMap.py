@@ -27,7 +27,7 @@ def operationSet(omap, operation, returnEntry={}):
         returnEntry: formato del retorno
 
     Returns:
-        entry modificado
+        returnEntry modificado
     """
     try:
         root = omap['root']

@@ -11,13 +11,13 @@ from DISClib.DataStructures import liststructure as lt
 
 def operationSet(hMap, operation, returnEntry):
     """
-    Retorna una lista con todas las llaves de la tabla de hash
-
+    Realiza la operation indicada en las entradas del map hash
     Args:
         hMap: El map
         returnEntry: formato del retorno
         operation: operacion a realizar
     Returns:
+        returnEntry modificado
     Raises:
         Exception
     """

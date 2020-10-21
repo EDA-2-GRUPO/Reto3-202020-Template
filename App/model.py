@@ -195,22 +195,65 @@ def updateIndex(Index, indexKey):
 # ==============================
 
 def getDateValue(dateOmap, date):
+    """
+
+    Args:
+        dateOmap: Oreder map
+        date: fecha
+    Returns:
+        valor asociado a la fecha
+    """
     dateRoot = om.get(dateOmap, date)
     if not dateRoot:
         return None
-    dateEntry = dateRoot['value']
-    return dateEntry
+    return dateRoot['value']
 
 
 def operationBeforeOmp(omap, key_bef, operation, returnEntry):
+    """
+    Realiza la operation indicada en las ramas del order map que tengan la llave
+    antes del key_bef ingresado y retorna el entry modificado con las operaciones realizadas
+    Args:
+        omap: mapa ordenado
+        key_bef: llave de limite superior
+        operation: funcion a ejecutar en las ramas
+        returnEntry: formato del retorno
+
+    Returns:
+        returnEntry modificado
+    """
     return Op_om.operationBefore(omap, key_bef, operation, returnEntry)
 
 
 def operationRangeOmp(omap, keylo, keyhi, operation, returnEntry):
+    """
+    Realiza la operation indicada en las ramas del order map que tengan el
+    key el rango de keylo y keyhi y retorna el entry modificado con las operaciones realizadas
+    Args:
+        omap: mapa ordenado
+        keylo: limite inferior
+        keyhi: limite superior
+        operation: funcion a ejecutar en las ramas
+        returnEntry: formato del retorno
+
+    Returns:
+        returnEntry modificado
+    """
     return Op_om.operationRange(omap, keylo, keyhi, operation, returnEntry)
 
 
 def operationSetMp(hMap, operation, returnEntry):
+    """
+    Realiza la operation indicada en las entradas del map hash
+    Args:
+        hMap: El map
+        returnEntry: formato del retorno
+        operation: operacion a realizar
+    Returns:
+        returnEntry modificado
+    Raises:
+        Exception
+    """
     return Op_mp.operationSet(hMap, operation, returnEntry)
 
 
@@ -232,8 +275,12 @@ funciones son llamadas cada vez que se itera dentro del arbol o del map
 
 
 def TotalAndFrequentOmp(root, totalAndMaxEntry):
-    """Funcion auxiliar para buscar en un orderMap visto como histograma la key
+    """
+    Funcion auxiliar para buscar en un orderMap visto como histograma la key
     con mayor numero de accidentes, y el valor total del conteo
+    Args:
+        root: rama de un omap
+        totalAndMaxEntry:
     """
     num_acc = root['value']['numAccidents']
     if num_acc > totalAndMaxEntry['value']:
@@ -250,8 +297,11 @@ def frequencyInMapForOmp(mapIndex):
     Args:
         mapIndex: el indice del mapa buscado
     """
-
     def resultFunc(root, frequencyEntry):
+        """
+        root: rama de un omap
+        frequencyEntry: map
+        """
         Op_mp.operationSet(root['value'][mapIndex], frequencyInMap, frequencyEntry)
         return frequencyEntry
 
@@ -262,20 +312,22 @@ def FrequencyInMapAndFrequentKey(mapIndex):
     """
     Funcion axuliar que es la union de frequencyInMapForOmp y TotalAndFrequentOmap, sin realizar
     el conteo total
-    returnEntry: tiene un formato {'map': mewmap, 'KeyFrequent': Entry}
     Args:
         mapIndex: el indice del mapa
     """
-
-    def resultFunc(root, maxEntry):
+    def resultFunc(root, mapAndMaxEntry):
+        """
+        root: rama de un omap
+        mapAndMaxEntry: tiene un formato {'map': mewmap, 'KeyFrequent': maxEntry}
+        """
         rValue = root['value']
         num_acc = rValue['numAccidents']
-        key_freq = maxEntry['KeyFrequent']
+        key_freq = mapAndMaxEntry['KeyFrequent']
         if num_acc > key_freq['value']:
             key_freq['value'] = num_acc
             key_freq['key'] = root['key']
-        Op_mp.operationSet(rValue[mapIndex], frequencyInMap, maxEntry['map'])
-        return maxEntry
+        Op_mp.operationSet(rValue[mapIndex], frequencyInMap, mapAndMaxEntry['map'])
+        return mapAndMaxEntry
 
     return resultFunc
 
@@ -292,8 +344,11 @@ def sndCircleRangeDobOmap(x, y, distance, secondOperation):
         secondOperation: operacion que se quiere realizar en el segundo Omap
 
     """
-
     def resultFunction(root, frequencyEntry):
+        """
+        root: rama de un omap
+        frequencyEntry: map ADT
+        """
         move = sqrt(distance ** 2 - (root['key'] - x) ** 2)
         Op_om.operationRange(root['value'], y - move, y + move, secondOperation, frequencyEntry)
         return frequencyEntry
@@ -341,10 +396,7 @@ def frequencyInMap(entry, frequencyEntry):
     en un mapa visto como histagrama
     Args:
         entry: una entrada de un map
-        frequencyEntry: un Map
-
-    Returns:
-
+        frequencyEntry: map ADT
     """
     key = entry['key']
     num_acc = entry['value']
@@ -363,9 +415,6 @@ def FrequentMp(entry, maxEntry):
     Args:
         entry: una entrada de un map
         maxEntry: un entry con una Lista, y un valor de total
-
-    Returns:
-
     """
     num_acc = entry['value']
     if num_acc > maxEntry['value']:
@@ -381,12 +430,9 @@ def TotalAndFrequentMp(entry, maxEntry):
     Args:
         entry: una entrada de un map
         maxEntry: un entry con un maxKey, un maxValue y un valor de total
-
-    Returns:
-
     """
     num_acc = entry['value']
-    if num_acc > maxEntry['maxValue']:
+    if num_acc > maxEntry['value']:
         maxEntry['value'] = num_acc
         maxEntry['key'] = entry['key']
     maxEntry['total'] += num_acc
@@ -444,10 +490,7 @@ def AddPercents(ListAndTotal):
     Añade los porcentajes a una lista contenida en un dict que ademas tiene
     el valor total del conteo
     Args:
-        ListAndTotal:
-
-    Returns:
-
+        ListAndTotal: {'list': list ADT, 'total': 0}
     """
     sList = ListAndTotal['list']
     iterator = it.newIterator(sList)
@@ -462,10 +505,7 @@ def weekdayFromIntToStr(weekdayList):
     Para los entry de una lista Transforma el numero de dia de la semana
     al nombre de este dia
     Args:
-        weekdayList:
-
-    Returns:
-
+        weekdayList: list ADT
     """
     weekday_list = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
     iterator = it.newIterator(weekdayList)
