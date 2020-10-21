@@ -17,26 +17,26 @@ Tal como se realizaron las implementaciones  es posible utilizar las funciones t
 # se crea las funciones Operation
 
 
-def operationSet(omap, operation, entry={}):
+def operationSet(omap, operation, returnEntry={}):
     """
     Realiza la operation indicada en todas las ramas del order map
     y retorna el entry modificado con las operaciones realizadas
     Args:
         omap: mapa ordenado
         operation: funcion a ejecutar en las ramas
-        entry: formato del retorno
+        returnEntry: formato del retorno
 
     Returns:
         entry modificado
     """
     try:
         root = omap['root']
-        return operationSetTree(root, operation, entry)
+        return operationSetTree(root, operation, returnEntry)
     except Exception as exp:
         error.reraise(exp, 'NOM: iteration')
 
 
-def operationRange(omap, keylo, keyhi, operation, entry={}):
+def operationRange(omap, keylo, keyhi, operation, returnEntry={}):
     """
     Realiza la operation indicada en las ramas del order map que tengan el
     key el rango de keylo y keyhi y retorna el entry modificado con las operaciones realizadas
@@ -45,7 +45,7 @@ def operationRange(omap, keylo, keyhi, operation, entry={}):
         keylo: limite inferior
         keyhi: limite superior
         operation: funcion a ejecutar en las ramas
-        entry: formato del retorno
+        returnEntry: formato del retorno
 
     Returns:
         entry modificado
@@ -53,12 +53,12 @@ def operationRange(omap, keylo, keyhi, operation, entry={}):
     try:
         root = omap['root']
         cmpfunction = omap['cmpfunction']
-        return operationRangeTree(root, keylo, keyhi, operation, entry, cmpfunction)
+        return operationRangeTree(root, keylo, keyhi, operation, returnEntry, cmpfunction)
     except Exception as exp:
         error.reraise(exp, 'NOM: iterationRange')
 
 
-def operationBefore(omap, key_bef, operation, entry={}):
+def operationBefore(omap, key_bef, operation, returnEntry={}):
     """
     Realiza la operation indicada en las ramas del order map que tengan la llave
     antes del key_bef ingresado y retorna el entry modificado con las operaciones realizadas
@@ -66,7 +66,7 @@ def operationBefore(omap, key_bef, operation, entry={}):
         omap: mapa ordenado
         key_bef: llave de limite superior
         operation: funcion a ejecutar en las ramas
-        entry: formato del retorno
+        returnEntry: formato del retorno
 
     Returns:
         entry modificado
@@ -75,7 +75,7 @@ def operationBefore(omap, key_bef, operation, entry={}):
         root = omap['root']
         cmpfunction = omap['cmpfunction']
 
-        return operationBeforeTree(root, key_bef, operation, entry, cmpfunction)
+        return operationBeforeTree(root, key_bef, operation, returnEntry, cmpfunction)
     except Exception as exp:
         error.reraise(exp, 'NOM: iterationBefore')
 
@@ -83,47 +83,46 @@ def operationBefore(omap, key_bef, operation, entry={}):
 # funciones en arboles
 
 
-def operationSetTree(root, operation, entry):
+def operationSetTree(root, operation, returnEntry):
     try:
         if root is not None:
-            operationSetTree(root['left'], operation, entry)
-            operation(root, entry)
-            operationSetTree(root['right'], operation, entry)
-        return entry
+            operationSetTree(root['left'], operation, returnEntry)
+            operation(root, returnEntry)
+            operationSetTree(root['right'], operation, returnEntry)
+        return returnEntry
     except Exception as exp:
         error.reraise(exp, 'NOM:operationSetTree')
 
 
-def operationRangeTree(root, keylo, keyhi, operation, entry, cmpfunction):
+def operationRangeTree(root, keylo, keyhi, operation, returnEntry, cmpfunction):
     try:
         if root is not None:
             complo = cmpfunction(keylo, root['key'])
             comphi = cmpfunction(keyhi, root['key'])
             if complo < 0:
-                operationRangeTree(root['left'], keylo, keyhi, operation, entry, cmpfunction)
+                operationRangeTree(root['left'], keylo, keyhi, operation, returnEntry, cmpfunction)
             if (complo <= 0) and (comphi >= 0):
-                operation(root, entry)
+                operation(root, returnEntry)
             if comphi > 0:
-                operationRangeTree(root['right'], keylo, keyhi, operation, entry, cmpfunction)
-        return entry
+                operationRangeTree(root['right'], keylo, keyhi, operation, returnEntry, cmpfunction)
+        return returnEntry
     except Exception as exp:
         error.reraise(exp, 'NOM:operationRangeTree')
 
 
-def operationBeforeTree(root, key, operation, entry, comparefunction):
+def operationBeforeTree(root, key_bef, operation, returnEntry, comparefunction):
     try:
         if root is None:
-            return entry
-        cmp = comparefunction(key, root['key'])
+            return returnEntry
+        cmp = comparefunction(key_bef, root['key'])
         if cmp < 0:
-            return operationBeforeTree(root['left'], key, operation, entry, comparefunction)
+            return operationBeforeTree(root['left'], key_bef, operation, returnEntry, comparefunction)
         elif cmp > 0:
-            operationSetTree(root['left'], operation, entry)
-            operation(root, entry)
-            operationBeforeTree(root['right'], key, operation, entry, comparefunction)
-            return entry
+            operationSetTree(root['left'], operation, returnEntry)
+            operation(root, returnEntry)
+            operationBeforeTree(root['right'], key_bef, operation, returnEntry, comparefunction)
+            return returnEntry
         else:
-            return operationSetTree(root['left'], operation, entry)
-
+            return operationSetTree(root['left'], operation, returnEntry)
     except Exception as exp:
         error.reraise(exp, 'NOM:operationBeforeTree')

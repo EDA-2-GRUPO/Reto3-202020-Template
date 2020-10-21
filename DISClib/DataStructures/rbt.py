@@ -1087,23 +1087,3 @@ def removeKey(root, key, cmpfunction):
         error.reraise(exp, 'RBT:removeKey')
 
 
-if __name__ == '__main__':
-    def compare(el1, el2):
-        if el1 == el2:
-            return 0
-        elif el1 < el2:
-            return -1
-        return 1
-
-
-    from random import randint
-
-    s = newMap(compare)
-    for _ in range(27):
-        # el = randint(1, 100)
-        put(s, _, chr(_ + 97))
-
-    g = keySet(s)
-    t = ValuesBefore(s, 23)
-    h = values(s, 23, 30)
-    q = valueSet(s)

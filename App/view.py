@@ -130,7 +130,7 @@ def main(cont):
         printMenu()
         inputs = input('Seleccione una opción para continuar\n>') + ' '
         intp = inputs[0]
-        if  intp == "w":
+        if intp == "w":
             del cont
             cont = inicializar()
             cargo = False
@@ -157,7 +157,7 @@ def main(cont):
                 fecha = input("Ingrese la fecha a consultar\n")
                 t1 = perf_counter()
                 print('...')
-                dateEntry = cnt.requirement1(dateIndex, fecha)
+                dateEntry = cnt.getDateInfo(dateIndex, fecha)
                 if dateEntry is None:
                     del dateEntry, fecha, t1
                     print('No se encontro la fecha')
@@ -178,7 +178,7 @@ def main(cont):
                 fecha = input("Ingrese la fecha posterior a la busqueda: \n")
                 t1 = perf_counter()
                 print('...')
-                maxSeverity = cnt.requirement2(dateIndex, fecha)
+                maxSeverity = cnt.mstFreqDateBfADate(dateIndex, fecha)
                 print('para antes de la fecha: ', fecha, '\n')
                 print('|| fecha con mas accidentes ||')
                 PrintMaxEntry(maxSeverity, ['fecha', 'numero de accidentes', 'total accidentes'])
@@ -195,7 +195,7 @@ def main(cont):
                 fecha2 = input('fecha 2\n')
                 t1 = perf_counter()
                 print('...')
-                maxSeverity = cnt.requirement3(dateIndex, fecha1, fecha2)
+                maxSeverity = cnt.mstFreqSeverityInRgDates(dateIndex, fecha1, fecha2)
                 print('para el rango de fechas: ', fecha1, 'a', fecha2, '\n')
                 print('|| Severidad mas frecuente ||')
                 PrintMaxEntry(maxSeverity, ['Severidad', 'numero de accidentes', 'total accidentes'])
@@ -212,12 +212,12 @@ def main(cont):
                 fecha2 = input('fecha2')
                 t1 = perf_counter()
                 print('...')
-                maxStateAndDate = cnt.requirement4(dateIndex, fecha1, fecha2)
+                maxStateAndDate = cnt.MstFreqDateAndMstFreqStateInRgDates(dateIndex, fecha1, fecha2)
                 print('para el rango de fechas: ', fecha1, 'a', fecha2, '\n')
                 print('|| Estado con mas accidentes ||')
-                PrintMaxEntry(maxStateAndDate['mState'], ['Estado', 'accidentes'])
+                PrintMaxEntry(maxStateAndDate['mstState'], ['Estado', 'accidentes'])
                 print('|| Fecha con mas accidentes ||')
-                PrintMaxEntry(maxStateAndDate['mKey'], ['Fecha', 'accidentes'])
+                PrintMaxEntry(maxStateAndDate['mstDate'], ['Fecha', 'accidentes'])
                 print('')
                 t2 = perf_counter()
                 print("tiempo de carga:", t2 - t1)
@@ -231,7 +231,7 @@ def main(cont):
                 hora2 = cnt.proxyTime(input('time2: '))
                 t1 = perf_counter()
                 print('...')
-                SeverityEntry = cnt.requirement5(timeIndex, hora1, hora2)
+                SeverityEntry = cnt.severityFrequencyListInRgHours(timeIndex, hora1, hora2)
                 print('para el rango de horas: ', hora1, 'a', hora2, '\n')
                 print('|| Accidentes por severidad ||')
                 PrintListEntry(SeverityEntry['list'], [('accidentes', 'value'), ('porcentaje', 'percent')])
@@ -250,7 +250,7 @@ def main(cont):
                 distancia = input('distancia: ')
                 t1 = perf_counter()
                 print("\nBuscando accidentes en la zona ingresada: \n")
-                weekdayEntry = cnt.requirement6(zoneIndex['DoubleMap'], lat, lng, distancia)
+                weekdayEntry = cnt.weekdayFrequencyListInArea(zoneIndex['DoubleMap'], lat, lng, distancia)
                 print('|| Accidentes por dia de la semana||')
                 PrintListEntry(weekdayEntry['list'], [('accidentes', 'value')])
                 print('total de accidentes :', weekdayEntry['total'])

@@ -19,10 +19,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  """
-
 import config as cf
+from DISClib.Algorithms.Sorting.insertionsort import insertionSort
 from App import model as md
-import datetime
+from datetime import datetime, time
 import csv
 
 """
@@ -77,37 +77,55 @@ def loadData(analyzer, list_files):
 #  Funciones para consultas
 # ___________________________________________________
 
-def requirement1(dateOmap, date):
-    Date = datetime.datetime.strptime(date, '%Y-%m-%d')
-    return md.requirement1(dateOmap, Date.date())
+def getDateInfo(dateOmap, date):
+    date = strToDatetime(date)
+    dateEntry = md.getDateValue(dateOmap, date)
+    if dateEntry is None: return None
+    ListEntry = md.operationSetMp(dateEntry['SeverityIndex'], md.makeListMp, md.newList('ARRAY_LIST'))
+    insertionSort(ListEntry, md.orderByKey)
+    return {'list': ListEntry, 'total': dateEntry['numAccidents']}
 
 
-def requirement2(dateOmap, date):
-    Date = datetime.datetime.strptime(date, '%Y-%m-%d')
-    return md.requirement2(dateOmap, Date.date())
+def mstFreqDateBfADate(dateOmap, before_date):
+    before_date = strToDatetime(before_date)
+    mstFreqDate = md.operationBeforeOmp(dateOmap, before_date, md.TotalAndFrequentOmp, md.MakeMaxFormat(True))
+    return mstFreqDate
 
 
-def requirement3(dateOmap, date1, date2):
-    date1 = datetime.datetime.strptime(date1, '%Y-%m-%d')
-    date2 = datetime.datetime.strptime(date2, '%Y-%m-%d')
-    return md.requirement3(dateOmap, date1.date(), date2.date())
+def mstFreqSeverityInRgDates(dateOmap, date1, date2):
+    date1, date2 = strToDatetime(date1), strToDatetime(date2)
+    frequency_fun = md.frequencyInMapForOmp('SeverityIndex')
+    severityFrequency = md.operationRangeOmp(dateOmap, date1, date2, frequency_fun, md.MakeMapFormat(3))
+    mstFreqSeverity = md.operationSetMp(severityFrequency, md.TotalAndFrequentMp, md.MakeMaxFormat(True))
+    return mstFreqSeverity
 
 
-def requirement4(dateOmap, date1, date2):
-    date1 = datetime.datetime.strptime(date1, '%Y-%m-%d')
-    date2 = datetime.datetime.strptime(date2, '%Y-%m-%d')
-    return md.requirement4(dateOmap, date1.date(), date2.date())
+def MstFreqDateAndMstFreqStateInRgDates(dateOmap, date1, date2):
+    date1, date2 = strToDatetime(date1), strToDatetime(date2)
+    freqAndFrequencyForm = {'KeyFrequent': md.MakeMaxFormat(False), 'map': md.MakeMapFormat(40)}
+    frequency_fun = md.FrequencyInMapAndFrequentKey('StateIndex')
+    stateFrequencyAndMfDate = md.operationRangeOmp(dateOmap, date1, date2, frequency_fun, freqAndFrequencyForm)
+    mostFrequentState = md.operationSetMp(stateFrequencyAndMfDate['map'], md.FrequentMp, md.MakeMaxFormat(False))
+    return {'mstDate': stateFrequencyAndMfDate['KeyFrequent'], 'mstState': mostFrequentState}
 
 
-def requirement5(timeOmap, time1, time2):
-    return md.requirement5(timeOmap, time1, time2)
+def severityFrequencyListInRgHours(timeOmap, time1, time2):
+    frequency_fun = md.frequencyInMapForOmp('SeverityIndex')
+    sevFrequency = md.operationRangeOmp(timeOmap, time1, time2, frequency_fun, md.MakeMapFormat(3))
+    SevListAndTotal = md.operationSetMp(sevFrequency, md.makeListAndTotalMp, md.MakeListFormat())
+    insertionSort(SevListAndTotal['list'], md.orderByKey)
+    md.AddPercents(SevListAndTotal)
+    return SevListAndTotal
 
 
-def requirement6(zoneOmap, lat, longi, distance):
-    lat = float(lat)
-    longi = float(longi)
-    distance = float(distance)
-    return md.requirement6(zoneOmap, lat, longi, distance)
+def weekdayFrequencyListInArea(zoneOmap, Lat, Lng, dist):
+    Lat, Lng, dist = float(Lat), float(Lng), float(dist)
+    cir_fun = md.sndCircleRangeDobOmap(Lat, Lng, dist, md.frequencyInMapForOmp('weekdayIndex'))
+    weekdayFrequency = md.operationRangeOmp(zoneOmap, Lat - dist, Lat + dist, cir_fun, md.MakeMapFormat(7))
+    weekdayListAndTotal = md.operationSetMp(weekdayFrequency, md.makeListAndTotalMp, md.MakeListFormat())
+    insertionSort(weekdayListAndTotal['list'], md.orderByKey)
+    md.weekdayFromIntToStr(weekdayListAndTotal['list'])
+    return weekdayListAndTotal
 
 
 def heightOmap(omap):
@@ -119,5 +137,9 @@ def sizeOmap(omap):
 
 
 def proxyTime(time_string):
-    time = datetime.time.fromisoformat(time_string)
-    return md.proxyTime(time)
+    r_time = time.fromisoformat(time_string)
+    return md.proxyTime(r_time)
+
+
+def strToDatetime(str_date):
+    return datetime.strptime(str_date, '%Y-%m-%d').date()
