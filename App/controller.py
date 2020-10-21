@@ -40,8 +40,8 @@ recae sobre el controlador.
 
 
 def init(in_t):
-    tipo = 'BST' if in_t == '1' else 'RBT'
-    analyzer = md.newAnalyzer(tipo)
+    Type = 'BST' if in_t == '1' else 'RBT'
+    analyzer = md.newAnalyzer(Type)
     return analyzer
 
 
@@ -80,7 +80,8 @@ def loadData(analyzer, list_files):
 def getDateInfo(dateOmap, date):
     date = strToDatetime(date)
     dateEntry = md.getDateValue(dateOmap, date)
-    if dateEntry is None: return None
+    if dateEntry is None:
+        return None
     ListEntry = md.operationSetMp(dateEntry['SeverityIndex'], md.makeListMp, md.newList('ARRAY_LIST'))
     insertionSort(ListEntry, md.orderByKey)
     return {'list': ListEntry, 'total': dateEntry['numAccidents']}

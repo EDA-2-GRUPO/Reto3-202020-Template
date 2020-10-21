@@ -414,9 +414,8 @@ def makeListMp(entry, listEntry):
     Funcion Auxiliar para crear un dict con una lista con las entradas
     de un map.
     Args:
+        listEntry: un entry con una lista
         entry: una entrada de un map
-        returnEntry: un entry con una Lista, y un valor de total
-
     Returns:
 
     """
@@ -430,7 +429,7 @@ def makeListAndTotalMp(entry, listAndTotalEntry):
     de un map, y el valor total que almacenan las llaves
     Args:
         entry: una entrada de un map
-        returnEntry: un entry con una Lista, y un valor de total
+        listAndTotalEntry: un entry con una lista, y un valor de total
 
     Returns:
 
@@ -446,7 +445,7 @@ def frequencyInMap(entry, frequencyEntry):
     en un mapa visto como histagrama
     Args:
         entry: una entrada de un map
-        returnEntry: un Map
+        frequencyEntry: un Map
 
     Returns:
 
@@ -467,7 +466,7 @@ def FrequentMp(entry, maxEntry):
     visto como histograma
     Args:
         entry: una entrada de un map
-        returnEntry: un entry con una Lista, y un valor de total
+        maxEntry: un entry con una Lista, y un valor de total
 
     Returns:
 
@@ -485,7 +484,7 @@ def TotalAndFrequentMp(entry, maxEntry):
     visto como histograma,  y obtener el total del conteo
     Args:
         entry: una entrada de un map
-        returnEntry: un entry con un maxKey, un maxValue y un valor de total
+        maxEntry: un entry con un maxKey, un maxValue y un valor de total
 
     Returns:
 
