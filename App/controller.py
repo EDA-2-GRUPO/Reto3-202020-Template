@@ -77,7 +77,7 @@ def rango_de_fechas(cont,min,max, num):
        mayor=model.recorrido(cont, fechas)
     elif num ==2:
        mayor=model.requerimient3(cont, fechas)
-    return mayorP
+    return mayor
 def fecha(cont,fecha):
     Date = datetime.datetime.strptime(fecha, '%Y-%m-%d')
     return model.fecha(cont,Date)

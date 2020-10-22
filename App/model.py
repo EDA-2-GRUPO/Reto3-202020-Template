@@ -154,7 +154,7 @@ def recorrido(cont, lista):
     listafinal = lt.newList("ARRAY_LIST")
     while lstit.hasNext(w):
         x = lstit.next(w)
-        g = lt.size(om.get(cont['dateIndex'], x)["value"]["lstaccidentes"])
+        g = om.get(cont['dateIndex'], x)["value"]["lstaccidentes"]
         contar += g
         if g > mayor:
             mayor = g
@@ -163,6 +163,7 @@ def recorrido(cont, lista):
     lt.addLast(listafinal, mayor)
     lt.addLast(listafinal, contar)
     return listafinal
+
 def requerimeint04(cont,lista):
     ntotal=0
     w = lstit.newIterator(lista)
