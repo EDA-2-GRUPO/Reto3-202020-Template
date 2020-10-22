@@ -58,7 +58,6 @@ def newAnalyzer():
 
 def addAccident(analyzer, date):
     updateDateIndex(analyzer['dateIndex'], date)
-
     return analyzer
 
     
