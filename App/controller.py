@@ -82,9 +82,10 @@ def getDateInfo(dateOmap, date):
     dateEntry = md.getDateValue(dateOmap, date)
     if dateEntry is None:
         return None
-    ListEntry = md.operationSetMp(dateEntry['SeverityIndex'], md.makeListMp, md.newList('ARRAY_LIST'))
-    insertionSort(ListEntry, md.orderByKey)
-    return {'list': ListEntry, 'total': dateEntry['numAccidents']}
+    severityList = md.operationSetMp(dateEntry['SeverityIndex'], md.makeListMp, md.newList('ARRAY_LIST'))
+    insertionSort(severityList, md.orderByKey)
+    severityListAndTotal = {'list': severityList, 'total': dateEntry['numAccidents']}
+    return severityListAndTotal
 
 
 def mstFreqDateBfADate(dateOmap, before_date):
@@ -113,11 +114,11 @@ def MstFreqDateAndMstFreqStateInRgDates(dateOmap, date1, date2):
 
 def severityFrequencyListInRgHours(timeOmap, time1, time2):
     frequency_fun = md.frequencyInMapForOmp('SeverityIndex')
-    sevFrequency = md.operationRangeOmp(timeOmap, time1, time2, frequency_fun, md.MakeMapFormat(3))
-    SevListAndTotal = md.operationSetMp(sevFrequency, md.makeListAndTotalMp, md.MakeListFormat())
-    insertionSort(SevListAndTotal['list'], md.orderByKey)
-    md.AddPercents(SevListAndTotal)
-    return SevListAndTotal
+    severityFrequency = md.operationRangeOmp(timeOmap, time1, time2, frequency_fun, md.MakeMapFormat(3))
+    severityListAndTotal = md.operationSetMp(severityFrequency, md.makeListAndTotalMp, md.MakeListFormat())
+    insertionSort(severityListAndTotal['list'], md.orderByKey)
+    md.AddPercents(severityListAndTotal)
+    return severityListAndTotal
 
 
 def weekdayFrequencyListInArea(zoneOmap, Lat, Lng, dist):
