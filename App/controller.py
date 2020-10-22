@@ -107,7 +107,8 @@ def MstFreqDateAndMstFreqStateInRgDates(dateOmap, date1, date2):
     frequency_fun = md.FrequencyInMapAndFrequentKey('StateIndex')
     stateFrequencyAndMfDate = md.operationRangeOmp(dateOmap, date1, date2, frequency_fun, freqAndFrequencyForm)
     mostFrequentState = md.operationSetMp(stateFrequencyAndMfDate['map'], md.FrequentMp, md.MakeMaxFormat(False))
-    return {'mstDate': stateFrequencyAndMfDate['KeyFrequent'], 'mstState': mostFrequentState}
+    mostFreqDateAndMostFreqState = {'mstDate': stateFrequencyAndMfDate['KeyFrequent'], 'mstState': mostFrequentState}
+    return mostFreqDateAndMostFreqState
 
 
 def severityFrequencyListInRgHours(timeOmap, time1, time2):
