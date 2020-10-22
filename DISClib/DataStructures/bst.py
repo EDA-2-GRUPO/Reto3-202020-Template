@@ -820,6 +820,7 @@ def keysRange(root, keylo, keyhi, lstkeys, cmpfunction):
                 keysRange(root['left'], keylo, keyhi, lstkeys, cmpfunction)
             if ((complo <= 0) and (comphi >= 0)):
                 lt.addLast(lstkeys, root['key'])
+                
             if (comphi > 0):
                 keysRange(root['right'], keylo, keyhi, lstkeys, cmpfunction)
         return lstkeys
