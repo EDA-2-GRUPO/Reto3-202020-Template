@@ -249,7 +249,7 @@ def main(cont):
                 lat = input("latitud: ")
                 lng = input('longitud: ')
                 distancia = input('distancia: ')
-                # t1 = perf_counter()
+                t1 = perf_counter()
                 print("\nBuscando accidentes en la zona ingresada: \n"
                       f"latitud: {lat}, longitud: {lng}, a una distancia de {distancia}  \n")
                 weekdayEntry = cnt.weekdayFrequencyListInArea(zoneIndex, lat, lng, distancia)

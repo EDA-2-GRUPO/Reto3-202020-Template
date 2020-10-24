@@ -177,7 +177,7 @@ def updateIndex(Index, indexKey):
 # Funciones de consulta
 # ==============================
 
-def getDateInfo(dateOmap: mp.newMap, date: datetime):
+def getDateInfo(dateOmap, date):
     """
     Para una fecha devuelve una lista de la cantidad de
     accidentes por severidad y el total de accidentes
