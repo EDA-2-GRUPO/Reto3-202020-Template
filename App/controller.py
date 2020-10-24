@@ -97,7 +97,8 @@ def MstFreqDateAndMstFreqStateInRgDates(dateOmap, date1, date2):
 
 
 def severityFrequencyListInRgHours(timeOmap, time1, time2):
-    return md.severityFrequencyListInRgHours(timeOmap, time1, time2)
+    time1, time2 = proxyTime(time1), proxyTime(time2)
+    return {'result': md.severityFrequencyListInRgHours(timeOmap, time1, time2), 'horas': (time1, time2)}
 
 
 def weekdayFrequencyListInArea(zoneOmap, Lat, Lng, dist):

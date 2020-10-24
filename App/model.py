@@ -25,7 +25,6 @@ from datetime import datetime, time
 # Modulos Curso complementarios de lista, iteradores, y sorting
 from DISClib.DataStructures.liststructure import addLast, newList
 from DISClib.DataStructures import listiterator as it
-from DISClib.Algorithms.Sorting.insertionsort import insertionSort
 # Modulos Curso de mapas Omap y map
 from DISClib.DataStructures import mapstructure as mp
 from DISClib.DataStructures import orderedmapstructure as om
@@ -138,7 +137,7 @@ def updateZoneOmap(ZoneOmap, zoneTuple, weekday):
     Args:
         zoneTuple: tupla con cordenada Latitud, cordenada Longitud
         ZoneOmap: entry con un omap y un conteo de cordenadas
-        weekday: dia del la semana representado del 0 al 6
+        weekday: dia del la semana representado del 1 al 7
     Returns:
 
     """
@@ -507,7 +506,7 @@ def proxyTime(o_time):
     """
     hour = o_time.hour
     minute = o_time.minute
-    if minute <= 30:
+    if minute < 45:
         minute = round(minute / 30) * 30
     elif hour == 23:
         minute = 59

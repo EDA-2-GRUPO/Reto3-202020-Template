@@ -77,7 +77,7 @@ def PrintListEntry(g, pairs):
     iterator = it.newIterator(g)
     for _ in range(g['size']):
         el = it.next(iterator)
-        text = '[ ' + str(el['key']) + ' ]   '
+        text = f"[ {el['key']}  ]   "
         for pair in pairs:
             text += pair[0] + " : " + str(el[pair[1]]) + "  "
         print(text)
@@ -86,7 +86,7 @@ def PrintListEntry(g, pairs):
 def PrintMaxEntry(entry, reference):
     i = 0
     for v in entry.values():
-        print(reference[i], ':', v)
+        print(f'{reference[i]} : {v}')
         i += 1
 
 
@@ -117,7 +117,7 @@ def validacion(cargo, Index, nameIndex):
         print('necesita cargar los datos')
         return False
     elif cnt.sizeOmap(Index) == 0:
-        print('no se ha cargado el ', nameIndex)
+        print(f'no se ha cargado el {nameIndex}')
         return False
     return True
 
@@ -160,7 +160,7 @@ def main(cont):
                     del dateEntry, fecha, t1
                     print('No se encontro la fecha')
                     continue
-                print('para la fecha', fecha, '\n')
+                print(f'para la fecha {fecha} \n')
                 print('|| Accidentes por severidad ||')
                 PrintListEntry(dateEntry['list'], [('accidentes', 'value')])
                 print('total de accidentes', dateEntry['total'])
@@ -177,7 +177,7 @@ def main(cont):
                 t1 = perf_counter()
                 print('...')
                 maxSeverity = cnt.mstFreqDateBfADate(dateIndex, fecha)
-                print('para antes de la fecha: ', fecha, '\n')
+                print(f'para antes de la fecha: {fecha} \n')
                 print('|| fecha con mas accidentes ||')
                 PrintMaxEntry(maxSeverity, ['fecha', 'numero de accidentes', 'total accidentes'])
                 print('')
@@ -194,7 +194,7 @@ def main(cont):
                 t1 = perf_counter()
                 print('...')
                 maxSeverity = cnt.mstFreqSeverityInRgDates(dateIndex, fecha1, fecha2)
-                print('para el rango de fechas: ', fecha1, 'a', fecha2, '\n')
+                print(f'para el rango de fechas: {fecha1} a {fecha2} \n')
                 print('|| Severidad mas frecuente ||')
                 PrintMaxEntry(maxSeverity, ['Severidad', 'numero de accidentes', 'total accidentes'])
                 t2 = perf_counter()
@@ -211,7 +211,7 @@ def main(cont):
                 t1 = perf_counter()
                 print('...')
                 maxStateAndDate = cnt.MstFreqDateAndMstFreqStateInRgDates(dateIndex, fecha1, fecha2)
-                print('para el rango de fechas: ', fecha1, 'a', fecha2, '\n')
+                print(f'para el rango de fechas: {fecha1} a {fecha2} \n')
                 print('|| Estado con mas accidentes ||')
                 PrintMaxEntry(maxStateAndDate['mstState'], ['Estado', 'accidentes'])
                 print('|| Fecha con mas accidentes ||')
@@ -225,12 +225,15 @@ def main(cont):
             if not validacion(cargo, timeIndex, 'timeIndex'):
                 continue
             else:
-                hora1 = cnt.proxyTime(input("time1: "))
-                hora2 = cnt.proxyTime(input('time2: '))
+                hora1 = input("time1: ")
+                hora2 = input('time2: ')
                 t1 = perf_counter()
                 print('...')
-                SeverityEntry = cnt.severityFrequencyListInRgHours(timeIndex, hora1, hora2)
-                print(f'para el rango de horas:  {hora1} a {hora2} \n')
+                r4 = cnt.severityFrequencyListInRgHours(timeIndex, hora1, hora2)
+                SeverityEntry = r4['result']
+                Haj = r4['horas']
+                print(f'para el rango de horas:  {hora1} a {hora2}')
+                print(f'ajustadas como {Haj[0]}  a {Haj[1]}\n')
                 print('|| Accidentes por severidad ||')
                 PrintListEntry(SeverityEntry['list'], [('accidentes', 'value'), ('porcentaje', 'percent')])
                 print('total de accidentes', SeverityEntry['total'])
@@ -246,8 +249,9 @@ def main(cont):
                 lat = input("latitud: ")
                 lng = input('longitud: ')
                 distancia = input('distancia: ')
-                t1 = perf_counter()
-                print("\nBuscando accidentes en la zona ingresada: \n")
+                # t1 = perf_counter()
+                print("\nBuscando accidentes en la zona ingresada: \n"
+                      f"latitud: {lat}, longitud: {lng}, a una distancia de {distancia}  \n")
                 weekdayEntry = cnt.weekdayFrequencyListInArea(zoneIndex, lat, lng, distancia)
                 print('|| Accidentes por dia de la semana||')
                 PrintListEntry(weekdayEntry['list'], [('accidentes', 'value')])
