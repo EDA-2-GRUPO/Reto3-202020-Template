@@ -59,8 +59,7 @@ def newAnalyzer(tipo):
     analyzer = {'numAccidents': 0,
                 'dateIndex': om.newMap(omaptype=tipo, comparefunction=compareOmpLst),
                 'timeIndex': om.newMap(omaptype=tipo, comparefunction=compareOmpLst),
-                'ZoneIndexLatLng': {'DoubleMap': om.newMap(omaptype=tipo, comparefunction=compareOmpLst),
-                                    'num_zones': 0}
+                'ZoneIndexLatLng': om.newMap(omaptype=tipo, comparefunction=compareOmpLst)
                 }
 
     return analyzer
@@ -77,8 +76,8 @@ def addAccident(analyzer, accident):
     analyzer['numAccidents'] += 1
     updateDateOmap(analyzer['dateIndex'], occurredTf.date(), SevKey, accident['State'])
     updateTimeOmap(analyzer['timeIndex'], HoursAndMinutes(occurredTf.time()), SevKey)
-    # updateZoneDoubleOmap(analyzer['ZoneIndexLatLng'], float(accident['Start_Lat']), float(accident['Start_Lng']),
-    #                      occurredTf.weekday())
+    updateZoneOmap(analyzer['ZoneIndexLatLng'], (float(accident['Start_Lat']), float(accident['Start_Lng'])),
+                   occurredTf.weekday())
     return analyzer
 
 
@@ -94,18 +93,18 @@ def updateDateOmap(omap, occurredDate, SevKey, stateKey):
     Returns:
 
     """
-    entry = om.get(omap, occurredDate)
+    dateRoot = om.get(omap, occurredDate)
 
-    if entry:
-        dateEntry = entry['value']  # lo correcto es me.getValue(entry), se usa para optimizar de aqui en adelante
+    if dateRoot:
+        dateValue = dateRoot['value']  # lo correcto es me.getValue(entry), se usa para optimizar de aqui en adelante
     else:
-        dateEntry = {'SeverityIndex': MakeMapFormat(2, ints=True), 'StateIndex': MakeMapFormat(23, 'CHAINING'),
+        dateValue = {'SeverityIndex': MakeMapFormat(2, ints=True), 'StateIndex': MakeMapFormat(23, 'CHAINING'),
                      'numAccidents': 0}
-        om.put(omap, occurredDate, dateEntry)
+        om.put(omap, occurredDate, dateValue)
 
-    dateEntry['numAccidents'] += 1
-    updateIndex(dateEntry['SeverityIndex'], SevKey)
-    updateIndex(dateEntry['StateIndex'], stateKey)
+    dateValue['numAccidents'] += 1
+    updateIndex(dateValue['SeverityIndex'], SevKey)
+    updateIndex(dateValue['StateIndex'], stateKey)
 
     return omap
 
@@ -122,47 +121,39 @@ def updateTimeOmap(omap, occurredTime, SevKey):
 
     """
 
-    entry = om.get(omap, occurredTime)
-    if entry:
-        timeEntry = entry['value']
+    timeRoot = om.get(omap, occurredTime)
+    if timeRoot:
+        timeValue = timeRoot['value']
     else:
-        timeEntry = {'SeverityIndex': MakeMapFormat(2, ints=True), 'numAccidents': 0}
-        om.put(omap, occurredTime, timeEntry)
+        timeValue = {'SeverityIndex': MakeMapFormat(2, ints=True), 'numAccidents': 0}
+        om.put(omap, occurredTime, timeValue)
 
-    timeEntry['numAccidents'] += 1
-    updateIndex(timeEntry['SeverityIndex'], SevKey)
+    timeValue['numAccidents'] += 1
+    updateIndex(timeValue['SeverityIndex'], SevKey)
 
     return omap
 
 
-def updateZoneDoubleOmap(LatLng, Latitude, Longitude, weekday):
+def updateZoneOmap(ZoneOmap, zoneTuple, weekday):
     """
     Args:
-        LatLng: entry con un omap y un conteo de cordenadas
-        Latitude: cordenada Latitud
-        Longitude: cordenada Longitud
+        zoneTuple: tupla con cordenada Latitud, cordenada Longitud
+        ZoneOmap: entry con un omap y un conteo de cordenadas
         weekday: dia del la semana representado del 0 al 6
     Returns:
 
     """
-    DoubleOmp = LatLng['DoubleMap']
-    entryLt = om.get(DoubleOmp, Latitude)
+    zoneRoot = om.get(ZoneOmap, zoneTuple)
 
-    if entryLt:
-        LtEntry = entryLt['value']
+    if zoneRoot:
+        zoneValue = zoneRoot['value']
     else:
-        LtEntry = om.newMap(DoubleOmp['type'], compareOmpLst)
-        om.put(DoubleOmp, Latitude, LtEntry)
-    entryLng = om.get(LtEntry, Longitude)
-    if entryLng:
-        LngEntry = entryLng['value']
-    else:
-        LngEntry = {'weekdayIndex': MakeMapFormat(2, 'CHAINING'), 'numAccidents': 0}
-        om.put(LtEntry, Longitude, LngEntry)
-        LatLng['num_zones'] += 1
-    LngEntry['numAccidents'] += 1
-    updateIndex(LngEntry['weekdayIndex'], weekday)
-    return DoubleOmp
+        zoneValue = {'weekdayIndex': MakeMapFormat(1, 'CHAINING'), 'numAccidents': 0}
+        om.put(ZoneOmap, zoneTuple, zoneValue)
+
+    zoneValue['numAccidents'] += 1
+    updateIndex(zoneValue['weekdayIndex'], weekday)
+    return zoneRoot
 
 
 def updateIndex(Index, indexKey):
@@ -288,8 +279,8 @@ def weekdayFrequencyListInArea(zoneOmap, Lat, Lng, dist):
     Returns:
         Entry con la lista y el total
     """
-    cir_fun = sndCircleRangeDobOmap(Lat, Lng, dist, frequencyInMapForOmp('weekdayIndex'))
-    weekdayFrequency = Op_om.operationRange(zoneOmap, Lat - dist, Lat + dist, cir_fun, MakeMapFormat(3, ints=True))
+    cir_fun = inTupleRange(Lat, Lng, dist, 'weekdayIndex')
+    weekdayFrequency = Op_om.operationRange(zoneOmap, (Lat - dist, Lng), (Lat + dist, Lng), cir_fun, MakeMapFormat(3, ints=True))
     weekdayListAndTotal = Op_mp.operationSet(weekdayFrequency, makeListAndTotalMp, MakeListFormat())
     insertionSort(weekdayListAndTotal['list'], orderByKey)
     weekdayFromIntToStr(weekdayListAndTotal['list'])
@@ -373,26 +364,15 @@ def FrequencyInMapAndFrequentKey(mapIndex):
     return resultFunc
 
 
-def sndCircleRangeDobOmap(x, y, distance, secondOperation):
-    """
-    Funcion axuliar para crear una operacion en un DobleOmap (order map dentro de order map)
-    para un rango dado que representa un 'circulo', definido por una key en el primer order map (x),
-    una key en el segundo (y), y un radio
-    Args:
-        x: cordenada x (primer order map)
-        y: cordenada y (segundo order map)
-        distance: radio en el que se busca
-        secondOperation: operacion que se quiere realizar en el segundo Omap
-
-    """
-
+def inTupleRange(x, y, distance, mapIndex):
     def resultFunction(root, frequencyEntry):
         """
         root: rama de un omap
         frequencyEntry: map ADT
         """
-        move = sqrt(distance ** 2 - (root['key'] - x) ** 2)
-        Op_om.operationRange(root['value'], y - move, y + move, secondOperation, frequencyEntry)
+        tkey = root['key']
+        if (tkey[0] - x) ** 2 + (tkey[1] - y) ** 2 <= distance ** 2:
+            Op_mp.operationSet(root['value'][mapIndex], frequencyInMap, frequencyEntry)
         return frequencyEntry
 
     return resultFunction

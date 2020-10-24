@@ -109,9 +109,8 @@ def infoPrints():
     print('altura del dateIndex: ', cnt.heightOmap(dateIndex))
     print('Cantidad de Horas registradas: ', cnt.sizeOmap(timeIndex))
     print('altura del TimeIndex: ', cnt.heightOmap(timeIndex))
-    print('Cantidad de cordenadas registradas: ', zoneIndex['num_zones'])
-    print('Cantidad de Latitudes registradas', cnt.sizeOmap(zoneIndex['DoubleMap']))
-    print('altura del primer Omap Latitude: ', cnt.heightOmap(zoneIndex['DoubleMap']))
+    print('Cantidad de cordenadas registradas: ', cnt.sizeOmap(zoneIndex))
+    print('altura del zoneIndex: ', cnt.heightOmap(zoneIndex))
 
 
 def validacion(cargo, Index, nameIndex):
@@ -232,7 +231,7 @@ def main(cont):
                 t1 = perf_counter()
                 print('...')
                 SeverityEntry = cnt.severityFrequencyListInRgHours(timeIndex, hora1, hora2)
-                print('para el rango de horas: ', hora1, 'a', hora2, '\n')
+                print(f'para el rango de horas:  {hora1} a {hora2} \n')
                 print('|| Accidentes por severidad ||')
                 PrintListEntry(SeverityEntry['list'], [('accidentes', 'value'), ('porcentaje', 'percent')])
                 print('total de accidentes', SeverityEntry['total'])
@@ -242,7 +241,7 @@ def main(cont):
                 del hora1, hora2, SeverityEntry, t1, t2
 
         elif intp == '6':
-            if not validacion(cargo, zoneIndex['DoubleMap'], 'zoneIndex'):
+            if not validacion(cargo, zoneIndex, 'zoneIndex'):
                 continue
             else:
                 lat = input("latitud: ")
@@ -250,7 +249,7 @@ def main(cont):
                 distancia = input('distancia: ')
                 t1 = perf_counter()
                 print("\nBuscando accidentes en la zona ingresada: \n")
-                weekdayEntry = cnt.weekdayFrequencyListInArea(zoneIndex['DoubleMap'], lat, lng, distancia)
+                weekdayEntry = cnt.weekdayFrequencyListInArea(zoneIndex, lat, lng, distancia)
                 print('|| Accidentes por dia de la semana||')
                 PrintListEntry(weekdayEntry['list'], [('accidentes', 'value')])
                 print('total de accidentes :', weekdayEntry['total'])
