@@ -26,6 +26,7 @@ from datetime import datetime, time
 # Modulos Curso complementarios de lista, iteradores, y sorting
 from DISClib.DataStructures.liststructure import addLast, newList
 from DISClib.DataStructures import listiterator as it
+from DISClib.Algorithms.Sorting.insertionsort import insertionSort
 # Modulos Curso de mapas Omap y map
 from DISClib.DataStructures import mapstructure as mp
 from DISClib.DataStructures import orderedmapstructure as om
@@ -98,7 +99,7 @@ def updateDateOmap(omap, occurredDate, SevKey, stateKey):
     if entry:
         dateEntry = entry['value']  # lo correcto es me.getValue(entry), se usa para optimizar de aqui en adelante
     else:
-        dateEntry = {'SeverityIndex': MakeMapFormat(4), 'StateIndex': MakeMapFormat(40, 'CHAINING'),
+        dateEntry = {'SeverityIndex': MakeMapFormat(2, ints=True), 'StateIndex': MakeMapFormat(23, 'CHAINING'),
                      'numAccidents': 0}
         om.put(omap, occurredDate, dateEntry)
 
@@ -125,7 +126,7 @@ def updateTimeOmap(omap, occurredTime, SevKey):
     if entry:
         timeEntry = entry['value']
     else:
-        timeEntry = {'SeverityIndex': MakeMapFormat(4), 'numAccidents': 0}
+        timeEntry = {'SeverityIndex': MakeMapFormat(2, ints=True), 'numAccidents': 0}
         om.put(omap, occurredTime, timeEntry)
 
     timeEntry['numAccidents'] += 1
@@ -136,13 +137,11 @@ def updateTimeOmap(omap, occurredTime, SevKey):
 
 def updateZoneDoubleOmap(LatLng, Latitude, Longitude, weekday):
     """
-
     Args:
         LatLng: entry con un omap y un conteo de cordenadas
         Latitude: cordenada Latitud
         Longitude: cordenada Longitud
         weekday: dia del la semana representado del 0 al 6
-
     Returns:
 
     """
@@ -154,20 +153,15 @@ def updateZoneDoubleOmap(LatLng, Latitude, Longitude, weekday):
     else:
         LtEntry = om.newMap(DoubleOmp['type'], compareOmpLst)
         om.put(DoubleOmp, Latitude, LtEntry)
-
     entryLng = om.get(LtEntry, Longitude)
-
     if entryLng:
         LngEntry = entryLng['value']
-
     else:
-        LngEntry = {'weekdayIndex': MakeMapFormat(7), 'numAccidents': 0}
+        LngEntry = {'weekdayIndex': MakeMapFormat(2, 'CHAINING'), 'numAccidents': 0}
         om.put(LtEntry, Longitude, LngEntry)
         LatLng['num_zones'] += 1
-
     LngEntry['numAccidents'] += 1
     updateIndex(LngEntry['weekdayIndex'], weekday)
-
     return DoubleOmp
 
 
@@ -194,67 +188,112 @@ def updateIndex(Index, indexKey):
 # Funciones de consulta
 # ==============================
 
-def getDateValue(dateOmap, date):
+def getDateInfo(dateOmap: mp.newMap, date: datetime):
     """
-
+    Para una fecha devuelve una lista de la cantidad de
+    accidentes por severidad y el total de accidentes
     Args:
-        dateOmap: Oreder map
-        date: fecha
+        dateOmap: Order map organizado por fechas
+        date: datetime de la fecha
+
     Returns:
-        valor asociado a la fecha
+        Entry con la lista y el total
     """
     dateRoot = om.get(dateOmap, date)
-    if not dateRoot:
+    if dateRoot is None:
         return None
-    return dateRoot['value']
+    dateEntry = dateRoot['value']
+    severityList = Op_mp.operationSet(dateEntry['SeverityIndex'], makeListMp, newList('ARRAY_LIST'))
+    severityListAndTotal = {'list': severityList, 'total': dateEntry['numAccidents']}
+    return severityListAndTotal
 
 
-def operationBeforeOmp(omap, key_bef, operation, returnEntry):
+def mstFreqDateBfADate(dateOmap, before_date):
     """
-    Realiza la operation indicada en las ramas del order map que tengan la llave
-    antes del key_bef ingresado y retorna el entry modificado con las operaciones realizadas
+    Para una serie de fechas antes de la fecha indicada, se calcula la
+    que tiene mayor cantidad de accidentes y el total de accidentes en la
+    serie de fechas
     Args:
-        omap: mapa ordenado
-        key_bef: llave de limite superior
-        operation: funcion a ejecutar en las ramas
-        returnEntry: formato del retorno
-
+        dateOmap: Order map organizado por fechas
+        before_date: datetime de la fecha
     Returns:
-        returnEntry modificado
+        entry con la fecha el numero de accidentes en esa fecha, y total
     """
-    return Op_om.operationBefore(omap, key_bef, operation, returnEntry)
+    mstFreqDate = Op_om.operationBefore(dateOmap, before_date, TotalAndFrequentOmp, MakeMaxFormat(True))
+    return mstFreqDate
 
 
-def operationRangeOmp(omap, keylo, keyhi, operation, returnEntry):
+def mstFreqSeverityInRgDates(dateOmap, date1, date2):
     """
-    Realiza la operation indicada en las ramas del order map que tengan el
-    key el rango de keylo y keyhi y retorna el entry modificado con las operaciones realizadas
+    Para un rango de fechas calcula la severidad mas frecuente y el
+    total de accidentes
     Args:
-        omap: mapa ordenado
-        keylo: limite inferior
-        keyhi: limite superior
-        operation: funcion a ejecutar en las ramas
-        returnEntry: formato del retorno
-
+        dateOmap: Order map organizado por fechas
+        date1:  datetime de la fecha de la primera fecha
+        date2:  datetime de la fecha de la segunda fecha
     Returns:
-        returnEntry modificado
-    """
-    return Op_om.operationRange(omap, keylo, keyhi, operation, returnEntry)
+        entry con la fecha el numero de accidentes en esa fecha, y total
 
 
-def operationSetMp(hMap, operation, returnEntry):
     """
-    Realiza la operation indicada en las entradas del map hash
+    frequency_fun = frequencyInMapForOmp('SeverityIndex')
+    severityFrequency = Op_om.operationRange(dateOmap, date1, date2, frequency_fun, MakeMapFormat(2, ints=True))
+    mstFreqSeverity = Op_mp.operationSet(severityFrequency, TotalAndFrequentMp, MakeMaxFormat(True))
+    return mstFreqSeverity
+
+
+def MstFreqDateAndMstFreqStateInRgDates(dateOmap, date1, date2):
+    """
+    Para un rango de fechas retorna la fecha con mas accidentes y el
+    estado con mas accidentes
     Args:
-        hMap: El map
-        returnEntry: formato del retorno
-        operation: operacion a realizar
+        dateOmap: Order map organizado por fechas
+        date1:  datetime de la fecha de la primera fecha
+        date2:  datetime de la fecha de la segunda fecha
     Returns:
-        returnEntry modificado
-    Raises:
-        Exception
+        dobleentry con un entry con la fecha el numero de accidentes en esa fecha
+        y un entry con el estado el numero de accidentes en ese estado
     """
-    return Op_mp.operationSet(hMap, operation, returnEntry)
+    frequency_fun = FrequencyInMapAndFrequentKey('StateIndex')
+    freqAndFrequencyForm = {'KeyFrequent': MakeMaxFormat(False), 'map': MakeMapFormat(40)}
+    stateFrequencyAndMfDate = Op_om.operationRange(dateOmap, date1, date2, frequency_fun, freqAndFrequencyForm)
+    mostFrequentState = Op_mp.operationSet(stateFrequencyAndMfDate['map'], FrequentMp, MakeMaxFormat(False))
+    mostFreqDateAndMostFreqState = {'mstDate': stateFrequencyAndMfDate['KeyFrequent'], 'mstState': mostFrequentState}
+    return mostFreqDateAndMostFreqState
+
+
+def severityFrequencyListInRgHours(timeOmap, time1, time2):
+    """
+    Para un rango de horas devuelve una lista de la cantidad de
+    accidentes por severidad y el total de accidentes
+    Args:
+        timeOmap: Order map organizado por horas
+        time1: time de la hora 1
+        time2: time de la hora 2
+    Returns:
+        Entry con la lista y el total
+    """
+    frequency_fun = frequencyInMapForOmp('SeverityIndex')
+    severityFrequency = Op_om.operationRange(timeOmap, time1, time2, frequency_fun, MakeMapFormat(2, ints=True))
+    severityListAndTotal = Op_mp.operationSet(severityFrequency, makeListAndTotalMp, MakeListFormat())
+    AddPercents(severityListAndTotal)
+    return severityListAndTotal
+
+
+def weekdayFrequencyListInArea(zoneOmap, Lat, Lng, dist):
+    """
+    Para un area definida por una latitud una longitud y una distancia devuelve una
+    lista de la cantidad de accidentes por severidad y el total de accidentes
+    Args:
+    Returns:
+        Entry con la lista y el total
+    """
+    cir_fun = sndCircleRangeDobOmap(Lat, Lng, dist, frequencyInMapForOmp('weekdayIndex'))
+    weekdayFrequency = Op_om.operationRange(zoneOmap, Lat - dist, Lat + dist, cir_fun, MakeMapFormat(3, ints=True))
+    weekdayListAndTotal = Op_mp.operationSet(weekdayFrequency, makeListAndTotalMp, MakeListFormat())
+    insertionSort(weekdayListAndTotal['list'], orderByKey)
+    weekdayFromIntToStr(weekdayListAndTotal['list'])
+    return weekdayListAndTotal
 
 
 # ==============================
@@ -297,6 +336,7 @@ def frequencyInMapForOmp(mapIndex):
     Args:
         mapIndex: el indice del mapa buscado
     """
+
     def resultFunc(root, frequencyEntry):
         """
         root: rama de un omap
@@ -315,6 +355,7 @@ def FrequencyInMapAndFrequentKey(mapIndex):
     Args:
         mapIndex: el indice del mapa
     """
+
     def resultFunc(root, mapAndMaxEntry):
         """
         root: rama de un omap
@@ -344,6 +385,7 @@ def sndCircleRangeDobOmap(x, y, distance, secondOperation):
         secondOperation: operacion que se quiere realizar en el segundo Omap
 
     """
+
     def resultFunction(root, frequencyEntry):
         """
         root: rama de un omap
@@ -450,8 +492,8 @@ def MakeMaxFormat(Total=False):
         return {'key': None, 'value': -1}
 
 
-def MakeMapFormat(els, Type='PROBING'):
-    return mp.newMap(els, maptype=Type, comparefunction=compareMp)
+def MakeMapFormat(els, Type='PROBING', ints=False):
+    return mp.newMap(els, maptype=Type, comparefunction=compareMp, ints=ints)
 
 
 def MakeListFormat(Type='ARRAY_LIST'):

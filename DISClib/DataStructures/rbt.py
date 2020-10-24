@@ -117,7 +117,7 @@ def remove(rbt, key):
     """
     try:
         root = rbt['root']
-        if ((not isRed(root['left'])) and (not isRed(root['right']))):
+        if (not isRed(root['left'])) and (not isRed(root['right'])):
             root['color'] = node.RED
 
         rbt['root'] = removeKey(root, key, rbt['cmpfunction'])
@@ -143,10 +143,10 @@ def contains(rbt, key):
         Exception
     """
     try:
-        if (rbt['root'] is None):
+        if rbt['root'] is None:
             return False
         else:
-            return (get(rbt, key) is not None)
+            return get(rbt, key) is not None
     except Exception as exp:
         error.reraise(exp, 'RBT: contains')
 
@@ -178,7 +178,7 @@ def isEmpty(rbt):
         Exception
     """
     try:
-        return (rbt['root'] is None)
+        return rbt['root'] is None
     except Exception as exp:
         error.reraise(exp, 'Bst:isempty')
 

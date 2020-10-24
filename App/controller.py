@@ -20,7 +20,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  """
 import config as cf
-from DISClib.Algorithms.Sorting.insertionsort import insertionSort
 from App import model as md
 from datetime import datetime, time
 import csv
@@ -79,56 +78,31 @@ def loadData(analyzer, list_files):
 
 def getDateInfo(dateOmap, date):
     date = strToDatetime(date)
-    dateEntry = md.getDateValue(dateOmap, date)
-    if dateEntry is None:
-        return None
-    severityList = md.operationSetMp(dateEntry['SeverityIndex'], md.makeListMp, md.newList('ARRAY_LIST'))
-    insertionSort(severityList, md.orderByKey)
-    severityListAndTotal = {'list': severityList, 'total': dateEntry['numAccidents']}
-    return severityListAndTotal
+    return md.getDateInfo(dateOmap, date)
 
 
 def mstFreqDateBfADate(dateOmap, before_date):
     before_date = strToDatetime(before_date)
-    mstFreqDate = md.operationBeforeOmp(dateOmap, before_date, md.TotalAndFrequentOmp, md.MakeMaxFormat(True))
-    return mstFreqDate
+    return md.mstFreqDateBfADate(dateOmap, before_date)
 
 
 def mstFreqSeverityInRgDates(dateOmap, date1, date2):
     date1, date2 = strToDatetime(date1), strToDatetime(date2)
-    frequency_fun = md.frequencyInMapForOmp('SeverityIndex')
-    severityFrequency = md.operationRangeOmp(dateOmap, date1, date2, frequency_fun, md.MakeMapFormat(3))
-    mstFreqSeverity = md.operationSetMp(severityFrequency, md.TotalAndFrequentMp, md.MakeMaxFormat(True))
-    return mstFreqSeverity
+    return md.mstFreqSeverityInRgDates(dateOmap, date1, date2)
 
 
 def MstFreqDateAndMstFreqStateInRgDates(dateOmap, date1, date2):
     date1, date2 = strToDatetime(date1), strToDatetime(date2)
-    freqAndFrequencyForm = {'KeyFrequent': md.MakeMaxFormat(False), 'map': md.MakeMapFormat(40)}
-    frequency_fun = md.FrequencyInMapAndFrequentKey('StateIndex')
-    stateFrequencyAndMfDate = md.operationRangeOmp(dateOmap, date1, date2, frequency_fun, freqAndFrequencyForm)
-    mostFrequentState = md.operationSetMp(stateFrequencyAndMfDate['map'], md.FrequentMp, md.MakeMaxFormat(False))
-    mostFreqDateAndMostFreqState = {'mstDate': stateFrequencyAndMfDate['KeyFrequent'], 'mstState': mostFrequentState}
-    return mostFreqDateAndMostFreqState
+    return md.MstFreqDateAndMstFreqStateInRgDates(dateOmap, date1, date2)
 
 
 def severityFrequencyListInRgHours(timeOmap, time1, time2):
-    frequency_fun = md.frequencyInMapForOmp('SeverityIndex')
-    severityFrequency = md.operationRangeOmp(timeOmap, time1, time2, frequency_fun, md.MakeMapFormat(3))
-    severityListAndTotal = md.operationSetMp(severityFrequency, md.makeListAndTotalMp, md.MakeListFormat())
-    insertionSort(severityListAndTotal['list'], md.orderByKey)
-    md.AddPercents(severityListAndTotal)
-    return severityListAndTotal
+    return md.severityFrequencyListInRgHours(timeOmap, time1, time2)
 
 
 def weekdayFrequencyListInArea(zoneOmap, Lat, Lng, dist):
     Lat, Lng, dist = float(Lat), float(Lng), float(dist)
-    cir_fun = md.sndCircleRangeDobOmap(Lat, Lng, dist, md.frequencyInMapForOmp('weekdayIndex'))
-    weekdayFrequency = md.operationRangeOmp(zoneOmap, Lat - dist, Lat + dist, cir_fun, md.MakeMapFormat(7))
-    weekdayListAndTotal = md.operationSetMp(weekdayFrequency, md.makeListAndTotalMp, md.MakeListFormat())
-    insertionSort(weekdayListAndTotal['list'], md.orderByKey)
-    md.weekdayFromIntToStr(weekdayListAndTotal['list'])
-    return weekdayListAndTotal
+    return md.weekdayFrequencyListInArea(zoneOmap, Lat, Lng, dist)
 
 
 def heightOmap(omap):

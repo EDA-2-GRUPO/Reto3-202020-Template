@@ -86,8 +86,8 @@ def operationBefore(omap, key_bef, operation, returnEntry={}):
 def operationSetTree(root, operation, returnEntry):
     try:
         if root is not None:
-            operationSetTree(root['left'], operation, returnEntry)
             operation(root, returnEntry)
+            operationSetTree(root['left'], operation, returnEntry)
             operationSetTree(root['right'], operation, returnEntry)
         return returnEntry
     except Exception as exp:
