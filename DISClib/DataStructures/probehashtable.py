@@ -97,7 +97,7 @@ def put(map, key, value):
         Exception
     """
     if map['ints']:
-        hashv = hash(key) % map['capacity']
+        hashv = key
     else:
         hashv = hashValue(map, key)  # Se obtiene el hascode de la llave
     entry = me.newMapEntry(key, value)
@@ -140,7 +140,7 @@ def get(map, key):
         Exception
     """
     if map['ints']:
-        hashv = key % map['capacity']
+        hashv = key
     else:
         hashv = hashValue(map, key)
     pos = findSlot(map, key, hashv, map['comparefunction'])

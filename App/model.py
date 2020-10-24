@@ -21,7 +21,6 @@
  """
 import config
 # Modulos externos nativos
-from math import sqrt
 from datetime import datetime, time
 # Modulos Curso complementarios de lista, iteradores, y sorting
 from DISClib.DataStructures.liststructure import addLast, newList
@@ -77,7 +76,7 @@ def addAccident(analyzer, accident):
     updateDateOmap(analyzer['dateIndex'], occurredTf.date(), SevKey, accident['State'])
     updateTimeOmap(analyzer['timeIndex'], HoursAndMinutes(occurredTf.time()), SevKey)
     updateZoneOmap(analyzer['ZoneIndexLatLng'], (float(accident['Start_Lat']), float(accident['Start_Lng'])),
-                   occurredTf.weekday())
+                   occurredTf.weekday() + 1)
     return analyzer
 
 
@@ -148,7 +147,7 @@ def updateZoneOmap(ZoneOmap, zoneTuple, weekday):
     if zoneRoot:
         zoneValue = zoneRoot['value']
     else:
-        zoneValue = {'weekdayIndex': MakeMapFormat(1, 'CHAINING'), 'numAccidents': 0}
+        zoneValue = {'weekdayIndex': MakeMapFormat(1, 'CHAINING', True), 'numAccidents': 0}
         om.put(ZoneOmap, zoneTuple, zoneValue)
 
     zoneValue['numAccidents'] += 1
@@ -245,7 +244,7 @@ def MstFreqDateAndMstFreqStateInRgDates(dateOmap, date1, date2):
         dobleentry con un entry con la fecha el numero de accidentes en esa fecha
         y un entry con el estado el numero de accidentes en ese estado
     """
-    frequency_fun = FrequencyInMapAndFrequentKey('StateIndex')
+    frequency_fun = FrequencyInMapAndFrequentKeyForOmp('StateIndex')
     freqAndFrequencyForm = {'KeyFrequent': MakeMaxFormat(False), 'map': MakeMapFormat(40)}
     stateFrequencyAndMfDate = Op_om.operationRange(dateOmap, date1, date2, frequency_fun, freqAndFrequencyForm)
     mostFrequentState = Op_mp.operationSet(stateFrequencyAndMfDate['map'], FrequentMp, MakeMaxFormat(False))
@@ -271,7 +270,7 @@ def severityFrequencyListInRgHours(timeOmap, time1, time2):
     return severityListAndTotal
 
 
-def weekdayFrequencyListInArea(zoneOmap, Lat, Lng, dist):
+def weekdayFrequencyListInArea(zoneOmap, cPoint, dist):
     """
     Para un area definida por una latitud una longitud y una distancia devuelve una
     lista de la cantidad de accidentes por severidad y el total de accidentes
@@ -279,10 +278,11 @@ def weekdayFrequencyListInArea(zoneOmap, Lat, Lng, dist):
     Returns:
         Entry con la lista y el total
     """
-    cir_fun = inTupleRange(Lat, Lng, dist, 'weekdayIndex')
-    weekdayFrequency = Op_om.operationRange(zoneOmap, (Lat - dist, Lng), (Lat + dist, Lng), cir_fun, MakeMapFormat(3, ints=True))
+    cir_fun = frequencyInMapForOmpTupleInCircleRange(cPoint, dist, 'weekdayIndex')
+    point1, point2 = (cPoint[0] - dist, cPoint[1]), (cPoint[0] + dist, cPoint[1])
+    weekdayFrequency = Op_om.operationRange(zoneOmap, point1, point2, cir_fun, MakeMapFormat(3, ints=True))
+    print(weekdayFrequency)
     weekdayListAndTotal = Op_mp.operationSet(weekdayFrequency, makeListAndTotalMp, MakeListFormat())
-    insertionSort(weekdayListAndTotal['list'], orderByKey)
     weekdayFromIntToStr(weekdayListAndTotal['list'])
     return weekdayListAndTotal
 
@@ -339,7 +339,7 @@ def frequencyInMapForOmp(mapIndex):
     return resultFunc
 
 
-def FrequencyInMapAndFrequentKey(mapIndex):
+def FrequencyInMapAndFrequentKeyForOmp(mapIndex):
     """
     Funcion axuliar que es la union de frequencyInMapForOmp y TotalAndFrequentOmap, sin realizar
     el conteo total
@@ -364,14 +364,25 @@ def FrequencyInMapAndFrequentKey(mapIndex):
     return resultFunc
 
 
-def inTupleRange(x, y, distance, mapIndex):
+def frequencyInMapForOmpTupleInCircleRange(point, distance, mapIndex):
+    """
+    Crea una funcion auxiliar para hallar la frecuencia acumulada de los maps,
+    vistos como histogramas, dentro de en un Order map ordenado por tuplas cordenadas,
+    para una Area representa un
+    por un 'circulo', definido por un punto (point), y una distncia
+    Args:
+        point: tupla con cordenada x, y
+        distance: radio en el que se busca
+        mapIndex:
+    """
+
     def resultFunction(root, frequencyEntry):
         """
         root: rama de un omap
         frequencyEntry: map ADT
         """
         tkey = root['key']
-        if (tkey[0] - x) ** 2 + (tkey[1] - y) ** 2 <= distance ** 2:
+        if (tkey[0] - point[0]) ** 2 + (tkey[1] - point[1]) ** 2 <= distance ** 2:
             Op_mp.operationSet(root['value'][mapIndex], frequencyInMap, frequencyEntry)
         return frequencyEntry
 
@@ -533,7 +544,7 @@ def weekdayFromIntToStr(weekdayList):
     iterator = it.newIterator(weekdayList)
     for _ in range(weekdayList['size']):
         el = it.next(iterator)
-        el['key'] = weekday_list[el['key']]
+        el['key'] = weekday_list[el['key'] - 1]
     return weekdayList
 
 

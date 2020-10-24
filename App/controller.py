@@ -102,7 +102,7 @@ def severityFrequencyListInRgHours(timeOmap, time1, time2):
 
 def weekdayFrequencyListInArea(zoneOmap, Lat, Lng, dist):
     Lat, Lng, dist = float(Lat), float(Lng), float(dist)
-    return md.weekdayFrequencyListInArea(zoneOmap, Lat, Lng, dist)
+    return md.weekdayFrequencyListInArea(zoneOmap, (Lat, Lng), dist)
 
 
 def heightOmap(omap):

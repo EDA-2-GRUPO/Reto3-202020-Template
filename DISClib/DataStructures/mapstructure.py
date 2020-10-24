@@ -60,7 +60,7 @@ def newMap(numelements=17,
         return cht.newMap(numelements,
                           prime,
                           loadfactor,
-                          comparefunction)
+                          comparefunction, ints)
     else:
         return pht.newMap(numelements,
                           prime,

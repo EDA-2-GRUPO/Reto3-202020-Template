@@ -45,7 +45,7 @@ Este código está basado en las implementaciones propuestas en:
 """
 
 
-def newMap(numelements, prime, loadfactor, cmpfunction):
+def newMap(numelements, prime, loadfactor, cmpfunction, ints):
     """Crea una tabla de simbolos (map) sin orden
 
     Crea una tabla de hash con capacidad igual a nuelements
@@ -75,6 +75,7 @@ def newMap(numelements, prime, loadfactor, cmpfunction):
                  'scale': scale,
                  'shift': shift,
                  'table': table,
+                 'ints': ints,
                  'size': 0,
                  'comparefunction': cmpfunction,
                  'type': 'CHAINING'}
@@ -115,8 +116,11 @@ def put(map, key, value):
     Raises:
         Exception
     """
-    hash = hashValue(map, key)
-    bucket = lt.getElement(map['table'], hash)
+    if map['ints']:
+        hashv = key % map['capacity']
+    else:
+        hashv = hashValue(map, key)
+    bucket = lt.getElement(map['table'], hashv)
     entry = me.newMapEntry(key, value)
     pos = lt.isPresent(bucket, key)
     if pos > 0:    # La pareja ya exista, se reemplaza el valor
@@ -138,8 +142,11 @@ def get(map, key):
     Raises:
         Exception
     """
-    hash = hashValue(map, key)
-    bucket = lt.getElement(map['table'], hash)
+    if map['ints']:
+        hashv = key % map['capacity']
+    else:
+        hashv = hashValue(map, key)
+    bucket = lt.getElement(map['table'], hashv)
     pos = lt.isPresent(bucket, key)
     if pos > 0:
         return lt.getElement(bucket, pos)

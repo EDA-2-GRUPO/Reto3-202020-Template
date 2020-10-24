@@ -21,7 +21,6 @@
  """
 import sys
 import config
-from DISClib.ADT.list import size as lts
 from App import controller as cnt
 from time import perf_counter
 from DISClib.DataStructures import listiterator as it
@@ -76,7 +75,7 @@ Funciones de Printeo
 
 def PrintListEntry(g, pairs):
     iterator = it.newIterator(g)
-    for _ in range(lts(g)):
+    for _ in range(g['size']):
         el = it.next(iterator)
         text = '[ ' + str(el['key']) + ' ]   '
         for pair in pairs:
