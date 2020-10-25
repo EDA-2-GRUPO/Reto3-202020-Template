@@ -23,14 +23,12 @@ import config
 # Modulos externos nativos
 from datetime import datetime, time
 # Modulos Curso complementarios de lista, iteradores, y sorting
-from DISClib.DataStructures.liststructure import addLast, newList
+from DISClib.DataStructures.liststructure import newList
 from DISClib.DataStructures import listiterator as it
 # Modulos Curso de mapas Omap y map
-from DISClib.DataStructures import mapstructure as mp
-from DISClib.DataStructures import orderedmapstructure as om
+from DISClib.DataStructures import mapstructure as mp, orderedmapstructure as om
 # Modulos propios de operaciones en Omap y map, para implementacion del curso
-from App import operationInOrderMap as Op_om
-from App import operationInMap as Op_mp
+from App import Operations as Op,  AuxiliarFunctions as Aux
 
 assert config
 
@@ -192,7 +190,7 @@ def getDateInfo(dateOmap, date):
     if dateRoot is None:
         return None
     dateEntry = dateRoot['value']
-    severityList = Op_mp.operationSet(dateEntry['SeverityIndex'], makeListMp, newList('ARRAY_LIST'))
+    severityList = Op.operationSetMap(dateEntry['SeverityIndex'], Aux.makeListMp, newList('ARRAY_LIST'))
     severityListAndTotal = {'list': severityList, 'total': dateEntry['numAccidents']}
     return severityListAndTotal
 
@@ -208,7 +206,7 @@ def mstFreqDateBfADate(dateOmap, before_date):
     Returns:
         entry con la fecha el numero de accidentes en esa fecha, y total
     """
-    mstFreqDate = Op_om.operationBefore(dateOmap, before_date, TotalAndFrequentOmp, MakeMaxFormat(True))
+    mstFreqDate = Op.operationBeforeOmp(dateOmap, before_date, Aux.TotalAndFrequentOmp, MakeMaxFormat(True))
     return mstFreqDate
 
 
@@ -225,9 +223,9 @@ def mstFreqSeverityInRgDates(dateOmap, date1, date2):
 
 
     """
-    frequency_fun = frequencyInMapForOmp('SeverityIndex')
-    severityFrequency = Op_om.operationRange(dateOmap, date1, date2, frequency_fun, MakeMapFormat(2, ints=True))
-    mstFreqSeverity = Op_mp.operationSet(severityFrequency, TotalAndFrequentMp, MakeMaxFormat(True))
+    frequency_fun = Aux.frequencyInMapForOmp('SeverityIndex')
+    severityFrequency = Op.operationRangeOmp(dateOmap, date1, date2, frequency_fun, MakeMapFormat(2, ints=True))
+    mstFreqSeverity = Op.operationSetMap(severityFrequency, Aux.TotalAndFrequentMp, MakeMaxFormat(True))
     return mstFreqSeverity
 
 
@@ -243,10 +241,10 @@ def MstFreqDateAndMstFreqStateInRgDates(dateOmap, date1, date2):
         dobleentry con un entry con la fecha el numero de accidentes en esa fecha
         y un entry con el estado el numero de accidentes en ese estado
     """
-    frequency_fun = FrequencyInMapAndFrequentKeyForOmp('StateIndex')
+    frequency_fun = Aux.FrequencyInMapAndFrequentKeyForOmp('StateIndex')
     freqAndFrequencyForm = {'KeyFrequent': MakeMaxFormat(False), 'map': MakeMapFormat(40)}
-    stateFrequencyAndMfDate = Op_om.operationRange(dateOmap, date1, date2, frequency_fun, freqAndFrequencyForm)
-    mostFrequentState = Op_mp.operationSet(stateFrequencyAndMfDate['map'], FrequentMp, MakeMaxFormat(False))
+    stateFrequencyAndMfDate = Op.operationRangeOmp(dateOmap, date1, date2, frequency_fun, freqAndFrequencyForm)
+    mostFrequentState = Op.operationSetMap(stateFrequencyAndMfDate['map'], Aux.FrequentMp, MakeMaxFormat(False))
     mostFreqDateAndMostFreqState = {'mstDate': stateFrequencyAndMfDate['KeyFrequent'], 'mstState': mostFrequentState}
     return mostFreqDateAndMostFreqState
 
@@ -262,9 +260,9 @@ def severityFrequencyListInRgHours(timeOmap, time1, time2):
     Returns:
         Entry con la lista y el total
     """
-    frequency_fun = frequencyInMapForOmp('SeverityIndex')
-    severityFrequency = Op_om.operationRange(timeOmap, time1, time2, frequency_fun, MakeMapFormat(2, ints=True))
-    severityListAndTotal = Op_mp.operationSet(severityFrequency, makeListAndTotalMp, MakeListFormat())
+    frequency_fun = Aux.frequencyInMapForOmp('SeverityIndex')
+    severityFrequency = Op.operationRangeOmp(timeOmap, time1, time2, frequency_fun, MakeMapFormat(2, ints=True))
+    severityListAndTotal = Op.operationSetMap(severityFrequency, Aux.makeListAndTotalMp, MakeListFormat())
     AddPercents(severityListAndTotal)
     return severityListAndTotal
 
@@ -277,198 +275,12 @@ def weekdayFrequencyListInArea(zoneOmap, cPoint, dist):
     Returns:
         Entry con la lista y el total
     """
-    cir_fun = frequencyInMapForOmpTupleInCircleRange(cPoint, dist, 'weekdayIndex')
+    cir_fun = Aux.frequencyInMapForOmpInCircle(cPoint, dist, 'weekdayIndex')
     point1, point2 = (cPoint[0] - dist, cPoint[1]), (cPoint[0] + dist, cPoint[1])
-    weekdayFrequency = Op_om.operationRange(zoneOmap, point1, point2, cir_fun, MakeMapFormat(3, ints=True))
-    print(weekdayFrequency)
-    weekdayListAndTotal = Op_mp.operationSet(weekdayFrequency, makeListAndTotalMp, MakeListFormat())
+    weekdayFrequency = Op.operationRangeOmp(zoneOmap, point1, point2, cir_fun, MakeMapFormat(3, ints=True))
+    weekdayListAndTotal = Op.operationSetMap(weekdayFrequency, Aux.makeListAndTotalMp, MakeListFormat())
     weekdayFromIntToStr(weekdayListAndTotal['list'])
     return weekdayListAndTotal
-
-
-# ==============================
-# Funciones auxiliares
-# ==============================
-
-"""
-Hay codigo repetido, de a 3 a 5 lineas  que se podrian contraer, sobre todo en las funciones que tienen Frequent en su 
-nombre, sin embargo las lineas de codigo que aorraban era pocas mas o menos 20, pero podian tener un rendimientO 
-alrededor de 20% menor por su llamado (estamos hablando de numeros muy pequños igual, fue por gusto), aclarar que las 
-funciones son llamadas cada vez que se itera dentro del arbol o del map
-"""
-
-
-# ===================================
-# Funciones auxiliares para Order Map
-# ===================================**
-
-
-def TotalAndFrequentOmp(root, totalAndMaxEntry):
-    """
-    Funcion auxiliar para buscar en un orderMap visto como histograma la key
-    con mayor numero de accidentes, y el valor total del conteo
-    Args:
-        root: rama de un omap
-        totalAndMaxEntry:
-    """
-    num_acc = root['value']['numAccidents']
-    if num_acc > totalAndMaxEntry['value']:
-        totalAndMaxEntry['value'] = num_acc
-        totalAndMaxEntry['key'] = root['key']
-    totalAndMaxEntry['total'] += num_acc
-    return totalAndMaxEntry
-
-
-def frequencyInMapForOmp(mapIndex):
-    """
-    Funcion axuliar para realizar la frecuencia acumulada de los maps, vistos como histogramas, dentro
-    de cada rama del Omap
-    Args:
-        mapIndex: el indice del mapa buscado
-    """
-
-    def resultFunc(root, frequencyEntry):
-        """
-        root: rama de un omap
-        frequencyEntry: map
-        """
-        Op_mp.operationSet(root['value'][mapIndex], frequencyInMap, frequencyEntry)
-        return frequencyEntry
-
-    return resultFunc
-
-
-def FrequencyInMapAndFrequentKeyForOmp(mapIndex):
-    """
-    Funcion axuliar que es la union de frequencyInMapForOmp y TotalAndFrequentOmap, sin realizar
-    el conteo total
-    Args:
-        mapIndex: el indice del mapa
-    """
-
-    def resultFunc(root, mapAndMaxEntry):
-        """
-        root: rama de un omap
-        mapAndMaxEntry: tiene un formato {'map': mewmap, 'KeyFrequent': maxEntry}
-        """
-        rValue = root['value']
-        num_acc = rValue['numAccidents']
-        key_freq = mapAndMaxEntry['KeyFrequent']
-        if num_acc > key_freq['value']:
-            key_freq['value'] = num_acc
-            key_freq['key'] = root['key']
-        Op_mp.operationSet(rValue[mapIndex], frequencyInMap, mapAndMaxEntry['map'])
-        return mapAndMaxEntry
-
-    return resultFunc
-
-
-def frequencyInMapForOmpTupleInCircleRange(point, distance, mapIndex):
-    """
-    Crea una funcion auxiliar para hallar la frecuencia acumulada de los maps,
-    vistos como histogramas, dentro de en un Order map ordenado por tuplas cordenadas,
-    para una Area representa un
-    por un 'circulo', definido por un punto (point), y una distncia
-    Args:
-        point: tupla con cordenada x, y
-        distance: radio en el que se busca
-        mapIndex:
-    """
-
-    def resultFunction(root, frequencyEntry):
-        """
-        root: rama de un omap
-        frequencyEntry: map ADT
-        """
-        tkey = root['key']
-        if (tkey[0] - point[0]) ** 2 + (tkey[1] - point[1]) ** 2 <= distance ** 2:
-            Op_mp.operationSet(root['value'][mapIndex], frequencyInMap, frequencyEntry)
-        return frequencyEntry
-
-    return resultFunction
-
-
-# ===================================
-# Funciones auxiliares para Map
-# ===================================
-
-def makeListMp(entry, listEntry):
-    """
-    Funcion Auxiliar para crear un dict con una lista con las entradas
-    de un map.
-    Args:
-        listEntry: un entry con una lista
-        entry: una entrada de un map
-    Returns:
-
-    """
-    addLast(listEntry, entry)
-    return listEntry
-
-
-def makeListAndTotalMp(entry, listAndTotalEntry):
-    """
-    Funcion Auxiliar para crear un dict con una lista con las entradas
-    de un map, y el valor total que almacenan las llaves
-    Args:
-        entry: una entrada de un map
-        listAndTotalEntry: un entry con una lista, y un valor de total
-
-    Returns:
-
-    """
-    addLast(listAndTotalEntry['list'], entry)
-    listAndTotalEntry['total'] += entry['value']
-    return listAndTotalEntry
-
-
-def frequencyInMap(entry, frequencyEntry):
-    """
-    Funcion Auxiliar para sacar la frecuencia de las llaves
-    en un mapa visto como histagrama
-    Args:
-        entry: una entrada de un map
-        frequencyEntry: map ADT
-    """
-    key = entry['key']
-    num_acc = entry['value']
-    try:
-        mp.get(frequencyEntry, key)['value'] += num_acc
-    except TypeError:
-        mp.put(frequencyEntry, key, num_acc)
-
-    return frequencyEntry
-
-
-def FrequentMp(entry, maxEntry):
-    """
-    Funcion Auxiliar para obtener la llave mas frecuente de un map
-    visto como histograma
-    Args:
-        entry: una entrada de un map
-        maxEntry: un entry con una Lista, y un valor de total
-    """
-    num_acc = entry['value']
-    if num_acc > maxEntry['value']:
-        maxEntry['value'] = num_acc
-        maxEntry['key'] = entry['key']
-    return maxEntry
-
-
-def TotalAndFrequentMp(entry, maxEntry):
-    """
-    Funcion Auxiliar para obtener la llave mas frecuente de un map
-    visto como histograma,  y obtener el total del conteo
-    Args:
-        entry: una entrada de un map
-        maxEntry: un entry con un maxKey, un maxValue y un valor de total
-    """
-    num_acc = entry['value']
-    if num_acc > maxEntry['value']:
-        maxEntry['value'] = num_acc
-        maxEntry['key'] = entry['key']
-    maxEntry['total'] += num_acc
-    return maxEntry
 
 
 # ==============================
@@ -555,7 +367,6 @@ def orderByKey(el1, el2):
     """
     funcion de comparacion mayor de dos entrys
     apartir de sus llaves
-
     """
     if el1['key'] > el2['key']:
         return 0

@@ -58,7 +58,7 @@ def loadData(analyzer, list_files):
         accident_file = cf.data_dir + file
         input_file = csv.DictReader(open(accident_file, encoding="utf-8"), delimiter=",")
         count = 0
-        print(file, 'cargando')
+        print(file, 'cargando...')
         for accident in input_file:
             md.addAccident(analyzer, accident)
             count += 1

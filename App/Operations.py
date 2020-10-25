@@ -1,23 +1,26 @@
 import config
+from DISClib.DataStructures import liststructure as lt
 from DISClib.Utils import error as error
+
 assert config
+# ======================#
+# Para order map
+# ======================#
 
 """
 Se crearon nuevos "metodos" siguiendo la logica de recorrido in-order y siguiendo las 
-implementacion hechas en el dataStructure, se creo las funciones con sus variantes y combinaciones:
-Before: recorre los valores antes de una key
+implementacion hechas en el dataStructure, se creo con sus variantes:
 Operation: realiza alguna operacion con la rama mientras la recorre
-
-Para los requerimientos solo se utiliza las funciones Operation y sus variantes, Set, Before, Range
+    Set: opera en todo el arbol, inspirada en Keyset
+    Before: opera en las ramas con keys antes de una key indicada, inspirada en Keys
+    Range: opera en las ramas con Keys en el rango indicado, inspirada en Rank
+Para los requerimientos solo se utiliza las funciones Operation Before y Range
 
 Tal como se realizaron las implementaciones  es posible utilizar las funciones tanto en BST como RBT
 """
 
 
-# se crea las funciones Operation
-
-
-def operationSet(omap, operation, returnEntry={}):
+def operationSetOmp(omap, operation, returnEntry):
     """
     Realiza la operation indicada en todas las ramas del order map
     y retorna el entry modificado con las operaciones realizadas
@@ -36,7 +39,7 @@ def operationSet(omap, operation, returnEntry={}):
         error.reraise(exp, 'NOM: iteration')
 
 
-def operationRange(omap, keylo, keyhi, operation, returnEntry={}):
+def operationRangeOmp(omap, keylo, keyhi, operation, returnEntry):
     """
     Realiza la operation indicada en las ramas del order map que tengan el
     key el rango de keylo y keyhi y retorna el entry modificado con las operaciones realizadas
@@ -58,7 +61,7 @@ def operationRange(omap, keylo, keyhi, operation, returnEntry={}):
         error.reraise(exp, 'NOM: iterationRange')
 
 
-def operationBefore(omap, key_bef, operation, returnEntry={}):
+def operationBeforeOmp(omap, key_bef, operation, returnEntry):
     """
     Realiza la operation indicada en las ramas del order map que tengan la llave
     antes del key_bef ingresado y retorna el entry modificado con las operaciones realizadas
@@ -126,3 +129,50 @@ def operationBeforeTree(root, key_bef, operation, returnEntry, comparefunction):
             return operationSetTree(root['left'], operation, returnEntry)
     except Exception as exp:
         error.reraise(exp, 'NOM:operationBeforeTree')
+
+
+# ======================#
+# Para Hash map
+# ======================#
+"""
+operacion directa en las entrys de un  map PROBE o CHAINING, aunque es meterme directamente con la esctructura 
+(al igual que se hiso con order map) igual es posible realizarlo sin acceder directamente (igualmente menos eficiente)
+,y deje la opcion comentada
+"""
+
+
+def operationSetMap(hMap, operation, returnEntry):
+    """
+    Realiza la operation indicada en las entradas del map hash
+    Args:
+        hMap: El map
+        returnEntry: formato del retorno
+        operation: operacion a realizar
+    Returns:
+        returnEntry modificado
+    Raises:
+        Exception
+    """
+    if hMap['type'] == 'CHAINING':
+        for pos in range(hMap['table']['size']):
+            bucket = lt.getElement(hMap['table'], pos + 1)
+            for element in range(bucket['size']):
+                entry = lt.getElement(bucket, element + 1)
+                operation(entry, returnEntry)
+    else:
+        for pos in range(hMap['table']['size']):
+            entry = lt.getElement(hMap['table'], pos + 1)
+            if entry['key'] is not None and entry['key'] != '__EMPTY__':
+                operation(entry, returnEntry)
+    return returnEntry
+
+# from DISClib.DataStructures import listiterator as it
+# from DISClib.DataStructures import mapstructure as mp
+# def operationSetMap(hMap, operation, returnEntry):
+#     keys = mp.keySet(hMap)
+#     iterK = it.newIterator(keys)
+#     for _ in range(lt.size(keys)):
+#         nk = it.next(iterK)
+#         entry = nmp.get(nmp, nk)
+#         operation(entry, returnEntry)
+#     return returnEntry
