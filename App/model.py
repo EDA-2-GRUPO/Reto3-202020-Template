@@ -50,19 +50,21 @@ def newAnalyzer():
 
     Retorna el analizador inicializado.
     """
-    analyzer = {'Accidente': None, 'dateIndex': om.newMap(omaptype='BST',
-                                                          comparefunction=compareDates)}
+    analyzer = {'Accidente': None, 
+                'dateIndex': om.newMap(omaptype='BST',
+                comparefunction=compareDates),
+                "total":0}
 
     return analyzer
 
 
-def addAccident(analyzer, date):
-    updateDateIndex(analyzer['dateIndex'], date)
+def addAccident(analyzer, date,cont):
+    """"actualiza la lista inicial con cada crime con el for del la
+    controller y date es la fecha con todo, esto quere decir severidad etc"""
+    updateDateIndex(analyzer['dateIndex'], date,cont)
     return analyzer
 
-    
-
-def updateDateIndex(map, date):
+def updateDateIndex(mape, date,cont):
     """
     Se toma la fecha del crimen y se busca si ya existe en el arbol
     dicha fecha.  Si es asi, se adiciona a su lista de crimenes
@@ -71,19 +73,20 @@ def updateDateIndex(map, date):
     Si no se encuentra creado un nodo para esa fecha en el arbol
     se crea y se actualiza el indice de tipos de crimenes
     """
-    occurredDate = date['Start_Time']
+    occurredDate = date['End_Time']
     accidentDate = datetime.datetime.strptime(occurredDate, '%Y-%m-%d %H:%M:%S')
-    entry = om.get(map, accidentDate.date())
+    entry = om.get(mape, accidentDate.date())
     if entry is None:
         datentry = newDataEntry()
-        om.put(map, accidentDate.date(), datentry)
+        om.put(mape, accidentDate.date(), datentry)
     else:
         datentry = me.getValue(entry)
-
-    addDateIndex(datentry, date)
-    return map
-def addDateIndex(datentry, accident):
+    addDateIndex(datentry, date,cont)
+    return mape
+def addDateIndex(datentry, accident,cont):
     """
+    dataentry: llaves SeverityIndex, lstaccidentes, Country.
+    accident: toda la franja de informacion del accidente.
     Actualiza un indice de tipo de crimenes.  Este indice tiene una lista
     de crimenes y una tabla de hash cuya llave es el tipo de crimen y
     el valor es una lista con los crimenes de dicho tipo en la fecha que
@@ -91,18 +94,16 @@ def addDateIndex(datentry, accident):
     """
     def updatemap(mapa, llave):
         esta=m.get(mapa, llave)
+        entry= 1
         if esta is None:
-            entry = lt.newList('SINGLELINKED', compareOffenses)
-            lt.addLast(entry,0)
             m.put(mapa, llave, entry)
         else:
             entry = me.getValue(esta)
-        ele_ante=lt.getElement(entry, 0)
-        lt.deleteElement(entry, 0)
-        lt.addLast(entry, ele_ante+1)
-    lst = int(datentry['lstaccidentes'])
-    datentry['lstaccidentes']=lst+1
-   
+            entry+=1
+            m.put(mapa, llave, entry)
+    datentry['lstaccidentes']+=1
+    cont["total"]+=1
+
     SeverityIndex = datentry['SeverityIndex']
     SevKey = accident['Severity']
     updatemap(SeverityIndex,SevKey)
@@ -158,6 +159,7 @@ def recorrido(cont, lista):
         if g > mayor:
             mayor = g
             nombre = x
+    print(contar)
     lt.addLast(listafinal, nombre)
     lt.addLast(listafinal, mayor)
     lt.addLast(listafinal, contar)

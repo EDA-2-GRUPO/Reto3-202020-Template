@@ -70,7 +70,7 @@ def Printlistafinal(lista):
         elif it==1:
             print("cantidad total de accidentes"+str(x))
         elif it==2:
-             print("cantidad de accidentes de la fecha dada" +str(x))
+             print("cantidad de accidentes de la fecha dada" ,x)
         it+=1
 """
 Menu principal
@@ -88,6 +88,7 @@ while True:
         t1 = perf_counter()
         controller.loadData(cont, crimefile,crimefile2)
         t2 = perf_counter()
+        print(cont["total"])
         print("tiempo de carga:", t2 - t1)
     elif int(inputs[0]) == 4:
         print("\nBuscando crimenes en un rango de fechas: ")

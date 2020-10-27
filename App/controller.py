@@ -25,6 +25,7 @@ from App import model
 import datetime
 import csv
 from DISClib.ADT import orderedmap as om
+from DISClib.ADT import list as lt
 
 """
 El controlador se encarga de mediar entre la vista y el modelo.
@@ -54,10 +55,11 @@ def loadData(analyzer, accidentsfile2016, accidentsfile2019):
     """
     Carga los datos de los archivos CSV en el modelo
     """
+    re=0
     crimesfile = cf.data_dir + accidentsfile2016
     input_file = csv.DictReader(open(crimesfile, encoding="utf-8"),delimiter=",")
     for crime in input_file:
-        model.addAccident(analyzer, crime)
+        model.addAccident(analyzer, crime,analyzer)
     """"crimesfile2 = cf.data_dir + accidentsfile2019
     input_file2 = csv.DictReader(open(crimesfile2, encoding="utf-8"),delimiter=",")
     for crime in input_file2:
